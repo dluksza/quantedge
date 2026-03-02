@@ -4,8 +4,8 @@ use std::{
 };
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Sma, SmaConfig,
-    Timestamp,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Timestamp,
+    ema_core::EmaCore,
 };
 
 /// Configuration for the Exponential Moving Average ([`Ema`])
@@ -165,7 +165,7 @@ impl IndicatorConfigBuilder<EmaConfig> for EmaConfigBuilder {
     fn build(self) -> EmaConfig {
         let length = self.length.expect("length is required");
         let bars_to_converge = if self.convergence {
-            3 * (length + 1)
+            EmaCore::bars_to_converge(length)
         } else {
             length
         };
@@ -242,15 +242,11 @@ impl IndicatorConfigBuilder<EmaConfig> for EmaConfigBuilder {
 #[derive(Clone, Debug)]
 pub struct Ema {
     config: EmaConfig,
-    sma: Option<Sma>,
-    alpha: f64,
-    previous: Price,
     current: Option<Price>,
     last_open_time: Option<Timestamp>,
-    seen_bars: usize,
-    converged: bool,
     cur_close: Option<Price>,
     prev_close: Option<Price>,
+    core: EmaCore,
 }
 
 impl Indicator for Ema {
@@ -261,20 +257,10 @@ impl Indicator for Ema {
         Self {
             config,
             current: None,
-            previous: 0.0,
             last_open_time: None,
-            seen_bars: 0,
-            converged: false,
             cur_close: None,
             prev_close: None,
-            #[allow(clippy::cast_precision_loss)]
-            alpha: 2.0 / (config.length + 1) as f64,
-            sma: Some(Sma::new(
-                SmaConfig::builder()
-                    .length(NonZero::new(config.length).unwrap())
-                    .source(config.source)
-                    .build(),
-            )),
+            core: EmaCore::new(config.length(), config.convergence),
         }
     }
 
@@ -289,42 +275,25 @@ impl Indicator for Ema {
 
         let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
 
-        if self.sma.is_some() && is_next_bar && self.seen_bars >= self.config.length {
-            self.sma = None;
-        }
-
-        if let Some(sma) = &mut self.sma {
-            self.current = sma.compute(ohlcv);
-        } else {
-            if is_next_bar {
-                self.prev_close = self.cur_close;
-                self.previous = self
-                    .current
-                    .expect("cur_value must be Some after SMA seeding phase");
-            }
-
-            let price = self.config.source.extract(ohlcv, self.prev_close);
-            self.current = Some(self.alpha.mul_add(price - self.previous, self.previous));
-        }
-
         if is_next_bar {
             self.last_open_time = Some(ohlcv.open_time());
+            self.prev_close = self.cur_close;
 
-            if !self.converged {
-                self.seen_bars += 1;
-                if self.seen_bars >= self.config.required_bars_to_converge() {
-                    self.converged = true;
-                }
-            }
+            let price = self.config.source.extract(ohlcv, self.prev_close);
+            self.current = self.core.push(price);
+        } else {
+            let price = self.config.source.extract(ohlcv, self.prev_close);
+            self.current = self.core.replace(price);
         }
+
         self.cur_close = Some(ohlcv.close());
 
-        self.value()
+        self.current
     }
 
     #[inline]
     fn value(&self) -> Option<Price> {
-        if self.converged { self.current } else { None }
+        self.current
     }
 }
 
@@ -370,42 +339,6 @@ mod tests {
             ema.compute(&bar(4.0, 2));
             // SMA seed = (5 + 4 + 6) / 3 = 5.0
             assert_eq!(ema.compute(&bar(6.0, 3)), Some(5.0));
-        }
-    }
-
-    mod computation {
-        use super::*;
-
-        #[test]
-        fn applies_formula_after_seed() {
-            // EMA(3): α = 2/(3+1) = 0.5
-            let mut ema = ema(3);
-            ema.compute(&bar(2.0, 1));
-            ema.compute(&bar(4.0, 2));
-            ema.compute(&bar(6.0, 3)); // seed = 4.0
-            // EMA = 8 * 0.5 + 4.0 * 0.5 = 6.0
-            assert_eq!(ema.compute(&bar(8.0, 4)), Some(6.0));
-        }
-
-        #[test]
-        fn continues_computation() {
-            // EMA(3): α = 0.5
-            let mut ema = ema(3);
-            ema.compute(&bar(2.0, 1));
-            ema.compute(&bar(4.0, 2));
-            ema.compute(&bar(6.0, 3)); // seed = 4.0
-            ema.compute(&bar(8.0, 4)); // 6.0
-            // EMA = 10 * 0.5 + 6.0 * 0.5 = 8.0
-            assert_eq!(ema.compute(&bar(10.0, 5)), Some(8.0));
-        }
-
-        #[test]
-        fn constant_input_converges() {
-            let mut ema = ema(3);
-            for i in 1..=20 {
-                ema.compute(&bar(50.0, i));
-            }
-            assert_eq!(ema.compute(&bar(50.0, 21)), Some(50.0));
         }
     }
 

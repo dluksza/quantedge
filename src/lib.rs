@@ -11,6 +11,7 @@
 
 mod bb;
 mod ema;
+mod ema_core;
 mod indicator;
 mod ohlcv;
 mod price_source;
