@@ -25,7 +25,11 @@ macro_rules! all_indicators {
         $m!("rsi14", Rsi, RsiConfig::close(nz(14)));
         $m!("rsi140", Rsi, RsiConfig::close(nz(140)));
         $m!("macd12269", Macd, MacdConfig::close(nz(12), nz(26), nz(9)));
-        $m!("macd12026090", Macd, MacdConfig::close(nz(120), nz(260), nz(90)));
+        $m!(
+            "macd12026090",
+            Macd,
+            MacdConfig::close(nz(120), nz(260), nz(90))
+        );
     };
 }
 
