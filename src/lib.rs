@@ -13,6 +13,7 @@ mod bb;
 mod ema;
 mod ema_core;
 mod indicator;
+mod macd;
 mod ohlcv;
 mod price_source;
 mod price_window;
@@ -26,6 +27,7 @@ pub use crate::price_source::PriceSource;
 
 pub use crate::bb::{Bb, BbConfig, BbConfigBuilder, BbValue, StdDev};
 pub use crate::ema::{Ema, EmaConfig, EmaConfigBuilder};
+pub use crate::macd::{Macd, MacdConfig, MacdConfigBuilder, MacdValue};
 pub use crate::rsi::{Rsi, RsiConfig, RsiConfigBuilder};
 pub use crate::sma::{Sma, SmaConfig, SmaConfigBuilder};
 
@@ -92,6 +94,7 @@ impl_inherent_methods!(Sma, SmaConfig, SmaConfigBuilder);
 impl_inherent_methods!(Rsi, RsiConfig, RsiConfigBuilder);
 impl_inherent_methods!(Ema, EmaConfig, EmaConfigBuilder);
 impl_inherent_methods!(Bb, BbConfig, BbConfigBuilder);
+impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
 
 #[cfg(test)]
 mod test_util;

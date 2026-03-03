@@ -48,7 +48,8 @@ on forming bars.
 
 Each indicator defines its own output type via an associated type on the
 `Indicator` trait. SMA, EMA, and RSI return `f64`. Bollinger Bands returns
-`BbValue { upper, middle, lower }`. No downcasting, no enums, full type
+`BbValue { upper, middle, lower }`. MACD returns
+`MacdValue { macd, signal, histogram }`. No downcasting, no enums, full type
 safety.
 
 ## Usage
@@ -127,10 +128,11 @@ trait Indicator: Sized + Clone + Display + Debug {
     fn value(&self) -> Option<Self::Output>;
 }
 
-// Sma: Output = f64
-// Ema: Output = f64
-// Rsi: Output = f64
-// Bb:  Output = BbValue { upper: f64, middle: f64, lower: f64 }
+// Sma:  Output = f64
+// Ema:  Output = f64
+// Rsi:  Output = f64
+// Bb:   Output = BbValue { upper: f64, middle: f64, lower: f64 }
+// Macd: Output = MacdValue { macd: f64, signal: Option<f64>, histogram: Option<f64> }
 ```
 
 ### Ohlcv Trait
@@ -208,10 +210,11 @@ to extract from the Ohlcv input:
 | EMA       | `f64`      | Exponential Moving Average                   |
 | RSI       | `f64`      | Relative Strength Index (Wilder's smoothing) |
 | BB        | `BbValue`  | Bollinger Bands (upper, mid, lower)          |
+| MACD      | `MacdValue`| Moving Average Convergence Divergence        |
 
 ### Planned
 
-MACD, ATR, CHOP, and more.
+ATR, CHOP, and more.
 
 ## Benchmarks
 
