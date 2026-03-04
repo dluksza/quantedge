@@ -23,7 +23,7 @@ impl BarState {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     pub(crate) fn handle(&mut self, ohlcv: &impl Ohlcv) -> BarAction {
         debug_assert!(
             self.last_open_time.is_none_or(|t| t <= ohlcv.open_time()),
