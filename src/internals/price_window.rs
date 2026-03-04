@@ -1,4 +1,4 @@
-use crate::{Ohlcv, Price, PriceSource, Timestamp, ring_buffer::RingBuffer};
+use crate::{Ohlcv, Price, PriceSource, Timestamp, internals::RingBuffer};
 
 #[derive(Clone, Debug)]
 pub(crate) struct PriceWindow<const SUM_OF_SQUARES: bool = false> {

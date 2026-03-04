@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Timestamp,
-    ema_core::EmaCore,
+    internals::EmaCore,
 };
 
 /// Configuration for the Exponential Moving Average ([`Ema`])

@@ -2,7 +2,7 @@ use std::{fmt::Display, num::NonZero};
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Price, PriceSource, Timestamp,
-    ema_core::EmaCore,
+    internals::EmaCore,
 };
 
 /// Configuration for the Moving Average Convergence Divergence ([`Macd`])

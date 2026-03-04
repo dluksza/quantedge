@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource,
-    price_window::{PriceWindow, PriceWindowWithSumOfSquares},
+    internals::{PriceWindow, PriceWindowWithSumOfSquares},
 };
 
 /// Standard deviation multiplier for Bollinger Bands.

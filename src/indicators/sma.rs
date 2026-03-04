@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource,
-    price_window::PriceWindow,
+    internals::PriceWindow,
 };
 
 /// Configuration for the Simple Moving Average ([`Sma`]) indicator.

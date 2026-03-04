@@ -9,27 +9,18 @@
 //! import needed. Import [`Indicator`], [`IndicatorConfig`], or
 //! [`IndicatorConfigBuilder`] only for generic code.
 
-mod bb;
-mod ema;
-mod ema_core;
+mod indicators;
+mod internals;
+
 mod indicator;
-mod macd;
 mod ohlcv;
 mod price_source;
-mod price_window;
-mod ring_buffer;
-mod rsi;
-mod sma;
 
 pub use crate::indicator::{Indicator, IndicatorConfig, IndicatorConfigBuilder};
 pub use crate::ohlcv::{Ohlcv, Price, Timestamp};
 pub use crate::price_source::PriceSource;
 
-pub use crate::bb::{Bb, BbConfig, BbConfigBuilder, BbValue, StdDev};
-pub use crate::ema::{Ema, EmaConfig, EmaConfigBuilder};
-pub use crate::macd::{Macd, MacdConfig, MacdConfigBuilder, MacdValue};
-pub use crate::rsi::{Rsi, RsiConfig, RsiConfigBuilder};
-pub use crate::sma::{Sma, SmaConfig, SmaConfigBuilder};
+pub use crate::indicators::*;
 
 macro_rules! impl_inherent_methods {
     ($indicator:ty, $config:ty, $builder:ty) => {
