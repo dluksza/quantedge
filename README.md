@@ -246,6 +246,8 @@ on a converged indicator.
 | RSI       | 140    | 3.83 µs       | 194 Melem/s    |
 | MACD      | 12/26/9 | 3.78 µs      | 197 Melem/s    |
 | MACD      | 120/260/90 | 3.68 µs   | 202 Melem/s    |
+| ATR       | 14     | 1.76 µs       | 422 Melem/s    |
+| ATR       | 140    | 1.70 µs       | 438 Melem/s    |
 
 ### Tick — single `compute()` on a converged indicator
 
@@ -261,6 +263,8 @@ on a converged indicator.
 | RSI       | 140    | 7.53 ns       |
 | MACD      | 12/26/9 | 12.1 ns      |
 | MACD      | 120/260/90 | 11.9 ns   |
+| ATR       | 14     | 1.86 ns       |
+| ATR       | 140    | 1.82 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
@@ -276,6 +280,8 @@ on a converged indicator.
 | RSI       | 140    | 8.30 ns       |
 | MACD      | 12/26/9 | 12.1 ns      |
 | MACD      | 120/260/90 | 11.9 ns   |
+| ATR       | 14     | 2.00 ns       |
+| ATR       | 140    | 1.96 ns       |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
@@ -291,6 +297,8 @@ on a converged indicator.
 | RSI       | 140    | 6.82 µs       | 327 Melem/s    |
 | MACD      | 12/26/9 | 8.45 µs      | 264 Melem/s    |
 | MACD      | 120/260/90 | 9.35 µs   | 239 Melem/s    |
+| ATR       | 14     | 5.16 µs       | 433 Melem/s    |
+| ATR       | 140    | 5.03 µs       | 443 Melem/s    |
 
 Run locally:
 

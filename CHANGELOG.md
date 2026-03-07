@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- ATR (Average True Range) with Wilder's smoothing, reference tests against talipp (731 BTC/USDT bars, 1e-6 tolerance), and Criterion benchmarks.
+
 ### Changed
 
 - Extracted `BarState` from duplicated bar-boundary detection logic in `PriceWindow`, `Ema`, and `Macd`. Centralizes `open_time` tracking, `prev_close` management, and the non-decreasing timestamp assertion into a single reusable internal type.

@@ -20,10 +20,12 @@ import csv
 import os
 import sys
 
-from talipp.indicators import BB, EMA, MACD, RSI, SMA
+from talipp.indicators import ATR, BB, EMA, MACD, RSI, SMA
+from talipp.ohlcv import OHLCV
 
 PERIOD = 20
 RSI_PERIOD = 14
+ATR_PERIOD = 14
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -132,17 +134,29 @@ def main():
                     ]
                 )
 
+    # ATR
+    ohlcv_bars = [OHLCV(r["open"], r["high"], r["low"], r["close"]) for r in rows]
+    atr = ATR(period=ATR_PERIOD, input_values=ohlcv_bars)
+    with open(f"{OUTPUT_DIR}/atr-14.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "expected"])
+        for i, val in enumerate(atr):
+            if val is not None:
+                w.writerow([times[i], f"{val:.10f}"])
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
     rsi_count = sum(1 for v in rsi if v is not None)
     macd_count = sum(1 for v in macd if v is not None and v.signal is not None)
+    atr_count = sum(1 for v in atr if v is not None)
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
         f"{bb_count} BB, "
         f"{rsi_count} RSI, "
-        f"{macd_count} MACD reference values "
+        f"{macd_count} MACD, "
+        f"{atr_count} ATR reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

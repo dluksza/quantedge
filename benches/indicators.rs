@@ -4,9 +4,7 @@ mod fixtures;
 use crate::fixtures::{load_reference_ohlcvs, repaint_sequence};
 
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
-use quantedge_ta::{
-    Bb, BbConfig, Ema, EmaConfig, Macd, MacdConfig, Rsi, RsiConfig, Sma, SmaConfig,
-};
+use quantedge_ta::*;
 use std::{hint::black_box, num::NonZero, time::Duration};
 
 fn nz(n: usize) -> NonZero<usize> {
@@ -30,6 +28,8 @@ macro_rules! all_indicators {
             Macd,
             MacdConfig::close(nz(120), nz(260), nz(90))
         );
+        $m!("atr14", Atr, AtrConfig::builder().length(nz(14)).build());
+        $m!("atr140", Atr, AtrConfig::builder().length(nz(140)).build());
     };
 }
 
