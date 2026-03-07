@@ -4,7 +4,9 @@ mod fixtures;
 use crate::fixtures::{load_reference_ohlcvs, repaint_sequence};
 
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
-use quantedge_ta::*;
+use quantedge_ta::{
+    Atr, AtrConfig, Bb, BbConfig, Ema, EmaConfig, Macd, MacdConfig, Rsi, RsiConfig, Sma, SmaConfig,
+};
 use std::{hint::black_box, num::NonZero, time::Duration};
 
 fn nz(n: usize) -> NonZero<usize> {
