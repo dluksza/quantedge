@@ -87,6 +87,7 @@ impl_inherent_methods!(Rsi, RsiConfig, RsiConfigBuilder);
 impl_inherent_methods!(Ema, EmaConfig, EmaConfigBuilder);
 impl_inherent_methods!(Bb, BbConfig, BbConfigBuilder);
 impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
+impl_inherent_methods!(Stoch, StochConfig, StochConfigBuilder);
 
 #[cfg(test)]
 mod test_util;

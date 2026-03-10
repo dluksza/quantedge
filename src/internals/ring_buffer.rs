@@ -55,6 +55,27 @@ impl RingBuffer {
 
         old
     }
+
+    #[inline]
+    pub(crate) fn find_value_and_index<F>(&self, should_replace: F) -> (Price, usize)
+    where
+        F: Fn(Price, Price) -> bool,
+    {
+        let mut index = 0;
+        let mut found = self.buffer[0];
+
+        for i in 1..self.len {
+            if should_replace(found, self.buffer[i]) {
+                index = i;
+                found = self.buffer[i];
+            }
+        }
+
+        (
+            found,
+            (self.tail + self.buffer.len() - index) % self.buffer.len(),
+        )
+    }
 }
 
 #[cfg(test)]
@@ -123,5 +144,60 @@ mod tests {
         rb.push(4.0); // evicts 2
         rb.push(5.0); // evicts 3, head wraps again
         assert_eq!(rb.push(6.0), Some(4.0));
+    }
+
+    mod find_value_and_index {
+        use super::RingBuffer;
+
+        #[test]
+        fn find_indexed() {
+            let mut rb = RingBuffer::new(3);
+            rb.push(4.0);
+            rb.push(2.0);
+            rb.push(5.0);
+
+            assert_eq!(rb.find_value_and_index(|a, b| a > b), (2.0, 1));
+            assert_eq!(rb.find_value_and_index(|a, b| a < b), (5.0, 0));
+        }
+
+        #[test]
+        fn find_indexed_after_wrap() {
+            let mut rb = RingBuffer::new(3);
+            rb.push(1.0);
+            rb.push(2.0);
+            rb.push(3.0);
+            // Wrap: evict 1, buffer = [4, 2, 3], head=1, tail=0
+            rb.push(4.0);
+
+            // Max is 4.0 at tail (position 0 = newest)
+            assert_eq!(rb.find_value_and_index(|a, b| a < b), (4.0, 0));
+            // Min is 2.0 at buffer[1], one back from oldest
+            assert_eq!(rb.find_value_and_index(|a, b| a > b), (2.0, 2));
+        }
+
+        #[test]
+        fn find_indexed_after_multiple_wraps() {
+            let mut rb = RingBuffer::new(3);
+            for v in [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 10.0] {
+                rb.push(v);
+            }
+            // Buffer = [10, 5, 6] (logical oldest→newest: 5, 6, 10)
+            // tail=0, head=1
+            assert_eq!(rb.find_value_and_index(|a, b| a < b), (10.0, 0));
+            assert_eq!(rb.find_value_and_index(|a, b| a > b), (5.0, 2));
+        }
+
+        #[test]
+        fn find_indexed_all_equal() {
+            let mut rb = RingBuffer::new(3);
+            rb.push(7.0);
+            rb.push(7.0);
+            rb.push(7.0);
+
+            // No predicate matches; stays at index 0 (oldest = position 2)
+            let (val, pos) = rb.find_value_and_index(|a, b| a < b);
+            assert_eq!(val, 7.0);
+            assert_eq!(pos, 2);
+        }
     }
 }

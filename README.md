@@ -47,10 +47,10 @@ on forming bars.
 ### Typed outputs
 
 Each indicator defines its own output type via an associated type on the
-`Indicator` trait. SMA, EMA, and RSI return `f64`. Bollinger Bands returns
+`Indicator` trait. SMA, EMA, RSI, and ATR return `f64`. Bollinger Bands returns
 `BbValue { upper, middle, lower }`. MACD returns
-`MacdValue { macd, signal, histogram }`. No downcasting, no enums, full type
-safety.
+`MacdValue { macd, signal, histogram }`. Stochastic returns
+`StochValue { k, d }`. No downcasting, no enums, full type safety.
 
 ## Usage
 
@@ -128,11 +128,13 @@ trait Indicator: Sized + Clone + Display + Debug {
     fn value(&self) -> Option<Self::Output>;
 }
 
-// Sma:  Output = f64
-// Ema:  Output = f64
-// Rsi:  Output = f64
-// Bb:   Output = BbValue { upper: f64, middle: f64, lower: f64 }
-// Macd: Output = MacdValue { macd: f64, signal: Option<f64>, histogram: Option<f64> }
+// Sma:   Output = f64
+// Ema:   Output = f64
+// Rsi:   Output = f64
+// Bb:    Output = BbValue { upper: f64, middle: f64, lower: f64 }
+// Macd:  Output = MacdValue { macd: f64, signal: Option<f64>, histogram: Option<f64> }
+// Stoch: Output = StochValue { k: f64, d: Option<f64> }
+// Atr:   Output = f64
 ```
 
 ### Ohlcv Trait
@@ -212,10 +214,11 @@ to extract from the Ohlcv input:
 | BB        | `BbValue`  | Bollinger Bands (upper, mid, lower)          |
 | MACD      | `MacdValue`| Moving Average Convergence Divergence        |
 | ATR       | `f64`      | Average True Range                           |
+| Stoch     | `StochValue`| Stochastic Oscillator (%K, %D)              |
 
 ### Planned
 
-CHOP, CCI, Stochastic, ADX, VWAP, OBV and more.
+CHOP, CCI, ADX, VWAP, OBV and more.
 
 ## Benchmarks
 
