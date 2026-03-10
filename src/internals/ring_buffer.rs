@@ -6,24 +6,22 @@ pub(crate) struct RingBuffer {
     head: usize,
     tail: usize,
     len: usize,
-    capacity: usize,
 }
 
 impl RingBuffer {
     #[must_use]
-    pub(crate) fn new(capacity: usize) -> Self {
+    pub(crate) fn new(length: usize) -> Self {
         Self {
-            buffer: vec![0.0; capacity],
+            buffer: vec![0.0; length],
             head: 0,
             tail: 0,
             len: 0,
-            capacity,
         }
     }
 
     #[inline]
     pub(crate) fn is_ready(&self) -> bool {
-        self.len == self.capacity
+        self.len == self.buffer.len()
     }
 
     #[inline]
@@ -35,7 +33,7 @@ impl RingBuffer {
 
             self.tail = self.head;
             self.head += 1;
-            if self.head == self.capacity {
+            if self.head == self.buffer.len() {
                 self.head = 0;
             }
 
