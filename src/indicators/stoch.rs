@@ -88,7 +88,7 @@ impl Display for StochConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "StochConfig(l: {}, k: {}, d: {}, s: {})",
+            "StochConfig({}, {}, {}, {})",
             self.length, self.k_smooth, self.d_smooth, self.source
         )
     }
@@ -682,10 +682,7 @@ mod tests {
                 .k_smooth(nz(3))
                 .d_smooth(nz(3))
                 .build();
-            assert_eq!(
-                config.to_string(),
-                "StochConfig(l: 14, k: 3, d: 3, s: Close)"
-            );
+            assert_eq!(config.to_string(), "StochConfig(14, 3, 3, Close)");
         }
 
         #[test]
