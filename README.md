@@ -232,83 +232,83 @@ on a converged indicator.
 **Repaint Stream** measures end-to-end throughput with 3 ticks per bar
 (open → mid → final), 2232 total observations.
 
-**Hardware:** Apple M3 Max (16 cores), 48 GB RAM, macOS 26.3, rustc 1.93.1,
+**Hardware:** Apple M5 Max (18 cores), 128 GB RAM, macOS 26.3.2, rustc 1.93.1,
 `--release` profile.
 
 ### Stream — process 744 bars from cold start
 
 | Indicator | Period | Time (median) | Throughput     |
 |-----------|--------|---------------|----------------|
-| SMA       | 20     | 1.07 µs       | 696 Melem/s    |
-| SMA       | 200    | 1.11 µs       | 669 Melem/s    |
-| EMA       | 20     | 1.37 µs       | 542 Melem/s    |
-| EMA       | 200    | 1.33 µs       | 561 Melem/s    |
-| BB        | 20     | 1.26 µs       | 590 Melem/s    |
-| BB        | 200    | 1.26 µs       | 590 Melem/s    |
-| RSI       | 14     | 4.01 µs       | 185 Melem/s    |
-| RSI       | 140    | 3.83 µs       | 194 Melem/s    |
-| MACD      | 12/26/9 | 3.80 µs      | 196 Melem/s    |
-| MACD      | 120/260/90 | 3.69 µs   | 202 Melem/s    |
-| ATR       | 14     | 1.76 µs       | 422 Melem/s    |
-| ATR       | 140    | 1.70 µs       | 438 Melem/s    |
-| Stoch     | 14/3/3 | 6.32 µs       | 118 Melem/s    |
+| SMA       | 20     | 810 ns        | 918 Melem/s    |
+| SMA       | 200    | 883 ns        | 842 Melem/s    |
+| EMA       | 20     | 986 ns        | 754 Melem/s    |
+| EMA       | 200    | 956 ns        | 778 Melem/s    |
+| BB        | 20     | 1.01 µs       | 737 Melem/s    |
+| BB        | 200    | 959 ns        | 776 Melem/s    |
+| RSI       | 14     | 3.04 µs       | 245 Melem/s    |
+| RSI       | 140    | 2.94 µs       | 253 Melem/s    |
+| MACD      | 12/26/9 | 2.83 µs      | 263 Melem/s    |
+| MACD      | 120/260/90 | 2.93 µs   | 254 Melem/s    |
+| ATR       | 14     | 1.42 µs       | 524 Melem/s    |
+| ATR       | 140    | 1.32 µs       | 564 Melem/s    |
+| Stoch     | 14/3/3 | 6.35 µs       | 117 Melem/s    |
 | Stoch     | 140/30/30 | 13.2 µs    | 56.2 Melem/s   |
 
 ### Tick — single `compute()` on a converged indicator
 
 | Indicator | Period | Time (median) |
 |-----------|--------|---------------|
-| SMA       | 20     | 10.5 ns       |
-| SMA       | 200    | 18.5 ns       |
-| EMA       | 20     | 2.05 ns       |
-| EMA       | 200    | 1.84 ns       |
-| BB        | 20     | 11.1 ns       |
-| BB        | 200    | 19.3 ns       |
-| RSI       | 14     | 7.73 ns       |
-| RSI       | 140    | 7.05 ns       |
-| MACD      | 12/26/9 | 10.5 ns      |
-| MACD      | 120/260/90 | 10.5 ns   |
+| SMA       | 20     | 8.31 ns       |
+| SMA       | 200    | 17.7 ns       |
+| EMA       | 20     | 2.80 ns       |
+| EMA       | 200    | 1.80 ns       |
+| BB        | 20     | 9.21 ns       |
+| BB        | 200    | 18.4 ns       |
+| RSI       | 14     | 8.62 ns       |
+| RSI       | 140    | 5.72 ns       |
+| MACD      | 12/26/9 | 8.80 ns      |
+| MACD      | 120/260/90 | 8.81 ns   |
 | ATR       | 14     | 1.86 ns       |
-| ATR       | 140    | 1.82 ns       |
-| Stoch     | 14/3/3 | 39.1 ns       |
-| Stoch     | 140/30/30 | 64.4 ns   |
+| ATR       | 140    | 1.45 ns       |
+| Stoch     | 14/3/3 | 43.0 ns       |
+| Stoch     | 140/30/30 | 54.0 ns   |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
 | Indicator | Period | Time (median) |
 |-----------|--------|---------------|
-| SMA       | 20     | 10.4 ns       |
-| SMA       | 200    | 17.9 ns       |
-| EMA       | 20     | 2.03 ns       |
-| EMA       | 200    | 1.79 ns       |
-| BB        | 20     | 11.0 ns       |
-| BB        | 200    | 19.7 ns       |
-| RSI       | 14     | 8.35 ns       |
-| RSI       | 140    | 7.92 ns       |
-| MACD      | 12/26/9 | 10.6 ns      |
-| MACD      | 120/260/90 | 10.7 ns   |
-| ATR       | 14     | 2.00 ns       |
-| ATR       | 140    | 1.96 ns       |
-| Stoch     | 14/3/3 | 37.2 ns       |
-| Stoch     | 140/30/30 | 43.8 ns   |
+| SMA       | 20     | 8.44 ns       |
+| SMA       | 200    | 17.5 ns       |
+| EMA       | 20     | 2.87 ns       |
+| EMA       | 200    | 1.51 ns       |
+| BB        | 20     | 9.84 ns       |
+| BB        | 200    | 19.6 ns       |
+| RSI       | 14     | 7.84 ns       |
+| RSI       | 140    | 3.68 ns       |
+| MACD      | 12/26/9 | 8.80 ns      |
+| MACD      | 120/260/90 | 8.68 ns   |
+| ATR       | 14     | 1.95 ns       |
+| ATR       | 140    | 1.45 ns       |
+| Stoch     | 14/3/3 | 40.9 ns       |
+| Stoch     | 140/30/30 | 63.4 ns   |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
 | Indicator | Period | Time (median) | Throughput     |
 |-----------|--------|---------------|----------------|
-| SMA       | 20     | 3.40 µs       | 656 Melem/s    |
-| SMA       | 200    | 3.57 µs       | 624 Melem/s    |
-| EMA       | 20     | 3.16 µs       | 706 Melem/s    |
-| EMA       | 200    | 3.21 µs       | 696 Melem/s    |
-| BB        | 20     | 4.09 µs       | 546 Melem/s    |
-| BB        | 200    | 4.17 µs       | 536 Melem/s    |
-| RSI       | 14     | 6.63 µs       | 337 Melem/s    |
-| RSI       | 140    | 6.82 µs       | 327 Melem/s    |
-| MACD      | 12/26/9 | 9.30 µs      | 240 Melem/s    |
-| MACD      | 120/260/90 | 9.75 µs   | 229 Melem/s    |
-| ATR       | 14     | 5.16 µs       | 433 Melem/s    |
-| ATR       | 140    | 5.03 µs       | 443 Melem/s    |
-| Stoch     | 14/3/3 | 13.2 µs       | 170 Melem/s    |
+| SMA       | 20     | 2.49 µs       | 896 Melem/s    |
+| SMA       | 200    | 2.60 µs       | 859 Melem/s    |
+| EMA       | 20     | 2.65 µs       | 842 Melem/s    |
+| EMA       | 200    | 2.67 µs       | 836 Melem/s    |
+| BB        | 20     | 2.97 µs       | 751 Melem/s    |
+| BB        | 200    | 3.42 µs       | 653 Melem/s    |
+| RSI       | 14     | 4.87 µs       | 458 Melem/s    |
+| RSI       | 140    | 5.18 µs       | 431 Melem/s    |
+| MACD      | 12/26/9 | 7.73 µs      | 289 Melem/s    |
+| MACD      | 120/260/90 | 8.07 µs   | 277 Melem/s    |
+| ATR       | 14     | 3.41 µs       | 654 Melem/s    |
+| ATR       | 140    | 3.43 µs       | 651 Melem/s    |
+| Stoch     | 14/3/3 | 13.4 µs       | 166 Melem/s    |
 | Stoch     | 140/30/30 | 18.6 µs   | 120 Melem/s    |
 
 Run locally:

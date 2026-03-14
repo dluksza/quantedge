@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-14
+
 ### Added
 
 - Stochastic Oscillator (%K, %D) with reference tests against talipp (729 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks.
@@ -59,6 +61,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.5.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.2.0
