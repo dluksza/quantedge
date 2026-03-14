@@ -107,7 +107,7 @@ impl IndicatorConfigBuilder<AtrConfig> for AtrConfigBuilder {
 ///
 /// The first `length` True Range values are averaged with a simple
 /// mean (SMA seed). After seeding, values are smoothed
-/// exponentially with `α = 1 / (length + 1)`:
+/// exponentially with Wilder's smoothing factor `α = 1 / length`:
 ///
 /// ```text
 /// ATR = α × TR + (1 − α) × prev_ATR
