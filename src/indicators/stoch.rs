@@ -190,7 +190,7 @@ impl StochValue {
 impl Display for StochValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.d {
-            Some(d) => write!(f, "Stoch(k: {}, d: {:4})", self.k, d),
+            Some(d) => write!(f, "Stoch(k: {}, d: {d})", self.k),
             None => write!(f, "Stoch(k: {}, d: -)", self.k),
         }
     }
@@ -702,7 +702,7 @@ mod tests {
                 k: 75.5,
                 d: Some(60.0),
             };
-            assert_eq!(v.to_string(), "Stoch(k: 75.5, d:   60)");
+            assert_eq!(v.to_string(), "Stoch(k: 75.5, d: 60)");
         }
 
         #[test]
