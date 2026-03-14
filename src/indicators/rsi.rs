@@ -89,7 +89,7 @@ impl RsiConfigBuilder {
     #[inline]
     #[must_use]
     pub fn length(mut self, length: std::num::NonZero<usize>) -> Self {
-        self.length = Some(length.get());
+        self.length.replace(length.get());
         self
     }
 }
