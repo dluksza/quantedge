@@ -82,6 +82,20 @@ impl StochConfig {
     pub fn d_smooth(&self) -> usize {
         self.d_smooth
     }
+
+    /// Stochastic Oscillator on closing price.
+    #[must_use]
+    pub fn close(
+        length: NonZero<usize>,
+        k_smooth: NonZero<usize>,
+        d_smooth: NonZero<usize>,
+    ) -> Self {
+        Self::builder()
+            .length(length)
+            .k_smooth(k_smooth)
+            .d_smooth(d_smooth)
+            .build()
+    }
 }
 
 impl Display for StochConfig {

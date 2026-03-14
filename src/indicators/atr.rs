@@ -53,6 +53,12 @@ impl AtrConfig {
     pub fn length(&self) -> usize {
         self.length
     }
+
+    /// ATR with the given window length.
+    #[must_use]
+    pub fn period(length: NonZero<usize>) -> Self {
+        Self::builder().length(length).build()
+    }
 }
 
 impl Display for AtrConfig {
