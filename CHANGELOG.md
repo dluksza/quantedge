@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-15
+
 ### Added
 
 - Keltner Channel (KC) — EMA-based centre line with ATR-scaled upper/lower bands. Configurable EMA length, ATR length, and band multiplier. Reference tests against talipp (725 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks.
@@ -74,6 +76,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.6.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.3.0
