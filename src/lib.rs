@@ -92,6 +92,7 @@ impl_inherent_methods!(Atr, AtrConfig, AtrConfigBuilder);
 impl_inherent_methods!(Sma, SmaConfig, SmaConfigBuilder);
 impl_inherent_methods!(Rsi, RsiConfig, RsiConfigBuilder);
 impl_inherent_methods!(Ema, EmaConfig, EmaConfigBuilder);
+impl_inherent_methods!(Kc, KcConfig, KcConfigBuilder);
 impl_inherent_methods!(Bb, BbConfig, BbConfigBuilder);
 impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
 impl_inherent_methods!(Stoch, StochConfig, StochConfigBuilder);

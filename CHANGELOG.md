@@ -4,6 +4,7 @@
 
 ### Added
 
+- Keltner Channel (KC) — EMA-based centre line with ATR-scaled upper/lower bands. Configurable EMA length, ATR length, and band multiplier.
 - `convergence()` method on `IndicatorConfig` trait — returns the number of bars until `compute()` first returns `Some`. Each indicator implements its own formula.
 
 ### Changed
