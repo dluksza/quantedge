@@ -10,14 +10,14 @@ use crate::{
 ///
 /// # Convergence
 ///
-/// MACD output begins when both EMAs have converged (after `slow_period`
-/// bars). The signal line requires an additional `signal_period` bars of
+/// MACD output begins when both EMAs have converged (after `slow_length`
+/// bars). The signal line requires an additional `signal_length` bars of
 /// MACD values to seed its own EMA. Full output (MACD, signal, histogram)
-/// is available at bar `slow_period + signal_period - 1`.
+/// is available at bar `slow_length + signal_length - 1`.
 ///
 /// # Panics
 ///
-/// Building a config panics if `fast_period >= slow_period`.
+/// Building a config panics if `fast_length >= slow_length`.
 ///
 /// # Example
 ///
@@ -30,15 +30,15 @@ use crate::{
 ///     NonZero::new(26).unwrap(),
 ///     NonZero::new(9).unwrap(),
 /// );
-/// assert_eq!(config.fast_period(), 12);
-/// assert_eq!(config.slow_period(), 26);
-/// assert_eq!(config.signal_period(), 9);
+/// assert_eq!(config.fast_length(), 12);
+/// assert_eq!(config.slow_length(), 26);
+/// assert_eq!(config.signal_length(), 9);
 /// ```
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct MacdConfig {
-    fast_period: usize,
-    slow_period: usize,
-    signal_period: usize,
+    fast_length: usize,
+    slow_length: usize,
+    signal_length: usize,
     source: PriceSource,
 }
 
@@ -57,18 +57,18 @@ impl IndicatorConfig for MacdConfig {
 
     #[inline]
     fn convergence(&self) -> usize {
-        self.slow_period
+        self.slow_length
     }
 }
 
 impl MacdConfig {
-    /// MACD on closing price with the given periods.
+    /// MACD on closing price with the given lengths.
     #[must_use]
     pub fn close(fast: NonZero<usize>, slow: NonZero<usize>, signal: NonZero<usize>) -> Self {
         Self::builder()
-            .fast_period(fast)
-            .slow_period(slow)
-            .signal_period(signal)
+            .fast_length(fast)
+            .slow_length(slow)
+            .signal_length(signal)
             .build()
     }
 
@@ -83,28 +83,28 @@ impl MacdConfig {
         )
     }
 
-    /// Fast EMA period.
+    /// Fast EMA length.
     #[must_use]
-    pub fn fast_period(&self) -> usize {
-        self.fast_period
+    pub fn fast_length(&self) -> usize {
+        self.fast_length
     }
 
-    /// Slow EMA period.
+    /// Slow EMA length.
     #[must_use]
-    pub fn slow_period(&self) -> usize {
-        self.slow_period
+    pub fn slow_length(&self) -> usize {
+        self.slow_length
     }
 
-    /// Signal EMA period.
+    /// Signal EMA length.
     #[must_use]
-    pub fn signal_period(&self) -> usize {
-        self.signal_period
+    pub fn signal_length(&self) -> usize {
+        self.signal_length
     }
 
     /// Bars until all outputs (including signal) are fully converged.
     #[must_use]
     pub fn full_convergence(&self) -> usize {
-        self.convergence() + self.signal_period - 1
+        self.convergence() + self.signal_length - 1
     }
 }
 
@@ -113,7 +113,7 @@ impl Display for MacdConfig {
         write!(
             f,
             "MacdConfig({}, {}, {}, {})",
-            self.fast_period, self.slow_period, self.signal_period, self.source
+            self.fast_length, self.slow_length, self.signal_length, self.source
         )
     }
 }
@@ -121,46 +121,46 @@ impl Display for MacdConfig {
 /// Builder for [`MacdConfig`].
 ///
 /// Defaults: source = [`PriceSource::Close`].
-/// `fast_period`, `slow_period`, and `signal_period` must be set before
+/// `fast_length`, `slow_length`, and `signal_length` must be set before
 /// calling [`build`](IndicatorConfigBuilder::build).
 pub struct MacdConfigBuilder {
-    fast_period: Option<usize>,
-    slow_period: Option<usize>,
-    signal_period: Option<usize>,
+    fast_length: Option<usize>,
+    slow_length: Option<usize>,
+    signal_length: Option<usize>,
     source: PriceSource,
 }
 
 impl MacdConfigBuilder {
     fn new() -> Self {
         Self {
-            fast_period: None,
-            slow_period: None,
-            signal_period: None,
+            fast_length: None,
+            slow_length: None,
+            signal_length: None,
             source: PriceSource::Close,
         }
     }
 
-    /// Sets the fast EMA period.
+    /// Sets the fast EMA length.
     #[inline]
     #[must_use]
-    pub fn fast_period(mut self, period: NonZero<usize>) -> Self {
-        self.fast_period.replace(period.get());
+    pub fn fast_length(mut self, length: NonZero<usize>) -> Self {
+        self.fast_length.replace(length.get());
         self
     }
 
-    /// Sets the slow EMA period.
+    /// Sets the slow EMA length.
     #[inline]
     #[must_use]
-    pub fn slow_period(mut self, period: NonZero<usize>) -> Self {
-        self.slow_period.replace(period.get());
+    pub fn slow_length(mut self, length: NonZero<usize>) -> Self {
+        self.slow_length.replace(length.get());
         self
     }
 
-    /// Sets the signal EMA period.
+    /// Sets the signal EMA length.
     #[inline]
     #[must_use]
-    pub fn signal_period(mut self, period: NonZero<usize>) -> Self {
-        self.signal_period.replace(period.get());
+    pub fn signal_length(mut self, length: NonZero<usize>) -> Self {
+        self.signal_length.replace(length.get());
         self
     }
 }
@@ -174,13 +174,13 @@ impl IndicatorConfigBuilder<MacdConfig> for MacdConfigBuilder {
 
     #[inline]
     fn build(self) -> MacdConfig {
-        let fast = self.fast_period.expect("fast_period is required");
-        let slow = self.slow_period.expect("slow_period is required");
-        assert!(fast < slow, "fast_period must be less than slow_period");
+        let fast = self.fast_length.expect("fast_length is required");
+        let slow = self.slow_length.expect("slow_length is required");
+        assert!(fast < slow, "fast_length must be less than slow_length");
         MacdConfig {
-            fast_period: fast,
-            slow_period: slow,
-            signal_period: self.signal_period.expect("signal_period is required"),
+            fast_length: fast,
+            slow_length: slow,
+            signal_length: self.signal_length.expect("signal_length is required"),
             source: self.source,
         }
     }
@@ -244,11 +244,11 @@ impl Display for MacdValue {
 ///
 /// ```text
 /// MACD      = EMA(fast) − EMA(slow)
-/// signal    = EMA(signal_period, MACD)
+/// signal    = EMA(signal_length, MACD)
 /// histogram = MACD − signal
 /// ```
 ///
-/// Each EMA is seeded with an SMA of its first `period` values.
+/// Each EMA is seeded with an SMA of its first `length` values.
 /// After seeding, all updates are O(1) per tick.
 ///
 /// Supports live repainting: feeding a bar with the same `open_time`
@@ -281,7 +281,7 @@ impl Display for MacdValue {
 ///     assert_eq!(macd.compute(&Bar(i as f64 * 10.0, i as u64)), None);
 /// }
 ///
-/// // MACD line available at bar 6 (slow_period)
+/// // MACD line available at bar 6 (slow_length)
 /// let val = macd.compute(&Bar(60.0, 6));
 /// assert!(val.is_some());
 /// ```
@@ -302,9 +302,9 @@ impl Indicator for Macd {
     fn new(config: Self::Config) -> Self {
         Self {
             config,
-            fast: EmaCore::new(config.fast_period(), false),
-            slow: EmaCore::new(config.slow_period(), false),
-            signal: EmaCore::new(config.signal_period(), false),
+            fast: EmaCore::new(config.fast_length(), false),
+            slow: EmaCore::new(config.slow_length(), false),
+            signal: EmaCore::new(config.signal_length(), false),
             current: None,
             bar_state: BarState::new(config.source()),
         }
@@ -364,9 +364,9 @@ impl Display for Macd {
         write!(
             f,
             "MACD({}, {}, {}, {})",
-            self.config.fast_period,
-            self.config.slow_period,
-            self.config.signal_period,
+            self.config.fast_length,
+            self.config.slow_length,
+            self.config.signal_length,
             self.config.source
         )
     }
@@ -414,7 +414,7 @@ mod tests {
         }
 
         #[test]
-        fn macd_line_available_at_slow_period() {
+        fn macd_line_available_at_slow_length() {
             let mut macd = macd_3_6_4();
             for i in 1..=5 {
                 #[allow(clippy::cast_precision_loss)]
@@ -540,7 +540,7 @@ mod tests {
             // SMA seed = first 4 MACD values
             assert!(macd_values.len() >= 4, "need at least 4 MACD values");
             let sma_seed: f64 = macd_values[..4].iter().sum::<f64>() / 4.0;
-            let alpha = 2.0 / 5.0; // signal_period = 4
+            let alpha = 2.0 / 5.0; // signal_length = 4
 
             let mut expected_signal = sma_seed;
             // Compareat the point where signal becomes available (4th MACD value)
@@ -736,7 +736,7 @@ mod tests {
         use std::collections::HashSet;
 
         #[test]
-        fn convergence_equals_slow_period() {
+        fn convergence_equals_slow_length() {
             let config = MacdConfig::default_close();
             assert_eq!(config.convergence(), 26);
 
@@ -747,7 +747,7 @@ mod tests {
         #[test]
         fn full_convergence_includes_signal() {
             let config = MacdConfig::default_close();
-            // convergence (26) + signal_period (9) - 1 = 34
+            // convergence (26) + signal_length (9) - 1 = 34
             assert_eq!(config.full_convergence(), 34);
 
             let config = MacdConfig::close(nz(3), nz(6), nz(4));
@@ -758,17 +758,17 @@ mod tests {
         #[test]
         fn default_is_12_26_9() {
             let config = MacdConfig::default_close();
-            assert_eq!(config.fast_period(), 12);
-            assert_eq!(config.slow_period(), 26);
-            assert_eq!(config.signal_period(), 9);
+            assert_eq!(config.fast_length(), 12);
+            assert_eq!(config.slow_length(), 26);
+            assert_eq!(config.signal_length(), 9);
         }
 
         #[test]
-        fn custom_periods() {
+        fn custom_lengths() {
             let config = MacdConfig::close(nz(5), nz(15), nz(7));
-            assert_eq!(config.fast_period(), 5);
-            assert_eq!(config.slow_period(), 15);
-            assert_eq!(config.signal_period(), 7);
+            assert_eq!(config.fast_length(), 5);
+            assert_eq!(config.slow_length(), 15);
+            assert_eq!(config.signal_length(), 7);
         }
 
         #[test]
@@ -778,13 +778,13 @@ mod tests {
         }
 
         #[test]
-        #[should_panic(expected = "fast_period must be less than slow_period")]
+        #[should_panic(expected = "fast_length must be less than slow_length")]
         fn panics_when_fast_equals_slow() {
             let _ = MacdConfig::close(nz(12), nz(12), nz(9));
         }
 
         #[test]
-        #[should_panic(expected = "fast_period must be less than slow_period")]
+        #[should_panic(expected = "fast_length must be less than slow_length")]
         fn panics_when_fast_greater_than_slow() {
             let _ = MacdConfig::close(nz(26), nz(12), nz(9));
         }
@@ -850,9 +850,9 @@ mod tests {
         #[test]
         fn uses_configured_source() {
             let config = MacdConfig::builder()
-                .fast_period(nz(3))
-                .slow_period(nz(6))
-                .signal_period(nz(4))
+                .fast_length(nz(3))
+                .slow_length(nz(6))
+                .signal_length(nz(4))
                 .source(PriceSource::HL2)
                 .build();
             let mut macd = Macd::new(config);

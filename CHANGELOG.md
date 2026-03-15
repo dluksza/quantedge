@@ -12,6 +12,7 @@
 - **Breaking:** Removed `EmaConfig::required_bars_to_converge()` — use `convergence()` instead.
 - **Breaking:** Removed `MacdConfig::convergence_bars()` — use `convergence()` instead.
 - **Breaking:** Renamed `MacdConfig::full_convergence_bars()` to `full_convergence()`.
+- **Breaking:** Renamed `MacdConfig` period accessors/builders to use `length` terminology: `fast_period()` → `fast_length()`, `slow_period()` → `slow_length()`, `signal_period()` → `signal_length()`.
 
 ## [0.5.0] - 2026-03-14
 
