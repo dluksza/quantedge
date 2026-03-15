@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ATR, BB, EMA, MACD, RSI, SMA, Stoch
+from talipp.indicators import ATR, BB, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -28,6 +28,9 @@ RSI_PERIOD = 14
 ATR_PERIOD = 14
 STOCH_PERIOD = 14
 STOCH_SMOOTH = 3
+KC_MA_PERIOD = 20
+KC_ATR_PERIOD = 10
+KC_MULT = 1.5
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -163,6 +166,31 @@ def main():
                     ]
                 )
 
+    # Keltner Channels
+    # talipp KeltnerChannels(ma_period, atr_period, atr_mult_up, atr_mult_down)
+    # uses EMA for centre line by default. Output: ub (upper), cb (central), lb (lower).
+    # This maps to Rust Kc(length=20, atr_length=10, multiplier=1.5).
+    kc = KeltnerChannels(
+        ma_period=KC_MA_PERIOD,
+        atr_period=KC_ATR_PERIOD,
+        atr_mult_up=KC_MULT,
+        atr_mult_down=KC_MULT,
+        input_values=ohlcv_bars,
+    )
+    with open(f"{OUTPUT_DIR}/kc-20-10-1.5.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "upper", "middle", "lower"])
+        for i, val in enumerate(kc):
+            if val is not None:
+                w.writerow(
+                    [
+                        times[i],
+                        f"{val.ub:.10f}",
+                        f"{val.cb:.10f}",
+                        f"{val.lb:.10f}",
+                    ]
+                )
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -170,6 +198,7 @@ def main():
     macd_count = sum(1 for v in macd if v is not None and v.signal is not None)
     atr_count = sum(1 for v in atr if v is not None)
     stoch_count = sum(1 for v in stoch if v is not None and v.d is not None)
+    kc_count = sum(1 for v in kc if v is not None)
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
@@ -177,7 +206,8 @@ def main():
         f"{rsi_count} RSI, "
         f"{macd_count} MACD, "
         f"{atr_count} ATR, "
-        f"{stoch_count} Stoch reference values "
+        f"{stoch_count} Stoch, "
+        f"{kc_count} KC reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

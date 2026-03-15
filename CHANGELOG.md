@@ -4,7 +4,7 @@
 
 ### Added
 
-- Keltner Channel (KC) — EMA-based centre line with ATR-scaled upper/lower bands. Configurable EMA length, ATR length, and band multiplier.
+- Keltner Channel (KC) — EMA-based centre line with ATR-scaled upper/lower bands. Configurable EMA length, ATR length, and band multiplier. Reference tests against talipp (725 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks.
 - `convergence()` method on `IndicatorConfig` trait — returns the number of bars until `compute()` first returns `Some`. Each indicator implements its own formula.
 
 ### Changed
