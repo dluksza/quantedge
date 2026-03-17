@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-17
+
 ### Added
 
 - Donchian Channel (DC) — tracks highest high and lowest low over a rolling window. Returns upper, middle, and lower bands. Default length 20. Reference tests against talipp (725 BTC/USDT bars, 1e-10 tolerance) and Criterion benchmarks.
@@ -80,6 +82,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.7.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.7.0
 [0.6.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.5.0
 [0.4.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.4.0
