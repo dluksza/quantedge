@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ATR, BB, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels
+from talipp.indicators import ADX, ATR, BB, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -32,6 +32,7 @@ KC_MA_PERIOD = 20
 KC_ATR_PERIOD = 10
 KC_MULT = 1.5
 DC_PERIOD = 20
+ADX_PERIOD = 14
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -210,6 +211,24 @@ def main():
                     ]
                 )
 
+    # ADX
+    # talipp ADX(di_period, adx_period) takes OHLCV. Output: adx, plus_di, minus_di.
+    # This maps to Rust Adx(length=14).
+    adx = ADX(di_period=ADX_PERIOD, adx_period=ADX_PERIOD, input_values=ohlcv_bars)
+    with open(f"{OUTPUT_DIR}/adx-14.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "adx", "plus_di", "minus_di"])
+        for i, val in enumerate(adx):
+            if val is not None and val.adx is not None:
+                w.writerow(
+                    [
+                        times[i],
+                        f"{val.adx:.10f}",
+                        f"{val.plus_di:.10f}",
+                        f"{val.minus_di:.10f}",
+                    ]
+                )
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -219,6 +238,7 @@ def main():
     stoch_count = sum(1 for v in stoch if v is not None and v.d is not None)
     kc_count = sum(1 for v in kc if v is not None)
     dc_count = sum(1 for v in dc if v is not None)
+    adx_count = sum(1 for v in adx if v is not None and v.adx is not None)
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
@@ -228,7 +248,8 @@ def main():
         f"{atr_count} ATR, "
         f"{stoch_count} Stoch, "
         f"{kc_count} KC, "
-        f"{dc_count} DC reference values "
+        f"{dc_count} DC, "
+        f"{adx_count} ADX reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

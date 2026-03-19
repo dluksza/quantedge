@@ -268,6 +268,8 @@ on a converged indicator.
 | KC        | 200/100 | 1.56 µs      | 477 Melem/s    |
 | DC        | 20     | 4.60 µs       | 162 Melem/s    |
 | DC        | 200    | 9.93 µs       | 74.9 Melem/s   |
+| ADX       | 14     | 4.19 µs       | 178 Melem/s    |
+| ADX       | 140    | 4.18 µs       | 178 Melem/s    |
 
 ### Tick — single `compute()` on a converged indicator
 
@@ -291,6 +293,8 @@ on a converged indicator.
 | KC        | 200/100 | 3.84 ns      |
 | DC        | 20     | 17.8 ns       |
 | DC        | 200    | 24.6 ns       |
+| ADX       | 14     | 13.0 ns       |
+| ADX       | 140    | 12.9 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
@@ -314,6 +318,8 @@ on a converged indicator.
 | KC        | 200/100 | 3.81 ns      |
 | DC        | 20     | 16.9 ns       |
 | DC        | 200    | 24.7 ns       |
+| ADX       | 14     | 11.4 ns       |
+| ADX       | 140    | 11.3 ns       |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
@@ -337,6 +343,8 @@ on a converged indicator.
 | KC        | 200/100 | 4.62 µs      | 483 Melem/s    |
 | DC        | 20     | 7.59 µs       | 294 Melem/s    |
 | DC        | 200    | 12.9 µs       | 172 Melem/s    |
+| ADX       | 14     | 10.3 µs       | 216 Melem/s    |
+| ADX       | 140    | 9.97 µs       | 224 Melem/s    |
 
 Run locally:
 

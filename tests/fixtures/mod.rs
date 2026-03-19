@@ -71,6 +71,15 @@ pub struct RefStochValue {
     pub d: f64,
 }
 
+/// Reference ADX value with timestamp (adx, +DI, -DI).
+#[derive(Debug, Deserialize)]
+pub struct RefAdxValue {
+    pub open_time: u64,
+    pub adx: f64,
+    pub plus_di: f64,
+    pub minus_di: f64,
+}
+
 /// Reference MACD value with timestamp (fully converged: all 3 fields present).
 #[derive(Debug, Deserialize)]
 pub struct RefMacdValue {
@@ -100,6 +109,11 @@ pub fn load_channel_ref(path: &str) -> Vec<RefChannelValue> {
 /// Load Stoch reference data (k, d).
 pub fn load_stoch_ref(path: &str) -> Vec<RefStochValue> {
     load_records(path, "invalid Stoch reference record")
+}
+
+/// Load ADX reference data (`adx`, `plus_di`, `minus_di`).
+pub fn load_adx_ref(path: &str) -> Vec<RefAdxValue> {
+    load_records(path, "invalid ADX reference record")
 }
 
 /// Load MACD reference data (macd, signal, histogram).
@@ -234,6 +248,34 @@ pub fn kc_bands(v: &quantedge_ta::KcValue) -> [(&str, f64); 3] {
         ("middle", v.middle()),
         ("lower", v.lower()),
     ]
+}
+
+/// Assert ADX values match between closed and repainted indicators.
+pub fn assert_adx_values_match(
+    bar_idx: usize,
+    closed: Option<quantedge_ta::AdxValue>,
+    repainted: Option<quantedge_ta::AdxValue>,
+    tolerance: f64,
+) {
+    match (closed, repainted) {
+        (None, None) => {}
+        (Some(c), Some(r)) => {
+            for (label, cv, rv) in [
+                ("ADX", c.adx(), r.adx()),
+                ("+DI", c.plus_di(), r.plus_di()),
+                ("-DI", c.minus_di(), r.minus_di()),
+            ] {
+                let diff = (cv - rv).abs();
+                assert!(
+                    diff <= tolerance,
+                    "ADX {label} diverged at bar {bar_idx}: closed={cv:.10}, repainted={rv:.10}, diff={diff:.2e}"
+                );
+            }
+        }
+        (c, r) => {
+            panic!("ADX convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
+        }
+    }
 }
 
 /// Assert MACD values match between closed and repainted indicators.

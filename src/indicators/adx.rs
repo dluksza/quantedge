@@ -192,14 +192,15 @@ impl Display for AdxValue {
 ///     .build();
 /// let mut adx = Adx::new(config);
 ///
-/// // Seeding phase
+/// // Seeding phase (convergence = length × 2 = 6 bars)
 /// assert!(adx.compute(&Bar { o: 10.0, h: 15.0, l: 8.0, c: 12.0, t: 1 }).is_none());
 /// assert!(adx.compute(&Bar { o: 12.0, h: 18.0, l: 10.0, c: 16.0, t: 2 }).is_none());
 /// assert!(adx.compute(&Bar { o: 16.0, h: 20.0, l: 14.0, c: 18.0, t: 3 }).is_none());
 /// assert!(adx.compute(&Bar { o: 18.0, h: 22.0, l: 15.0, c: 20.0, t: 4 }).is_none());
+/// assert!(adx.compute(&Bar { o: 20.0, h: 25.0, l: 17.0, c: 23.0, t: 5 }).is_none());
 ///
 /// // ADX output begins
-/// let value = adx.compute(&Bar { o: 20.0, h: 25.0, l: 17.0, c: 23.0, t: 5 });
+/// let value = adx.compute(&Bar { o: 23.0, h: 28.0, l: 19.0, c: 26.0, t: 6 });
 /// assert!(value.is_some());
 /// ```
 #[derive(Clone, Debug)]
@@ -210,6 +211,7 @@ pub struct Adx {
     prev_low: Option<Price>,
     current_high: Price,
     current_low: Price,
+    dm_started: bool,
     smoothed_plus_dm: EmaCore, // Wilder's α = 1/length
     smoothed_minus_dm: EmaCore,
     smoothed_tr: EmaCore,
@@ -233,6 +235,7 @@ impl Indicator for Adx {
             prev_low: None,
             current_high: 0.0,
             current_low: 0.0,
+            dm_started: false,
             smoothed_plus_dm: EmaCore::with_alpha(length, alpha),
             smoothed_minus_dm: EmaCore::with_alpha(length, alpha),
             smoothed_tr: EmaCore::with_alpha(length, alpha),
@@ -246,44 +249,56 @@ impl Indicator for Adx {
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             crate::internals::BarAction::Advance(true_range) => {
-                let (plus_dm, minus_dm) = if self.prev_high.is_some() {
-                    Adx::dm(ohlcv, self.current_high, self.current_low)
-                } else {
-                    (0.0, 0.0)
-                };
+                self.smoothed_tr.push(true_range);
 
-                self.prev_high = Some(self.current_high);
-                self.prev_low = Some(self.current_low);
+                if self.prev_high.is_some() {
+                    let (plus_dm, minus_dm) = Adx::dm(ohlcv, self.current_high, self.current_low);
 
-                let smooth_tr = self.smoothed_tr.push(true_range);
-                let smooth_plus_dm = self.smoothed_plus_dm.push(plus_dm);
-                let smooth_minus_dm = self.smoothed_minus_dm.push(minus_dm);
+                    self.prev_high = Some(self.current_high);
+                    self.prev_low = Some(self.current_low);
+                    self.dm_started = true;
 
-                match (smooth_tr, smooth_plus_dm, smooth_minus_dm) {
-                    (Some(smooth_tr), Some(smooth_plus_dm), Some(smooth_minus_dm)) => {
-                        let (plus_di, minus_di, dx) =
-                            Adx::compute_adx(smooth_tr, smooth_plus_dm, smooth_minus_dm);
+                    let smooth_plus_dm = self.smoothed_plus_dm.push(plus_dm);
+                    let smooth_minus_dm = self.smoothed_minus_dm.push(minus_dm);
 
-                        self.smoother.push(dx).map(|adx| AdxValue {
-                            adx,
-                            plus_di,
-                            minus_di,
-                        })
+                    match (smooth_plus_dm, smooth_minus_dm) {
+                        (Some(smooth_plus_dm), Some(smooth_minus_dm)) => {
+                            let smooth_tr = self.smoothed_tr.value().unwrap_or(0.0);
+                            let (plus_di, minus_di, dx) =
+                                Adx::compute_adx(smooth_tr, smooth_plus_dm, smooth_minus_dm);
+
+                            self.smoother.push(dx).map(|adx| AdxValue {
+                                adx,
+                                plus_di,
+                                minus_di,
+                            })
+                        }
+                        _ => None,
                     }
-                    _ => None,
+                } else {
+                    self.prev_high = Some(self.current_high);
+                    self.prev_low = Some(self.current_low);
+                    None
                 }
             }
             crate::internals::BarAction::Repaint(true_range) => {
+                self.smoothed_tr.replace(true_range);
+
+                if !self.dm_started {
+                    self.current_high = ohlcv.high();
+                    self.current_low = ohlcv.low();
+                    return self.current;
+                }
                 match (self.prev_high, self.prev_low) {
                     (Some(prev_high), Some(prev_low)) => {
                         let (plus_dm, minus_dm) = Adx::dm(ohlcv, prev_high, prev_low);
 
-                        let smooth_tr = self.smoothed_tr.replace(true_range);
                         let smooth_plus_dm = self.smoothed_plus_dm.replace(plus_dm);
                         let smooth_minus_dm = self.smoothed_minus_dm.replace(minus_dm);
 
-                        match (smooth_tr, smooth_plus_dm, smooth_minus_dm) {
-                            (Some(smooth_tr), Some(smooth_plus_dm), Some(smooth_minus_dm)) => {
+                        match (smooth_plus_dm, smooth_minus_dm) {
+                            (Some(smooth_plus_dm), Some(smooth_minus_dm)) => {
+                                let smooth_tr = self.smoothed_tr.value().unwrap_or(0.0);
                                 let (plus_di, minus_di, dx) =
                                     Adx::compute_adx(smooth_tr, smooth_plus_dm, smooth_minus_dm);
 
@@ -369,7 +384,7 @@ mod tests {
         Adx::new(AdxConfig::builder().length(nz(length)).build())
     }
 
-    /// Returns a converged ADX(3) after 5 trending-up bars.
+    /// Returns a converged ADX(3) after 7 trending-up bars.
     fn seeded_adx3() -> Adx {
         let mut a = adx(3);
         a.compute(&ohlc(10.0, 15.0, 8.0, 12.0, 1));
@@ -377,6 +392,8 @@ mod tests {
         a.compute(&ohlc(16.0, 20.0, 14.0, 18.0, 3));
         a.compute(&ohlc(18.0, 22.0, 15.0, 20.0, 4));
         a.compute(&ohlc(20.0, 25.0, 17.0, 23.0, 5));
+        a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
+        a.compute(&ohlc(26.0, 31.0, 22.0, 29.0, 7));
         a
     }
 
@@ -390,6 +407,7 @@ mod tests {
             assert!(a.compute(&ohlc(12.0, 18.0, 10.0, 16.0, 2)).is_none());
             assert!(a.compute(&ohlc(16.0, 20.0, 14.0, 18.0, 3)).is_none());
             assert!(a.compute(&ohlc(18.0, 22.0, 15.0, 20.0, 4)).is_none());
+            assert!(a.compute(&ohlc(20.0, 25.0, 17.0, 23.0, 5)).is_none());
         }
 
         #[test]
@@ -407,7 +425,7 @@ mod tests {
         #[test]
         fn value_matches_last_compute() {
             let mut a = seeded_adx3();
-            let computed = a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
+            let computed = a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8));
             assert_eq!(a.value(), computed);
         }
     }
@@ -436,7 +454,9 @@ mod tests {
             a.compute(&ohlc(32.0, 33.0, 25.0, 27.0, 2));
             a.compute(&ohlc(27.0, 28.0, 20.0, 22.0, 3));
             a.compute(&ohlc(22.0, 23.0, 15.0, 17.0, 4));
-            let val = a.compute(&ohlc(17.0, 18.0, 10.0, 12.0, 5)).unwrap();
+            a.compute(&ohlc(17.0, 18.0, 10.0, 12.0, 5));
+            a.compute(&ohlc(12.0, 13.0, 6.0, 8.0, 6));
+            let val = a.compute(&ohlc(8.0, 9.0, 3.0, 5.0, 7)).unwrap();
             assert!(
                 val.minus_di() > val.plus_di(),
                 "-DI should exceed +DI in downtrend: -DI={}, +DI={}",
@@ -468,6 +488,7 @@ mod tests {
                 ohlc(5.0, 10.0, 2.0, 9.0, 6),
                 ohlc(9.0, 50.0, 1.0, 45.0, 7),
                 ohlc(45.0, 48.0, 40.0, 42.0, 8),
+                ohlc(42.0, 55.0, 38.0, 50.0, 9),
             ];
             for b in &bars {
                 if let Some(v) = a.compute(b) {
@@ -512,9 +533,9 @@ mod tests {
         #[test]
         fn repaint_updates_value() {
             let mut a = seeded_adx3();
-            let original = a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6)).unwrap();
+            let original = a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8)).unwrap();
             // Repaint with much higher high — +DI should increase
-            let repainted = a.compute(&ohlc(23.0, 40.0, 19.0, 38.0, 6)).unwrap();
+            let repainted = a.compute(&ohlc(29.0, 46.0, 25.0, 44.0, 8)).unwrap();
             assert!(
                 repainted.plus_di() > original.plus_di(),
                 "higher high should increase +DI: {} vs {}",
@@ -526,13 +547,13 @@ mod tests {
         #[test]
         fn multiple_repaints_match_single() {
             let mut a = seeded_adx3();
-            a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
-            a.compute(&ohlc(23.0, 35.0, 15.0, 30.0, 6)); // repaint 1
-            a.compute(&ohlc(23.0, 30.0, 18.0, 25.0, 6)); // repaint 2
-            let final_val = a.compute(&ohlc(23.0, 27.0, 20.0, 24.0, 6)).unwrap();
+            a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8));
+            a.compute(&ohlc(29.0, 41.0, 21.0, 36.0, 8)); // repaint 1
+            a.compute(&ohlc(29.0, 36.0, 24.0, 31.0, 8)); // repaint 2
+            let final_val = a.compute(&ohlc(29.0, 33.0, 26.0, 30.0, 8)).unwrap();
 
             let mut clean = seeded_adx3();
-            let expected = clean.compute(&ohlc(23.0, 27.0, 20.0, 24.0, 6)).unwrap();
+            let expected = clean.compute(&ohlc(29.0, 33.0, 26.0, 30.0, 8)).unwrap();
 
             assert!((final_val.adx() - expected.adx()).abs() < 1e-10);
             assert!((final_val.plus_di() - expected.plus_di()).abs() < 1e-10);
@@ -542,13 +563,13 @@ mod tests {
         #[test]
         fn repaint_then_advance_uses_repainted() {
             let mut a = seeded_adx3();
-            a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
-            a.compute(&ohlc(23.0, 30.0, 18.0, 28.0, 6)); // repaint bar 6
-            let after = a.compute(&ohlc(28.0, 33.0, 24.0, 31.0, 7)).unwrap();
+            a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8));
+            a.compute(&ohlc(29.0, 36.0, 24.0, 34.0, 8)); // repaint bar 8
+            let after = a.compute(&ohlc(34.0, 39.0, 30.0, 37.0, 9)).unwrap();
 
             let mut clean = seeded_adx3();
-            clean.compute(&ohlc(23.0, 30.0, 18.0, 28.0, 6));
-            let expected = clean.compute(&ohlc(28.0, 33.0, 24.0, 31.0, 7)).unwrap();
+            clean.compute(&ohlc(29.0, 36.0, 24.0, 34.0, 8));
+            let expected = clean.compute(&ohlc(34.0, 39.0, 30.0, 37.0, 9)).unwrap();
 
             assert!((after.adx() - expected.adx()).abs() < 1e-10);
             assert!((after.plus_di() - expected.plus_di()).abs() < 1e-10);
@@ -573,8 +594,8 @@ mod tests {
             let mut a = seeded_adx3();
             let mut cloned = a.clone();
 
-            let orig = a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6)).unwrap();
-            let clone_val = cloned.compute(&ohlc(23.0, 15.0, 5.0, 8.0, 6)).unwrap();
+            let orig = a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8)).unwrap();
+            let clone_val = cloned.compute(&ohlc(29.0, 21.0, 11.0, 14.0, 8)).unwrap();
 
             assert!(
                 (orig.adx() - clone_val.adx()).abs() > 1e-10,
@@ -682,7 +703,7 @@ mod tests {
         #[test]
         fn matches_last_compute() {
             let mut a = seeded_adx3();
-            let computed = a.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
+            let computed = a.compute(&ohlc(29.0, 34.0, 25.0, 32.0, 8));
             assert_eq!(a.value(), computed);
         }
 
