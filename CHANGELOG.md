@@ -1,10 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [0.8.0] - 2026-03-19
 
 ### Added
 
-- Average Directional Index (ADX) — measures trend strength on a 0–100 scale with +DI and −DI directional indicators. Uses Wilder's smoothing (`α = 1/length`). Returns `AdxValue { adx, plus_di, minus_di }`.
+- Average Directional Index (ADX) — measures trend strength on a 0–100 scale with +DI and −DI directional indicators. Uses Wilder's smoothing (`α = 1/length`). Returns `AdxValue { adx, plus_di, minus_di }`. Reference tests against talipp (717 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks.
+
+### Changed
+
+- ADX hot path optimized (~5% improvement): precomputed `100/smooth_tr` reciprocal replaces two divisions with one division + two multiplications; reuses push/replace return values to eliminate a redundant branch per tick.
 
 ## [0.7.0] - 2026-03-17
 
@@ -86,6 +90,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.8.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.8.0
 [0.7.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.7.0
 [0.6.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.6.0
 [0.5.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.5.0
