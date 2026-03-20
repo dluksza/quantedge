@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ADX, ATR, BB, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels
+from talipp.indicators import ADX, ATR, BB, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels, Williams
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -33,6 +33,7 @@ KC_ATR_PERIOD = 10
 KC_MULT = 1.5
 DC_PERIOD = 20
 ADX_PERIOD = 14
+WILLR_PERIOD = 14
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -229,6 +230,17 @@ def main():
                     ]
                 )
 
+    # Williams %R
+    # talipp Williams(period) takes OHLCV. Output: single float.
+    # This maps to Rust WillR(length=14).
+    willr = Williams(period=WILLR_PERIOD, input_values=ohlcv_bars)
+    with open(f"{OUTPUT_DIR}/willr-14.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "expected"])
+        for i, val in enumerate(willr):
+            if val is not None:
+                w.writerow([times[i], f"{val:.10f}"])
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -239,6 +251,7 @@ def main():
     kc_count = sum(1 for v in kc if v is not None)
     dc_count = sum(1 for v in dc if v is not None)
     adx_count = sum(1 for v in adx if v is not None and v.adx is not None)
+    willr_count = sum(1 for v in willr if v is not None)
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
@@ -249,7 +262,8 @@ def main():
         f"{stoch_count} Stoch, "
         f"{kc_count} KC, "
         f"{dc_count} DC, "
-        f"{adx_count} ADX reference values "
+        f"{adx_count} ADX, "
+        f"{willr_count} WillR reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

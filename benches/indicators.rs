@@ -6,7 +6,7 @@ use crate::fixtures::{load_reference_ohlcvs, repaint_sequence};
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Dc, DcConfig, Ema, EmaConfig, Kc, KcConfig, Macd,
-    MacdConfig, Rsi, RsiConfig, Sma, SmaConfig, Stoch, StochConfig,
+    MacdConfig, Rsi, RsiConfig, Sma, SmaConfig, Stoch, StochConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, time::Duration};
 
@@ -71,6 +71,16 @@ macro_rules! all_indicators {
         $m!("dc200", Dc, DcConfig::builder().length(nz(200)).build());
         $m!("adx14", Adx, AdxConfig::builder().length(nz(14)).build());
         $m!("adx140", Adx, AdxConfig::builder().length(nz(140)).build());
+        $m!(
+            "willr14",
+            WillR,
+            WillRConfig::builder().length(nz(14)).build()
+        );
+        $m!(
+            "willr140",
+            WillR,
+            WillRConfig::builder().length(nz(140)).build()
+        );
     };
 }
 

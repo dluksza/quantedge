@@ -297,7 +297,10 @@ mod tests {
             // Window: bar2, bar3. HH=22, LL=10
             let v2 = wr.value().unwrap();
 
-            assert!((v1 - v2).abs() > 1e-10, "value should change when extreme ages out");
+            assert!(
+                (v1 - v2).abs() > 1e-10,
+                "value should change when extreme ages out"
+            );
         }
     }
 
