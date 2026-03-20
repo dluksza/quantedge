@@ -8,6 +8,7 @@ mod macd;
 mod rsi;
 mod sma;
 mod stoch;
+mod willr;
 
 pub use adx::*;
 pub use atr::*;
@@ -19,3 +20,4 @@ pub use macd::*;
 pub use rsi::*;
 pub use sma::*;
 pub use stoch::*;
+pub use willr::*;

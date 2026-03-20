@@ -98,6 +98,7 @@ impl_inherent_methods!(Kc, KcConfig, KcConfigBuilder);
 impl_inherent_methods!(Bb, BbConfig, BbConfigBuilder);
 impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
 impl_inherent_methods!(Stoch, StochConfig, StochConfigBuilder);
+impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 
 #[cfg(test)]
 mod test_util;
