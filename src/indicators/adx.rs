@@ -354,7 +354,7 @@ impl Adx {
         smooth_plus_dm: Price,
         smooth_minus_dm: Price,
     ) -> (Price, Price, Price) {
-        if smooth_tr.abs() < f64::EPSILON {
+        if smooth_tr < f64::EPSILON {
             return (0.0, 0.0, 0.0); // plus_di, minus_di, dx
         }
 
