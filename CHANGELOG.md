@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-22
+
 ### Added
 
 - Commodity Channel Index (CCI) — measures deviation of price from its statistical mean, scaled by mean absolute deviation. Uses the traditional 0.015 constant so ~70–80% of values fall between −100 and +100. Default source is HLC3 (typical price). Convenience constructors `CciConfig::close()` and `CciConfig::hlc3()`. Returns `f64`. Reference tests against talipp (725 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks.
@@ -102,6 +104,8 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.10.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.10.0
+[0.9.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.9.0
 [0.8.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.8.0
 [0.7.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.7.0
 [0.6.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.6.0
