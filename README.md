@@ -234,7 +234,7 @@ to extract from the Ohlcv input:
 
 ### Planned
 
-CHOP, VWAP, OBV and more.
+CHOP, Ichimoku, StochRSI, OBV, VWAP, Supertrend, Parabolic SAR.
 
 ## Benchmarks
 
