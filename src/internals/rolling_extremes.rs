@@ -29,11 +29,6 @@ impl RollingExtremes {
     }
 
     #[must_use]
-    pub(crate) fn is_ready(&self) -> bool {
-        self.highs.is_ready()
-    }
-
-    #[must_use]
     pub(crate) fn highest_high(&self) -> Price {
         self.high_val.max(self.forming_high)
     }
@@ -43,7 +38,12 @@ impl RollingExtremes {
         self.low_val.min(self.forming_low)
     }
 
-    pub(crate) fn push(&mut self, ohlcv: &impl Ohlcv) -> (Price, Price) {
+    #[must_use]
+    pub(crate) fn extremes(&self) -> (Price, Price) {
+        (self.highest_high(), self.lowest_low())
+    }
+
+    pub(crate) fn push(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
         if self.high_val < 0.0 {
             self.high_val = ohlcv.high();
         }
@@ -81,17 +81,25 @@ impl RollingExtremes {
 
         self.forming_low = ohlcv.low();
 
-        (self.highest_high(), self.lowest_low())
+        self.value()
     }
 
-    pub(crate) fn replace(&mut self, ohlcv: &impl Ohlcv) -> (Price, Price) {
+    pub(crate) fn replace(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
         self.highs.replace(ohlcv.high());
         self.lows.replace(ohlcv.low());
 
         self.forming_high = ohlcv.high();
         self.forming_low = ohlcv.low();
 
-        (self.highest_high(), self.lowest_low())
+        self.value()
+    }
+
+    fn value(&self) -> Option<(Price, Price)> {
+        if self.highs.is_ready() {
+            Some((self.highest_high(), self.lowest_low()))
+        } else {
+            None
+        }
     }
 }
 
@@ -153,9 +161,8 @@ mod tests {
         #[test]
         fn returns_current_extremes() {
             let mut re = RollingExtremes::new(3);
-            let (hh, ll) = re.push(&ohlc(20.0, 10.0, 15.0));
-            assert_eq!(hh, 20.0);
-            assert_eq!(ll, 10.0);
+            let actual = re.push(&ohlc(20.0, 10.0, 15.0));
+            assert_eq!(actual, None);
         }
     }
 
@@ -206,13 +213,13 @@ mod tests {
             assert_eq!(re.highest_high(), 25.0);
             assert_eq!(re.lowest_low(), 10.0);
         }
+
         #[test]
         fn returns_current_extremes() {
             let mut re = RollingExtremes::new(3);
             re.push(&ohlc(20.0, 10.0, 15.0));
-            let (hh, ll) = re.replace(&ohlc(25.0, 8.0, 18.0));
-            assert_eq!(hh, 25.0);
-            assert_eq!(ll, 8.0);
+            let actual = re.replace(&ohlc(25.0, 8.0, 18.0));
+            assert_eq!(actual, None);
         }
 
         #[test]

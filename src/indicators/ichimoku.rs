@@ -320,20 +320,10 @@ impl Indicator for Ichimoku {
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
-                let tenkan_sen = Self::price_midpoint(
-                    self.tenkan_extremes.push(ohlcv),
-                    self.tenkan_extremes.is_ready(),
-                );
-                let kijun_sen = Self::price_midpoint(
-                    self.kijun_extremes.push(ohlcv),
-                    self.kijun_extremes.is_ready(),
-                );
-
-                let displaced_b = Self::price_midpoint(
-                    self.senkou_b_extremes.push(ohlcv),
-                    self.senkou_b_extremes.is_ready(),
-                )
-                .and_then(|sb| self.senkou_b_buffer.push(sb));
+                let tenkan_sen = Self::price_midpoint(self.tenkan_extremes.push(ohlcv));
+                let kijun_sen = Self::price_midpoint(self.kijun_extremes.push(ohlcv));
+                let displaced_b = Self::price_midpoint(self.senkou_b_extremes.push(ohlcv))
+                    .and_then(|sb| self.senkou_b_buffer.push(sb));
 
                 if let (Some(tenkan), Some(kijun)) = (tenkan_sen, kijun_sen) {
                     let displaced_a = self.senkou_a_buffer.push(tenkan.midpoint(kijun));
@@ -354,19 +344,11 @@ impl Indicator for Ichimoku {
                 }
             }
             BarAction::Repaint(price) => {
-                let tenkan_sen = Self::price_midpoint(
-                    self.tenkan_extremes.replace(ohlcv),
-                    self.tenkan_extremes.is_ready(),
-                );
-                let kijun_sen = Self::price_midpoint(
-                    self.kijun_extremes.replace(ohlcv),
-                    self.kijun_extremes.is_ready(),
-                );
+                let tenkan_sen = Self::price_midpoint(self.tenkan_extremes.replace(ohlcv));
+                let kijun_sen = Self::price_midpoint(self.kijun_extremes.replace(ohlcv));
 
-                if let Some(senkou_b) = Self::price_midpoint(
-                    self.senkou_b_extremes.replace(ohlcv),
-                    self.senkou_b_extremes.is_ready(),
-                ) {
+                if let Some(senkou_b) = Self::price_midpoint(self.senkou_b_extremes.replace(ohlcv))
+                {
                     self.senkou_b_buffer.replace(senkou_b);
                 }
 
@@ -395,12 +377,8 @@ impl Indicator for Ichimoku {
 }
 
 impl Ichimoku {
-    fn price_midpoint((highest_high, lowest_low): (Price, Price), is_ready: bool) -> Option<Price> {
-        if is_ready {
-            Some(highest_high.midpoint(lowest_low))
-        } else {
-            None
-        }
+    fn price_midpoint(extremes: Option<(Price, Price)>) -> Option<Price> {
+        extremes.map(|(highest_high, lowest_low)| highest_high.midpoint(lowest_low))
     }
 }
 

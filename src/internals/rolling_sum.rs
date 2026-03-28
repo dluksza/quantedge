@@ -25,11 +25,12 @@ impl RollingSum {
             None
         }
     }
-    pub(crate) fn replace(&mut self, value: f64) -> f64 {
+
+    pub(crate) fn replace(&mut self, value: f64) -> Option<f64> {
         let old = self.buffer.replace(value);
         self.sum = self.sum - old + value;
 
-        self.sum
+        self.sum()
     }
 
     #[must_use]

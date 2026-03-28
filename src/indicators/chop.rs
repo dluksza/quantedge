@@ -169,30 +169,28 @@ impl Indicator for Chop {
     }
 
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
-        let (tr_sum, highest_high, lowest_low) = match self.bar_state.handle(ohlcv) {
+        let extremes = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
-                let (highest_high, lowest_low) = self.extremes.push(ohlcv);
                 self.tr_sum.push(price);
-
-                (self.tr_sum.sum(), highest_high, lowest_low)
+                self.extremes.push(ohlcv)
             }
             BarAction::Repaint(price) => {
-                let (highest_high, lowest_low) = self.extremes.replace(ohlcv);
                 self.tr_sum.replace(price);
-
-                (self.tr_sum.sum(), highest_high, lowest_low)
+                self.extremes.replace(ohlcv)
             }
         };
 
-        let extreme_diff = highest_high - lowest_low;
+        self.current = extremes.and_then(|(highest_high, lowest_low)| {
+            let extreme_diff = highest_high - lowest_low;
 
-        self.current = if extreme_diff < f64::EPSILON {
-            Some(100.0)
-        } else if let Some(tr_sum) = tr_sum {
-            Some((tr_sum / extreme_diff).log10() * self.log_length_reciprocal)
-        } else {
-            None
-        };
+            if extreme_diff < f64::EPSILON {
+                Some(100.0)
+            } else {
+                self.tr_sum
+                    .sum()
+                    .map(|sum| (sum / extreme_diff).log10() * self.log_length_reciprocal)
+            }
+        });
 
         self.current
     }

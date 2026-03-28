@@ -199,22 +199,18 @@ impl Indicator for Dc {
 
         let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
 
-        let (highest_high, lowest_low) = if is_next_bar {
+        let extremes = if is_next_bar {
             self.last_open_time = Some(ohlcv.open_time());
             self.extremes.push(ohlcv)
         } else {
             self.extremes.replace(ohlcv)
         };
 
-        self.current = if self.extremes.is_ready() {
-            Some(DcValue {
-                upper: highest_high,
-                middle: (highest_high + lowest_low) * 0.5,
-                lower: lowest_low,
-            })
-        } else {
-            None
-        };
+        self.current = extremes.map(|(highest_high, lowest_low)| DcValue {
+            upper: highest_high,
+            middle: (highest_high + lowest_low) * 0.5,
+            lower: lowest_low,
+        });
 
         self.current
     }

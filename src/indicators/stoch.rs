@@ -295,15 +295,13 @@ impl Indicator for Stoch {
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
-                let (highest_high, lowest_low) = self.extremes.push(ohlcv);
-
-                if !self.extremes.is_ready() {
-                    return None;
-                }
-
                 let k_sum = self
-                    .k_sum
-                    .push(Self::k_value(price, highest_high, lowest_low));
+                    .extremes
+                    .push(ohlcv)
+                    .and_then(|(highest_high, lowest_low)| {
+                        self.k_sum
+                            .push(Self::k_value(price, highest_high, lowest_low))
+                    });
 
                 match k_sum {
                     Some(k_sum) => {
@@ -316,28 +314,24 @@ impl Indicator for Stoch {
                 }
             }
             BarAction::Repaint(price) => {
-                let (highest_high, lowest_low) = self.extremes.replace(ohlcv);
+                self.extremes.replace(ohlcv);
 
-                if !self.extremes.is_ready() {
-                    return None;
-                }
+                self.current.map(|current| {
+                    let (highest_high, lowest_low) = self.extremes.extremes();
+                    let k = self
+                        .k_sum
+                        .replace(Self::k_value(price, highest_high, lowest_low))
+                        .expect("k_sum must be ready when current is Some")
+                        * self.k_reciprocal;
+                    let d_sum = self.d_sum.replace(k);
 
-                let k_sum = self
-                    .k_sum
-                    .replace(Self::k_value(price, highest_high, lowest_low));
-
-                match self.current {
-                    Some(current) => {
-                        let k = k_sum * self.k_reciprocal;
-                        let d_sum = self.d_sum.replace(k);
-
-                        Some(StochValue {
-                            k,
-                            d: current.d.map(|_| d_sum * self.d_reciprocal),
-                        })
+                    StochValue {
+                        k,
+                        d: current.d.map(|_| {
+                            d_sum.expect("d_sum must be ready when d is Some") * self.d_reciprocal
+                        }),
                     }
-                    None => None,
-                }
+                })
             }
         };
 

@@ -172,21 +172,19 @@ impl Indicator for WillR {
     }
 
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
-        let (price, (highest_high, lowest_low)) = match self.bar_state.handle(ohlcv) {
+        let (price, extremes) = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => (price, self.extremes.push(ohlcv)),
             BarAction::Repaint(price) => (price, self.extremes.replace(ohlcv)),
         };
 
-        self.current = if self.extremes.is_ready() {
+        self.current = extremes.map(|(highest_high, lowest_low)| {
             let extreme_diff = highest_high - lowest_low;
             if extreme_diff < f64::EPSILON {
-                Some(-50.0)
+                -50.0
             } else {
-                Some((highest_high - price) / extreme_diff * -100.0)
+                (highest_high - price) / extreme_diff * -100.0
             }
-        } else {
-            None
-        };
+        });
 
         self.current
     }
