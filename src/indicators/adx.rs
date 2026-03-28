@@ -2,7 +2,7 @@ use std::{fmt::Display, num::NonZero};
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price,
-    internals::{BarState, EmaCore},
+    internals::{BarAction, BarState, EmaCore},
 };
 
 /// Configuration for the Average Directional Index ([`Adx`]) indicator.
@@ -240,7 +240,7 @@ impl Indicator for Adx {
     #[allow(clippy::similar_names)]
     fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
-            crate::internals::BarAction::Advance(true_range) => {
+            BarAction::Advance(true_range) => {
                 let smooth_tr = self.smoothed_tr.push(true_range);
 
                 if self.prev_high.is_some() {
@@ -275,7 +275,7 @@ impl Indicator for Adx {
                     None
                 }
             }
-            crate::internals::BarAction::Repaint(true_range) => {
+            BarAction::Repaint(true_range) => {
                 let smooth_tr = self.smoothed_tr.replace(true_range);
 
                 if self.dm_started {
