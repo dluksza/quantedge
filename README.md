@@ -287,6 +287,8 @@ on a converged indicator.
 | CCI       | 200    | 27.8 µs       | 26.7 Melem/s   |
 | CHOP      | 14     | 6.43 µs       | 116 Melem/s    |
 | CHOP      | 140    | 13.1 µs       | 56.6 Melem/s   |
+| Ichimoku  | 9/26/52/26 | 15.4 µs   | 48.3 Melem/s   |
+| Ichimoku  | 36/104/208/104 | 24.5 µs | 30.4 Melem/s  |
 
 ### Tick — single `compute()` on a converged indicator
 
@@ -318,6 +320,8 @@ on a converged indicator.
 | CCI       | 200    | 63.1 ns       |
 | CHOP      | 14     | 33.7 ns       |
 | CHOP      | 140    | 36.6 ns       |
+| Ichimoku  | 9/26/52/26 | 105 ns   |
+| Ichimoku  | 36/104/208/104 | 116 ns |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
@@ -349,6 +353,8 @@ on a converged indicator.
 | CCI       | 200    | 62.7 ns       |
 | CHOP      | 14     | 28.9 ns       |
 | CHOP      | 140    | 34.0 ns       |
+| Ichimoku  | 9/26/52/26 | 71.6 ns  |
+| Ichimoku  | 36/104/208/104 | 113 ns |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
@@ -380,6 +386,8 @@ on a converged indicator.
 | CCI       | 200    | 84.5 µs       | 26.4 Melem/s   |
 | CHOP      | 14     | 12.5 µs       | 179 Melem/s    |
 | CHOP      | 140    | 18.1 µs       | 123 Melem/s    |
+| Ichimoku  | 9/26/52/26 | 27.6 µs   | 80.9 Melem/s   |
+| Ichimoku  | 36/104/208/104 | 36.7 µs | 60.8 Melem/s  |
 
 Run locally:
 

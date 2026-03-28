@@ -6,8 +6,8 @@ use crate::fixtures::{load_reference_ohlcvs, repaint_sequence};
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
-    Ema, EmaConfig, Kc, KcConfig, Macd, MacdConfig, Rsi, RsiConfig, Sma, SmaConfig, Stoch,
-    StochConfig, WillR, WillRConfig,
+    Ema, EmaConfig, Ichimoku, IchimokuConfig, Kc, KcConfig, Macd, MacdConfig, Rsi, RsiConfig, Sma,
+    SmaConfig, Stoch, StochConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, time::Duration};
 
@@ -89,6 +89,26 @@ macro_rules! all_indicators {
             "chop140",
             Chop,
             ChopConfig::builder().length(nz(140)).build()
+        );
+        $m!(
+            "ichimoku9265226",
+            Ichimoku,
+            IchimokuConfig::builder()
+                .tenkan_length(nz(9))
+                .kijun_length(nz(26))
+                .senkou_b_length(nz(52))
+                .displacement(nz(26))
+                .build()
+        );
+        $m!(
+            "ichimoku36104208104",
+            Ichimoku,
+            IchimokuConfig::builder()
+                .tenkan_length(nz(36))
+                .kijun_length(nz(104))
+                .senkou_b_length(nz(208))
+                .displacement(nz(104))
+                .build()
         );
     };
 }

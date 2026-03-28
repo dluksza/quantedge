@@ -80,6 +80,16 @@ pub struct RefAdxValue {
     pub minus_di: f64,
 }
 
+/// Reference Ichimoku value with timestamp (`tenkan`, `kijun`, `senkou_a`, `senkou_b`).
+#[derive(Debug, Deserialize)]
+pub struct RefIchimokuValue {
+    pub open_time: u64,
+    pub tenkan: f64,
+    pub kijun: f64,
+    pub senkou_a: f64,
+    pub senkou_b: f64,
+}
+
 /// Reference MACD value with timestamp (fully converged: all 3 fields present).
 #[derive(Debug, Deserialize)]
 pub struct RefMacdValue {
@@ -114,6 +124,11 @@ pub fn load_stoch_ref(path: &str) -> Vec<RefStochValue> {
 /// Load ADX reference data (`adx`, `plus_di`, `minus_di`).
 pub fn load_adx_ref(path: &str) -> Vec<RefAdxValue> {
     load_records(path, "invalid ADX reference record")
+}
+
+/// Load Ichimoku reference data (`tenkan`, `kijun`, `senkou_a`, `senkou_b`).
+pub fn load_ichimoku_ref(path: &str) -> Vec<RefIchimokuValue> {
+    load_records(path, "invalid Ichimoku reference record")
 }
 
 /// Load MACD reference data (macd, signal, histogram).
@@ -274,6 +289,36 @@ pub fn assert_adx_values_match(
         }
         (c, r) => {
             panic!("ADX convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
+        }
+    }
+}
+
+/// Assert Ichimoku values match between closed and repainted indicators.
+pub fn assert_ichimoku_values_match(
+    bar_idx: usize,
+    closed: Option<quantedge_ta::IchimokuValue>,
+    repainted: Option<quantedge_ta::IchimokuValue>,
+    tolerance: f64,
+) {
+    match (closed, repainted) {
+        (None, None) => {}
+        (Some(c), Some(r)) => {
+            for (label, cv, rv) in [
+                ("tenkan", c.tenkan(), r.tenkan()),
+                ("kijun", c.kijun(), r.kijun()),
+                ("senkou_a", c.senkou_a(), r.senkou_a()),
+                ("senkou_b", c.senkou_b(), r.senkou_b()),
+                ("chikou_close", c.chikou_close(), r.chikou_close()),
+            ] {
+                let diff = (cv - rv).abs();
+                assert!(
+                    diff <= tolerance,
+                    "Ichimoku {label} diverged at bar {bar_idx}: closed={cv:.10}, repainted={rv:.10}, diff={diff:.2e}"
+                );
+            }
+        }
+        (c, r) => {
+            panic!("Ichimoku convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
         }
     }
 }

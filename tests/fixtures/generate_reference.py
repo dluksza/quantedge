@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels, Williams
+from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels, Williams, Ichimoku
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -36,6 +36,10 @@ ADX_PERIOD = 14
 WILLR_PERIOD = 14
 CCI_PERIOD = 20
 CHOP_PERIOD = 14
+ICHIMOKU_TENKAN = 9
+ICHIMOKU_KIJUN = 26
+ICHIMOKU_SENKOU_B = 52
+ICHIMOKU_DISPLACEMENT = 26
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -265,6 +269,41 @@ def main():
             if val is not None:
                 w.writerow([times[i], f"{val:.10f}"])
 
+    # Ichimoku Cloud
+    # talipp Ichimoku params: tenkan_period, kijun_period, senkou_slow_period,
+    # senkou_lookup_period (displacement), chikou_lag_period.
+    # Output: conversion_line (tenkan), base_line (kijun),
+    # cloud_leading_fast_line (senkou_a), cloud_leading_slow_line (senkou_b),
+    # lagging_line (chikou - already displaced, we skip it).
+    ichimoku = Ichimoku(
+        tenkan_period=ICHIMOKU_TENKAN,
+        kijun_period=ICHIMOKU_KIJUN,
+        senkou_slow_period=ICHIMOKU_SENKOU_B,
+        senkou_lookup_period=ICHIMOKU_DISPLACEMENT,
+        chikou_lag_period=ICHIMOKU_DISPLACEMENT,
+        input_values=ohlcv_bars,
+    )
+    with open(f"{OUTPUT_DIR}/ichimoku-9-26-52-26.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "tenkan", "kijun", "senkou_a", "senkou_b"])
+        for i, val in enumerate(ichimoku):
+            if (
+                val is not None
+                and val.conversion_line is not None
+                and val.base_line is not None
+                and val.cloud_leading_fast_line is not None
+                and val.cloud_leading_slow_line is not None
+            ):
+                w.writerow(
+                    [
+                        times[i],
+                        f"{val.conversion_line:.10f}",
+                        f"{val.base_line:.10f}",
+                        f"{val.cloud_leading_fast_line:.10f}",
+                        f"{val.cloud_leading_slow_line:.10f}",
+                    ]
+                )
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -278,6 +317,15 @@ def main():
     willr_count = sum(1 for v in willr if v is not None)
     cci_count = sum(1 for v in cci if v is not None)
     chop_count = sum(1 for v in chop if v is not None)
+    ichimoku_count = sum(
+        1
+        for v in ichimoku
+        if v is not None
+        and v.conversion_line is not None
+        and v.base_line is not None
+        and v.cloud_leading_fast_line is not None
+        and v.cloud_leading_slow_line is not None
+    )
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
@@ -291,7 +339,8 @@ def main():
         f"{adx_count} ADX, "
         f"{willr_count} WillR, "
         f"{cci_count} CCI, "
-        f"{chop_count} CHOP reference values "
+        f"{chop_count} CHOP, "
+        f"{ichimoku_count} Ichimoku reference values "
         f"from {len(rows)} OHLCV bars."
     )
 
