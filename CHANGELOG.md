@@ -2,9 +2,15 @@
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-03-28
+
 ### Added
 
 - Ichimoku Cloud (Ichimoku Kinko Hyo) — comprehensive trend indicator producing five lines: Tenkan-sen (conversion), Kijun-sen (base), Senkou Span A/B (cloud boundaries), and Chikou close (lagging span input). Configurable lookback windows and displacement. Standard settings via `IchimokuBuilder::default()` (9/26/52/26). Returns `IchimokuValue { tenkan, kijun, senkou_a, senkou_b, chikou_close }`. Reference tests against talipp (666 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks. Unit tests covering filling, computation, sliding, repaint, live data, clone, config, display, and value accessor.
+
+### Changed
+
+- Encoded convergence in `RollingExtremes` and `RollingSum` return types — `push()`/`replace()` now return `Option` so callers use `?`-propagation instead of separate `is_ready()` guards. Simplifies convergence logic in CHOP, DC, Stoch, WillR, and Ichimoku. Internal-only change, no public API affected.
 
 ## [0.11.0] - 2026-03-26
 
@@ -118,6 +124,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.12.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.12.0
 [0.11.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.11.0
 [0.10.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.10.0
 [0.9.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.9.0
