@@ -66,15 +66,11 @@ impl Display for ChopConfig {
 /// [`build`](IndicatorConfigBuilder::build).
 pub struct ChopConfigBuilder {
     length: Option<usize>,
-    source: PriceSource,
 }
 
 impl ChopConfigBuilder {
     fn new() -> Self {
-        Self {
-            length: None,
-            source: PriceSource::Close,
-        }
+        Self { length: None }
     }
 
     /// Sets the indicator window length.
@@ -86,8 +82,7 @@ impl ChopConfigBuilder {
 }
 
 impl IndicatorConfigBuilder<ChopConfig> for ChopConfigBuilder {
-    fn source(mut self, source: PriceSource) -> Self {
-        self.source = source;
+    fn source(self, _source: PriceSource) -> Self {
         self
     }
 
