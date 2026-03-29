@@ -102,12 +102,12 @@ impl StochConfig {
 }
 
 impl Default for StochConfig {
-    /// Default: length=14, `k_smooth`=1, `d_smooth`=3, source=Close
-    /// (Fast Stochastic, `TradingView` default).
+    /// Default: length=14, `k_smooth`=3, `d_smooth`=3, source=Close
+    /// (Slow Stochastic, `TradingView` default).
     fn default() -> Self {
         Self {
             length: 14,
-            k_smooth: 1,
+            k_smooth: 3,
             d_smooth: 3,
             source: PriceSource::Close,
         }
@@ -253,10 +253,9 @@ impl Display for StochValue {
 ///
 /// # `TradingView` comparison
 ///
-/// `TradingView`'s default "Stoch" indicator is the **Slow Stochastic**,
-/// which applies an extra SMA-3 smoothing to %K before computing %D.
-/// This crate implements the **Fast Stochastic**. To compare directly
-/// against `TradingView`, set its *Smooth* parameter to 1.
+/// The default config matches `TradingView`'s "Stoch" indicator
+/// (**Slow Stochastic**: 14/3/3). Set `k_smooth` to 1 for the
+/// **Fast Stochastic**.
 ///
 /// # Example
 ///
