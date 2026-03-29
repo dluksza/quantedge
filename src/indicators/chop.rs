@@ -43,6 +43,12 @@ impl IndicatorConfig for ChopConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        ChopConfigBuilder {
+            length: Some(self.length),
+        }
+    }
 }
 
 impl ChopConfig {
@@ -456,6 +462,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = ChopConfig::builder().length(nz(14)).build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

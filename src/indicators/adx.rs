@@ -44,6 +44,12 @@ impl IndicatorConfig for AdxConfig {
     fn convergence(&self) -> usize {
         self.length * 2
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        AdxConfigBuilder {
+            length: Some(self.length),
+        }
+    }
 }
 
 impl AdxConfig {
@@ -675,6 +681,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = AdxConfig::builder().length(nz(14)).build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

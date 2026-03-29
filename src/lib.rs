@@ -64,6 +64,12 @@ macro_rules! impl_inherent_methods {
             pub fn convergence(&self) -> usize {
                 <Self as IndicatorConfig>::convergence(self)
             }
+
+            /// See [`IndicatorConfig::to_builder`].
+            #[must_use]
+            pub fn to_builder(&self) -> <Self as IndicatorConfig>::Builder {
+                <Self as IndicatorConfig>::to_builder(self)
+            }
         }
 
         // --- IndicatorConfigBuilder ---

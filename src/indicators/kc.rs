@@ -110,6 +110,15 @@ impl IndicatorConfig for KcConfig {
     fn convergence(&self) -> usize {
         self.length.max(self.atr_length)
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        KcConfigBuilder {
+            length: Some(self.length),
+            atr_length: Some(self.atr_length),
+            multiplier: self.multiplier,
+            source: self.source,
+        }
+    }
 }
 
 impl KcConfig {
@@ -759,6 +768,17 @@ mod tests {
             set.insert(a);
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = KcConfig::builder()
+                .length(nz(20))
+                .atr_length(nz(10))
+                .multiplier(KcMultiplier::new(2.0))
+                .source(PriceSource::HL2)
+                .build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

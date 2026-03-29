@@ -56,6 +56,15 @@ impl IndicatorConfig for StochConfig {
     fn convergence(&self) -> usize {
         self.length + self.k_smooth
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        StochConfigBuilder {
+            length: Some(self.length),
+            k_smooth: Some(self.k_smooth),
+            d_smooth: Some(self.d_smooth),
+            source: self.source,
+        }
+    }
 }
 
 impl StochConfig {
@@ -794,6 +803,12 @@ mod tests {
             assert_eq!(config.length(), 14);
             assert_eq!(config.k_smooth(), 3);
             assert_eq!(config.d_smooth(), 5);
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = StochConfig::close(nz(14), nz(3), nz(3));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

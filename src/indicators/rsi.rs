@@ -40,6 +40,13 @@ impl IndicatorConfig for RsiConfig {
     fn convergence(&self) -> usize {
         self.length + 1
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        RsiConfigBuilder {
+            length: Some(self.length),
+            source: self.source,
+        }
+    }
 }
 
 impl RsiConfig {
@@ -721,6 +728,12 @@ mod tests {
             set.insert(a);
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = RsiConfig::close(nz(14));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

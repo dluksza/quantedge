@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `to_builder()` on `IndicatorConfig` trait — returns a builder pre-filled with the config's current values, allowing single-field overrides without reconstructing from scratch. Implemented for all 14 indicators.
+
 ## [0.12.0] - 2026-03-28
 
 ### Added

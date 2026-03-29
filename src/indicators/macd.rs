@@ -56,6 +56,15 @@ impl IndicatorConfig for MacdConfig {
     fn convergence(&self) -> usize {
         self.slow_length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        MacdConfigBuilder {
+            fast_length: Some(self.fast_length),
+            slow_length: Some(self.slow_length),
+            signal_length: Some(self.signal_length),
+            source: self.source,
+        }
+    }
 }
 
 impl MacdConfig {
@@ -797,6 +806,12 @@ mod tests {
             set.insert(a);
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = MacdConfig::close(nz(12), nz(26), nz(9));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

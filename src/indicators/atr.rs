@@ -41,6 +41,12 @@ impl IndicatorConfig for AtrConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        AtrConfigBuilder {
+            length: self.length,
+        }
+    }
 }
 
 impl AtrConfig {
@@ -525,6 +531,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = AtrConfig::builder().length(nz(14)).build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

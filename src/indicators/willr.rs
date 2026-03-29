@@ -42,6 +42,13 @@ impl IndicatorConfig for WillRConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        WillRConfigBuilder {
+            length: Some(self.length),
+            source: self.source,
+        }
+    }
 }
 
 impl WillRConfig {
@@ -482,6 +489,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = WillRConfig::close(nz(14));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

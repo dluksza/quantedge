@@ -62,6 +62,13 @@ impl IndicatorConfig for CciConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        CciConfigBuilder {
+            length: Some(self.length),
+            source: self.source,
+        }
+    }
 }
 
 impl Display for CciConfig {
@@ -494,6 +501,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = CciConfig::hlc3(nz(20));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

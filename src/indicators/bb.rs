@@ -102,6 +102,14 @@ impl IndicatorConfig for BbConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        BbConfigBuilder {
+            length: Some(self.length),
+            source: self.source,
+            std_dev: self.std_dev,
+        }
+    }
 }
 
 impl BbConfig {
@@ -615,6 +623,16 @@ mod tests {
         #[should_panic(expected = "std_dev must not be NaN")]
         fn std_dev_rejects_nan() {
             let _ = StdDev::new(f64::NAN);
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = BbConfig::builder()
+                .length(nz(15))
+                .std_dev(StdDev::new(2.5))
+                .source(PriceSource::HLC3)
+                .build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

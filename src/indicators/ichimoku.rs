@@ -59,6 +59,15 @@ impl IndicatorConfig for IchimokuConfig {
         let span_b = self.senkou_b_length + self.displacement + 1;
         span_a.max(span_b)
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        IchimokuBuilder {
+            tenkan_length: Some(self.tenkan_length),
+            kijun_length: Some(self.kijun_length),
+            senkou_b_length: Some(self.senkou_b_length),
+            displacement: Some(self.displacement),
+        }
+    }
 }
 
 impl IchimokuConfig {
@@ -757,6 +766,12 @@ mod tests {
             assert_eq!(config.kijun_length(), 22);
             assert_eq!(config.senkou_b_length(), 44);
             assert_eq!(config.displacement(), 22);
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = IchimokuConfig::builder().default().build();
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

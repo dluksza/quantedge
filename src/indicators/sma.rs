@@ -39,6 +39,13 @@ impl IndicatorConfig for SmaConfig {
     fn convergence(&self) -> usize {
         self.length
     }
+
+    fn to_builder(&self) -> Self::Builder {
+        SmaConfigBuilder {
+            length: Some(self.length),
+            source: self.source,
+        }
+    }
 }
 
 impl SmaConfig {
@@ -413,6 +420,12 @@ mod tests {
 
             assert!(set.contains(&b));
             assert!(!set.contains(&c));
+        }
+
+        #[test]
+        fn to_builder_roundtrip() {
+            let config = SmaConfig::hl2(nz(10));
+            assert_eq!(config.to_builder().build(), config);
         }
     }
 

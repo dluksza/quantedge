@@ -104,6 +104,18 @@ let config = BbConfig::builder()
     .build();
 ```
 
+Derive a new config from an existing one with `to_builder()`:
+
+```rust
+use quantedge_ta::{SmaConfig, PriceSource};
+use std::num::NonZero;
+
+let sma_close = SmaConfig::close(NonZero::new(20).unwrap());
+
+// Change only the price source, keep the same length
+let sma_hl2 = sma_close.to_builder().source(PriceSource::HL2).build();
+```
+
 Live data with repainting:
 
 ```rust

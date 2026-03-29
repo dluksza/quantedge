@@ -22,6 +22,9 @@ pub trait IndicatorConfig: Sized + PartialEq + Eq + Hash + Display + Debug {
 
     /// Bars until [`compute`](Indicator::compute) returns Some
     fn convergence(&self) -> usize;
+
+    /// Returns a builder pre-filled with this config's values.
+    fn to_builder(&self) -> Self::Builder;
 }
 
 /// Builder for an [`IndicatorConfig`].
