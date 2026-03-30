@@ -589,18 +589,17 @@ mod tests {
             for t in 1..=6 {
                 ich.compute(&ohlc(10.0, 20.0, 5.0, 15.0, t));
             }
-            // Intermediate repaints stay within existing extremes (H<=20, L>=5)
-            // to avoid evicting deque entries that can't be restored.
+            // Monotonic repaints: high goes up, low goes down
             ich.compute(&ohlc(10.0, 18.0, 7.0, 14.0, 7));
-            ich.compute(&ohlc(10.0, 19.0, 6.0, 16.0, 7)); // repaint
-            let final_val = ich.compute(&ohlc(10.0, 17.0, 8.0, 13.0, 7)).unwrap();
+            ich.compute(&ohlc(10.0, 19.0, 6.0, 16.0, 7)); // repaint (h up, l down)
+            let final_val = ich.compute(&ohlc(10.0, 21.0, 4.0, 13.0, 7)).unwrap();
 
             // Clean computation
             let mut clean = ichimoku(small_config());
             for t in 1..=6 {
                 clean.compute(&ohlc(10.0, 20.0, 5.0, 15.0, t));
             }
-            let expected = clean.compute(&ohlc(10.0, 17.0, 8.0, 13.0, 7)).unwrap();
+            let expected = clean.compute(&ohlc(10.0, 21.0, 4.0, 13.0, 7)).unwrap();
 
             assert!((final_val.tenkan() - expected.tenkan()).abs() < 1e-10);
             assert!((final_val.kijun() - expected.kijun()).abs() < 1e-10);

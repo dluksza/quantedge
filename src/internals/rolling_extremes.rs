@@ -9,8 +9,6 @@ pub(crate) struct RollingExtremes {
     high_pos: usize,
     low_val: Price,
     low_pos: usize,
-    forming_high: Price,
-    forming_low: Price,
 }
 
 impl RollingExtremes {
@@ -23,19 +21,17 @@ impl RollingExtremes {
             high_pos: 0,
             low_val: f64::MAX,
             low_pos: 0,
-            forming_high: -1.0,
-            forming_low: f64::MAX,
         }
     }
 
     #[must_use]
     pub(crate) fn highest_high(&self) -> Price {
-        self.high_val.max(self.forming_high)
+        self.high_val
     }
 
     #[must_use]
     pub(crate) fn lowest_low(&self) -> Price {
-        self.low_val.min(self.forming_low)
+        self.low_val
     }
 
     #[must_use]
@@ -44,18 +40,14 @@ impl RollingExtremes {
     }
 
     pub(crate) fn push(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
-        if self.high_val < 0.0 {
-            self.high_val = ohlcv.high();
-        }
-        if self.low_val >= f64::MAX {
-            self.low_val = ohlcv.low();
-        }
+        let high = ohlcv.high();
+        let low = ohlcv.low();
 
-        self.highs.push(ohlcv.high());
+        self.highs.push(high);
 
-        if self.forming_high > self.high_val {
-            self.high_val = self.forming_high;
-            self.high_pos = 1;
+        if high >= self.high_val {
+            self.high_val = high;
+            self.high_pos = 0;
         } else if self.high_pos == self.oldest_pos {
             (self.high_val, self.high_pos) = self
                 .highs
@@ -64,13 +56,11 @@ impl RollingExtremes {
             self.high_pos += 1;
         }
 
-        self.forming_high = ohlcv.high();
+        self.lows.push(low);
 
-        self.lows.push(ohlcv.low());
-
-        if self.forming_low < self.low_val {
-            self.low_val = self.forming_low;
-            self.low_pos = 1;
+        if low <= self.low_val {
+            self.low_val = low;
+            self.low_pos = 0;
         } else if self.low_pos == self.oldest_pos {
             (self.low_val, self.low_pos) = self
                 .lows
@@ -79,17 +69,37 @@ impl RollingExtremes {
             self.low_pos += 1;
         }
 
-        self.forming_low = ohlcv.low();
-
         self.value()
     }
 
+    /// Repaint the current forming bar with updated OHLCV data.
+    ///
+    /// Assumes OHLCV monotonicity: on repaint, the high can only go higher
+    /// and the low can only go lower (as new ticks arrive within a bar).
     pub(crate) fn replace(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
-        self.highs.replace(ohlcv.high());
-        self.lows.replace(ohlcv.low());
+        let high = ohlcv.high();
+        let low = ohlcv.low();
 
-        self.forming_high = ohlcv.high();
-        self.forming_low = ohlcv.low();
+        let prev_high = self.highs.replace(high);
+        let prev_low = self.lows.replace(low);
+
+        debug_assert!(
+            high >= prev_high,
+            "OHLCV monotonicity violated: high decreased on repaint"
+        );
+        debug_assert!(
+            low <= prev_low,
+            "OHLCV monotonicity violated: low increased on repaint"
+        );
+
+        if high > self.high_val {
+            self.high_val = high;
+            self.high_pos = 0;
+        }
+        if low < self.low_val {
+            self.low_val = low;
+            self.low_pos = 0;
+        }
 
         self.value()
     }
@@ -180,38 +190,17 @@ mod tests {
         }
 
         #[test]
-        fn repaint_lower_high_triggers_rescan_if_was_extreme() {
-            let mut re = RollingExtremes::new(3);
-            re.push(&ohlc(20.0, 10.0, 15.0));
-            re.push(&ohlc(30.0, 12.0, 18.0)); // this bar is the max
-            // Repaint: lower high than bar 1
-            re.replace(&ohlc(15.0, 12.0, 14.0));
-            // Bar 1 (high=20) should now be the max
-            assert_eq!(re.highest_high(), 20.0);
-        }
-
-        #[test]
-        fn repaint_higher_low_triggers_rescan_if_was_extreme() {
-            let mut re = RollingExtremes::new(3);
-            re.push(&ohlc(20.0, 10.0, 15.0));
-            re.push(&ohlc(22.0, 5.0, 18.0)); // this bar is the min
-            // Repaint: higher low than bar 1
-            re.replace(&ohlc(22.0, 15.0, 18.0));
-            // Bar 1 (low=10) should now be the min
-            assert_eq!(re.lowest_low(), 10.0);
-        }
-
-        #[test]
-        fn multiple_repaints_stable() {
+        fn multiple_monotonic_repaints_stable() {
             let mut re = RollingExtremes::new(3);
             re.push(&ohlc(20.0, 10.0, 15.0));
             re.push(&ohlc(22.0, 12.0, 17.0));
-            re.replace(&ohlc(30.0, 8.0, 20.0));
-            re.replace(&ohlc(18.0, 14.0, 16.0));
+            // Each repaint: high goes higher, low goes lower (OHLCV monotonicity)
             re.replace(&ohlc(25.0, 11.0, 18.0));
-            // Final state: bar 1 = (20,10), forming = (25,11)
-            assert_eq!(re.highest_high(), 25.0);
-            assert_eq!(re.lowest_low(), 10.0);
+            re.replace(&ohlc(30.0, 8.0, 20.0));
+            re.replace(&ohlc(35.0, 6.0, 22.0));
+            // Final state: bar 1 = (20,10), forming = (35,6)
+            assert_eq!(re.highest_high(), 35.0);
+            assert_eq!(re.lowest_low(), 6.0);
         }
 
         #[test]

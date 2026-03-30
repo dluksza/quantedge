@@ -356,12 +356,12 @@ mod tests {
         fn multiple_repaints_match_single() {
             let mut d = seeded_dc();
             d.compute(&ohlc(12.0, 16.0, 11.0, 13.0, 4));
-            d.compute(&ohlc(12.0, 20.0, 6.0, 15.0, 4)); // repaint 1
-            d.compute(&ohlc(12.0, 14.0, 10.0, 11.0, 4)); // repaint 2
-            let final_val = d.compute(&ohlc(12.0, 15.0, 9.0, 12.0, 4)).unwrap();
+            d.compute(&ohlc(12.0, 18.0, 10.0, 15.0, 4)); // repaint 1 (h up, l down)
+            d.compute(&ohlc(12.0, 19.0, 9.0, 14.0, 4)); // repaint 2 (h up, l down)
+            let final_val = d.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 4)).unwrap();
 
             let mut clean = seeded_dc();
-            let expected = clean.compute(&ohlc(12.0, 15.0, 9.0, 12.0, 4)).unwrap();
+            let expected = clean.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 4)).unwrap();
 
             assert_eq!(final_val.upper(), expected.upper());
             assert_eq!(final_val.lower(), expected.lower());

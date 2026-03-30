@@ -343,7 +343,7 @@ mod tests {
         fn repaint_during_filling() {
             let mut wr = willr(3);
             wr.compute(&ohlc(10.0, 20.0, 10.0, 15.0, 1));
-            wr.compute(&ohlc(12.0, 18.0, 12.0, 16.0, 1)); // repaint bar 1
+            wr.compute(&ohlc(12.0, 22.0, 8.0, 16.0, 1)); // repaint bar 1 (h up, l down)
             assert_eq!(wr.compute(&ohlc(14.0, 22.0, 14.0, 18.0, 2)), None);
             // Bar 3: window full
             assert!(wr.compute(&ohlc(16.0, 24.0, 16.0, 20.0, 3)).is_some());

@@ -607,12 +607,12 @@ mod tests {
         fn multiple_repaints_match_single() {
             let mut s = seeded_stoch();
             s.compute(&ohlc(12.0, 16.0, 11.0, 13.0, 5));
-            s.compute(&ohlc(12.0, 18.0, 7.0, 15.0, 5)); // repaint 1
-            s.compute(&ohlc(12.0, 14.0, 10.0, 11.0, 5)); // repaint 2
-            let final_val = s.compute(&ohlc(12.0, 15.0, 9.0, 12.0, 5)).unwrap();
+            s.compute(&ohlc(12.0, 18.0, 10.0, 15.0, 5)); // repaint 1 (h up, l down)
+            s.compute(&ohlc(12.0, 19.0, 9.0, 14.0, 5)); // repaint 2 (h up, l down)
+            let final_val = s.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 5)).unwrap();
 
             let mut clean = seeded_stoch();
-            let expected = clean.compute(&ohlc(12.0, 15.0, 9.0, 12.0, 5)).unwrap();
+            let expected = clean.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 5)).unwrap();
 
             assert!((final_val.k() - expected.k()).abs() < 1e-10);
             assert_eq!(final_val.d().is_some(), expected.d().is_some());

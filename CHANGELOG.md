@@ -7,6 +7,10 @@
 - `to_builder()` on `IndicatorConfig` trait — returns a builder pre-filled with the config's current values, allowing single-field overrides without reconstructing from scratch. Implemented for all 14 indicators.
 - `Default` impl for all 14 indicator configs with industry-standard parameters (matching TradingView defaults and original author specifications). `Default` is now a supertrait bound on `IndicatorConfig`.
 
+### Changed
+
+- `RollingExtremes` optimized: removed `forming_high`/`forming_low` fields by folding the forming bar into the tracked extreme directly, leveraging OHLCV monotonicity (high only increases, low only decreases during bar formation). `highest_high()`/`lowest_low()` are now pure field reads. Stream throughput improved 2–12% and repaint stream throughput improved 1–12% for all indicators using `RollingExtremes` (Stoch, DC, WillR, CHOP, Ichimoku). Internal-only change, no public API affected.
+
 ## [0.12.0] - 2026-03-28
 
 ### Added

@@ -285,22 +285,22 @@ on a converged indicator.
 | MACD      | 120/260/90 | 2.93 µs   | 254 Melem/s    |
 | ATR       | 14     | 1.42 µs       | 524 Melem/s    |
 | ATR       | 140    | 1.32 µs       | 564 Melem/s    |
-| Stoch     | 14/3/3 | 6.35 µs       | 117 Melem/s    |
-| Stoch     | 140/30/30 | 13.2 µs    | 56.2 Melem/s   |
+| Stoch     | 14/3/3 | 6.73 µs       | 111 Melem/s    |
+| Stoch     | 140/30/30 | 12.6 µs    | 58.8 Melem/s   |
 | KC        | 20/10  | 1.53 µs       | 486 Melem/s    |
 | KC        | 200/100 | 1.56 µs      | 477 Melem/s    |
-| DC        | 20     | 4.60 µs       | 162 Melem/s    |
-| DC        | 200    | 9.93 µs       | 74.9 Melem/s   |
+| DC        | 20     | 4.36 µs       | 171 Melem/s    |
+| DC        | 200    | 10.3 µs       | 72.4 Melem/s   |
 | ADX       | 14     | 3.90 µs       | 191 Melem/s    |
 | ADX       | 140    | 3.94 µs       | 189 Melem/s    |
 | WillR     | 14     | 4.46 µs       | 167 Melem/s    |
-| WillR     | 140    | 11.1 µs       | 66.9 Melem/s   |
+| WillR     | 140    | 11.4 µs       | 65.2 Melem/s   |
 | CCI       | 20     | 2.61 µs       | 285 Melem/s    |
 | CCI       | 200    | 27.8 µs       | 26.7 Melem/s   |
-| CHOP      | 14     | 6.43 µs       | 116 Melem/s    |
-| CHOP      | 140    | 13.1 µs       | 56.6 Melem/s   |
+| CHOP      | 14     | 6.52 µs       | 114 Melem/s    |
+| CHOP      | 140    | 13.0 µs       | 57.3 Melem/s   |
 | Ichimoku  | 9/26/52/26 | 15.4 µs   | 48.3 Melem/s   |
-| Ichimoku  | 36/104/208/104 | 24.5 µs | 30.4 Melem/s  |
+| Ichimoku  | 36/104/208/104 | 25.1 µs | 29.7 Melem/s  |
 
 ### Tick — single `compute()` on a converged indicator
 
@@ -318,22 +318,22 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.81 ns   |
 | ATR       | 14     | 1.86 ns       |
 | ATR       | 140    | 1.45 ns       |
-| Stoch     | 14/3/3 | 43.0 ns       |
-| Stoch     | 140/30/30 | 54.0 ns   |
+| Stoch     | 14/3/3 | 43.9 ns       |
+| Stoch     | 140/30/30 | 47.7 ns   |
 | KC        | 20/10  | 4.32 ns       |
 | KC        | 200/100 | 3.84 ns      |
-| DC        | 20     | 17.8 ns       |
-| DC        | 200    | 24.6 ns       |
+| DC        | 20     | 18.3 ns       |
+| DC        | 200    | 24.0 ns       |
 | ADX       | 14     | 12.2 ns       |
 | ADX       | 140    | 12.1 ns       |
-| WillR     | 14     | 18.2 ns       |
-| WillR     | 140    | 34.7 ns       |
+| WillR     | 14     | 19.3 ns       |
+| WillR     | 140    | 23.4 ns       |
 | CCI       | 20     | 10.7 ns       |
 | CCI       | 200    | 63.1 ns       |
-| CHOP      | 14     | 33.7 ns       |
-| CHOP      | 140    | 36.6 ns       |
-| Ichimoku  | 9/26/52/26 | 105 ns   |
-| Ichimoku  | 36/104/208/104 | 116 ns |
+| CHOP      | 14     | 30.2 ns       |
+| CHOP      | 140    | 38.0 ns       |
+| Ichimoku  | 9/26/52/26 | 106 ns   |
+| Ichimoku  | 36/104/208/104 | 115 ns |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
@@ -351,22 +351,22 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.68 ns   |
 | ATR       | 14     | 1.95 ns       |
 | ATR       | 140    | 1.45 ns       |
-| Stoch     | 14/3/3 | 40.9 ns       |
-| Stoch     | 140/30/30 | 63.4 ns   |
+| Stoch     | 14/3/3 | 43.0 ns       |
+| Stoch     | 140/30/30 | 45.0 ns   |
 | KC        | 20/10  | 4.05 ns       |
 | KC        | 200/100 | 3.81 ns      |
-| DC        | 20     | 16.9 ns       |
-| DC        | 200    | 24.7 ns       |
+| DC        | 20     | 16.4 ns       |
+| DC        | 200    | 23.2 ns       |
 | ADX       | 14     | 11.1 ns       |
 | ADX       | 140    | 11.3 ns       |
-| WillR     | 14     | 16.3 ns       |
-| WillR     | 140    | 31.5 ns       |
+| WillR     | 14     | 16.6 ns       |
+| WillR     | 140    | 21.5 ns       |
 | CCI       | 20     | 14.0 ns       |
 | CCI       | 200    | 62.7 ns       |
-| CHOP      | 14     | 28.9 ns       |
-| CHOP      | 140    | 34.0 ns       |
-| Ichimoku  | 9/26/52/26 | 71.6 ns  |
-| Ichimoku  | 36/104/208/104 | 113 ns |
+| CHOP      | 14     | 27.9 ns       |
+| CHOP      | 140    | 36.9 ns       |
+| Ichimoku  | 9/26/52/26 | 74.4 ns  |
+| Ichimoku  | 36/104/208/104 | 115 ns |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
@@ -384,22 +384,22 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.07 µs   | 277 Melem/s    |
 | ATR       | 14     | 3.41 µs       | 654 Melem/s    |
 | ATR       | 140    | 3.43 µs       | 651 Melem/s    |
-| Stoch     | 14/3/3 | 13.4 µs       | 166 Melem/s    |
-| Stoch     | 140/30/30 | 18.6 µs   | 120 Melem/s    |
+| Stoch     | 14/3/3 | 13.9 µs       | 161 Melem/s    |
+| Stoch     | 140/30/30 | 19.2 µs   | 116 Melem/s    |
 | KC        | 20/10  | 5.23 µs       | 427 Melem/s    |
 | KC        | 200/100 | 4.62 µs      | 483 Melem/s    |
-| DC        | 20     | 7.59 µs       | 294 Melem/s    |
-| DC        | 200    | 12.9 µs       | 172 Melem/s    |
+| DC        | 20     | 7.20 µs       | 310 Melem/s    |
+| DC        | 200    | 12.9 µs       | 173 Melem/s    |
 | ADX       | 14     | 9.71 µs       | 230 Melem/s    |
 | ADX       | 140    | 9.51 µs       | 235 Melem/s    |
-| WillR     | 14     | 7.84 µs       | 285 Melem/s    |
-| WillR     | 140    | 14.1 µs       | 158 Melem/s    |
+| WillR     | 14     | 7.70 µs       | 290 Melem/s    |
+| WillR     | 140    | 14.2 µs       | 157 Melem/s    |
 | CCI       | 20     | 7.86 µs       | 284 Melem/s    |
 | CCI       | 200    | 84.5 µs       | 26.4 Melem/s   |
-| CHOP      | 14     | 12.5 µs       | 179 Melem/s    |
-| CHOP      | 140    | 18.1 µs       | 123 Melem/s    |
-| Ichimoku  | 9/26/52/26 | 27.6 µs   | 80.9 Melem/s   |
-| Ichimoku  | 36/104/208/104 | 36.7 µs | 60.8 Melem/s  |
+| CHOP      | 14     | 12.5 µs       | 178 Melem/s    |
+| CHOP      | 140    | 18.3 µs       | 122 Melem/s    |
+| Ichimoku  | 9/26/52/26 | 27.4 µs   | 81.5 Melem/s   |
+| Ichimoku  | 36/104/208/104 | 36.1 µs | 61.9 Melem/s  |
 
 Run locally:
 
