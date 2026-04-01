@@ -34,11 +34,6 @@ impl RollingExtremes {
         self.low_val
     }
 
-    #[must_use]
-    pub(crate) fn extremes(&self) -> (Price, Price) {
-        (self.highest_high(), self.lowest_low())
-    }
-
     pub(crate) fn push(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
         let high = ohlcv.high();
         let low = ohlcv.low();

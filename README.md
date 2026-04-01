@@ -285,8 +285,8 @@ on a converged indicator.
 | MACD      | 120/260/90 | 2.93 µs   | 254 Melem/s    |
 | ATR       | 14     | 1.42 µs       | 524 Melem/s    |
 | ATR       | 140    | 1.32 µs       | 564 Melem/s    |
-| Stoch     | 14/3/3 | 6.73 µs       | 111 Melem/s    |
-| Stoch     | 140/30/30 | 12.6 µs    | 58.8 Melem/s   |
+| Stoch     | 14/3/3 | 6.43 µs       | 116 Melem/s    |
+| Stoch     | 140/30/30 | 12.4 µs    | 60.1 Melem/s   |
 | KC        | 20/10  | 1.53 µs       | 486 Melem/s    |
 | KC        | 200/100 | 1.56 µs      | 477 Melem/s    |
 | DC        | 20     | 4.36 µs       | 171 Melem/s    |
@@ -318,8 +318,8 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.81 ns   |
 | ATR       | 14     | 1.86 ns       |
 | ATR       | 140    | 1.45 ns       |
-| Stoch     | 14/3/3 | 43.9 ns       |
-| Stoch     | 140/30/30 | 47.7 ns   |
+| Stoch     | 14/3/3 | 40.8 ns       |
+| Stoch     | 140/30/30 | 39.9 ns   |
 | KC        | 20/10  | 4.32 ns       |
 | KC        | 200/100 | 3.84 ns      |
 | DC        | 20     | 18.3 ns       |
@@ -351,8 +351,8 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.68 ns   |
 | ATR       | 14     | 1.95 ns       |
 | ATR       | 140    | 1.45 ns       |
-| Stoch     | 14/3/3 | 43.0 ns       |
-| Stoch     | 140/30/30 | 45.0 ns   |
+| Stoch     | 14/3/3 | 39.7 ns       |
+| Stoch     | 140/30/30 | 38.2 ns   |
 | KC        | 20/10  | 4.05 ns       |
 | KC        | 200/100 | 3.81 ns      |
 | DC        | 20     | 16.4 ns       |
@@ -384,8 +384,8 @@ on a converged indicator.
 | MACD      | 120/260/90 | 8.07 µs   | 277 Melem/s    |
 | ATR       | 14     | 3.41 µs       | 654 Melem/s    |
 | ATR       | 140    | 3.43 µs       | 651 Melem/s    |
-| Stoch     | 14/3/3 | 13.9 µs       | 161 Melem/s    |
-| Stoch     | 140/30/30 | 19.2 µs   | 116 Melem/s    |
+| Stoch     | 14/3/3 | 13.6 µs       | 164 Melem/s    |
+| Stoch     | 140/30/30 | 18.7 µs   | 119 Melem/s    |
 | KC        | 20/10  | 5.23 µs       | 427 Melem/s    |
 | KC        | 200/100 | 4.62 µs      | 483 Melem/s    |
 | DC        | 20     | 7.20 µs       | 310 Melem/s    |

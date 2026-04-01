@@ -342,14 +342,16 @@ impl Indicator for Stoch {
                 }
             }
             BarAction::Repaint(price) => {
-                self.extremes.replace(ohlcv);
+                let k_sum = self
+                    .extremes
+                    .replace(ohlcv)
+                    .and_then(|(highest_high, lowest_low)| {
+                        self.k_sum
+                            .replace(Self::k_value(price, highest_high, lowest_low))
+                    });
 
                 self.current.map(|current| {
-                    let (highest_high, lowest_low) = self.extremes.extremes();
-                    let k = self
-                        .k_sum
-                        .replace(Self::k_value(price, highest_high, lowest_low))
-                        .expect("k_sum must be ready when current is Some")
+                    let k = k_sum.expect("k_sum must be ready when current is Some")
                         * self.k_reciprocal;
                     let d_sum = self.d_sum.replace(k);
 
@@ -648,6 +650,55 @@ mod tests {
             assert!(s.value().is_none()); // still filling
             let val = s.compute(&ohlc(12.0, 15.0, 11.0, 12.0, 4));
             assert!(val.is_some()); // now converged
+        }
+
+        #[test]
+        fn repaint_during_k_smooth_filling_produces_correct_values() {
+            // With k_smooth > 1, repainting while k_sum is still filling
+            // must update the stale k_sum entry. Otherwise the smoothed %K
+            // after convergence will be wrong.
+            //
+            // Stoch(length=2, k_smooth=3, d_smooth=1):
+            //   extremes ready at bar 2, k_sum fills bars 2–4, first output bar 5.
+            //   Repainting bars 2–4 with different closes must propagate
+            //   through k_sum so bar 5 matches a clean (no-repaint) run.
+            let config = StochConfig::builder()
+                .length(nz(2))
+                .k_smooth(nz(3))
+                .d_smooth(nz(1))
+                .build();
+
+            let bars: [(f64, f64, f64, f64, u64); 5] = [
+                (10.0, 15.0, 8.0, 12.0, 1),
+                (12.0, 16.0, 9.0, 14.0, 2),
+                (14.0, 18.0, 11.0, 13.0, 3),
+                (13.0, 17.0, 10.0, 15.0, 4),
+                (15.0, 19.0, 12.0, 16.0, 5),
+            ];
+
+            // Clean run: one tick per bar
+            let mut clean = Stoch::new(config);
+            for &(o, h, l, c, t) in &bars {
+                clean.compute(&ohlc(o, h, l, c, t));
+            }
+            let expected = clean.value().unwrap();
+
+            // Repainted run: each bar gets an intermediate tick first
+            let mut repainted = Stoch::new(config);
+            for &(o, h, l, c, t) in &bars {
+                // Intermediate tick with close near open
+                repainted.compute(&ohlc(o, o + 0.5, o - 0.5, o + 0.1, t));
+                // Final tick with real values
+                repainted.compute(&ohlc(o, h, l, c, t));
+            }
+            let actual = repainted.value().unwrap();
+
+            assert!(
+                (actual.k() - expected.k()).abs() < 1e-10,
+                "repaint during k_sum filling corrupted %K: got {}, expected {}",
+                actual.k(),
+                expected.k()
+            );
         }
     }
 

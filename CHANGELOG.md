@@ -11,6 +11,10 @@
 
 - `RollingExtremes` optimized: removed `forming_high`/`forming_low` fields by folding the forming bar into the tracked extreme directly, leveraging OHLCV monotonicity (high only increases, low only decreases during bar formation). `highest_high()`/`lowest_low()` are now pure field reads. Stream throughput improved 2–12% and repaint stream throughput improved 1–12% for all indicators using `RollingExtremes` (Stoch, DC, WillR, CHOP, Ichimoku). Internal-only change, no public API affected.
 
+### Fixed
+
+- Stoch: repainting a bar while `k_sum` was still filling (when `k_smooth > 1`) skipped `k_sum.replace()` because it was gated behind `current.map()`. Stale intermediate values persisted in `k_sum`, corrupting smoothed %K after convergence. Moved `k_sum.replace()` outside the convergence gate so it fires whenever the extremes window is ready. Also removed unused `RollingExtremes::extremes()`. Stoch stream throughput improved 4–8%, tick/repaint latency improved 8–10%.
+
 ## [0.12.0] - 2026-03-28
 
 ### Added
