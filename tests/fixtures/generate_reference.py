@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, RSI, SMA, Stoch, KeltnerChannels, DonchianChannels, Williams, Ichimoku
+from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, RSI, SMA, Stoch, StochRSI, KeltnerChannels, DonchianChannels, Williams, Ichimoku
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -28,6 +28,10 @@ RSI_PERIOD = 14
 ATR_PERIOD = 14
 STOCH_PERIOD = 14
 STOCH_SMOOTH = 3
+STOCH_RSI_RSI_PERIOD = 14
+STOCH_RSI_STOCH_PERIOD = 14
+STOCH_RSI_K_SMOOTH = 3
+STOCH_RSI_D_SMOOTH = 3
 KC_MA_PERIOD = 20
 KC_ATR_PERIOD = 10
 KC_MULT = 1.5
@@ -175,6 +179,30 @@ def main():
                     ]
                 )
 
+    # Stochastic RSI
+    # talipp StochRSI(rsi_period, stoch_period, k_smoothing_period, d_smoothing_period)
+    # uses SMA for smoothing by default. Output: k (%K), d (%D).
+    # This maps to Rust StochRsi(rsi_length=14, stoch_length=14, k_smooth=3, d_smooth=3).
+    stoch_rsi = StochRSI(
+        rsi_period=STOCH_RSI_RSI_PERIOD,
+        stoch_period=STOCH_RSI_STOCH_PERIOD,
+        k_smoothing_period=STOCH_RSI_K_SMOOTH,
+        d_smoothing_period=STOCH_RSI_D_SMOOTH,
+        input_values=closes,
+    )
+    with open(f"{OUTPUT_DIR}/stoch-rsi-14-14-3-3-close.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "k", "d"])
+        for i, val in enumerate(stoch_rsi):
+            if val is not None and val.k is not None and val.d is not None:
+                w.writerow(
+                    [
+                        times[i],
+                        f"{val.k:.10f}",
+                        f"{val.d:.10f}",
+                    ]
+                )
+
     # Keltner Channels
     # talipp KeltnerChannels(ma_period, atr_period, atr_mult_up, atr_mult_down)
     # uses EMA for centre line by default. Output: ub (upper), cb (central), lb (lower).
@@ -311,6 +339,7 @@ def main():
     macd_count = sum(1 for v in macd if v is not None and v.signal is not None)
     atr_count = sum(1 for v in atr if v is not None)
     stoch_count = sum(1 for v in stoch if v is not None and v.d is not None)
+    stoch_rsi_count = sum(1 for v in stoch_rsi if v is not None and v.k is not None and v.d is not None)
     kc_count = sum(1 for v in kc if v is not None)
     dc_count = sum(1 for v in dc if v is not None)
     adx_count = sum(1 for v in adx if v is not None and v.adx is not None)
@@ -334,6 +363,7 @@ def main():
         f"{macd_count} MACD, "
         f"{atr_count} ATR, "
         f"{stoch_count} Stoch, "
+        f"{stoch_rsi_count} StochRSI, "
         f"{kc_count} KC, "
         f"{dc_count} DC, "
         f"{adx_count} ADX, "

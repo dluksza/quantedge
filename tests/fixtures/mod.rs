@@ -416,6 +416,45 @@ pub fn assert_stoch_values_match(
     }
 }
 
+/// Assert `StochRsi` values match between closed and repainted indicators.
+pub fn assert_stoch_rsi_values_match(
+    bar_idx: usize,
+    closed: Option<quantedge_ta::StochRsiValue>,
+    repainted: Option<quantedge_ta::StochRsiValue>,
+    tolerance: f64,
+) {
+    match (closed, repainted) {
+        (None, None) => {}
+        (Some(c), Some(r)) => {
+            let diff = (c.k() - r.k()).abs();
+            assert!(
+                diff <= tolerance,
+                "StochRsi %K diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
+                c.k(),
+                r.k()
+            );
+            match (c.d(), r.d()) {
+                (Some(cd), Some(rd)) => {
+                    let diff = (cd - rd).abs();
+                    assert!(
+                        diff <= tolerance,
+                        "StochRsi %D diverged at bar {bar_idx}: closed={cd:.10}, repainted={rd:.10}, diff={diff:.2e}"
+                    );
+                }
+                (None, None) => {}
+                (cd, rd) => {
+                    panic!(
+                        "StochRsi %D convergence mismatch at bar {bar_idx}: closed={cd:?}, repainted={rd:?}"
+                    );
+                }
+            }
+        }
+        (c, r) => {
+            panic!("StochRsi convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
+        }
+    }
+}
+
 /// Generate reference match + repaint tests for a single-value indicator.
 ///
 /// Usage: `reference_test!(sma_20, Sma, SmaConfig::close(nz(20)), "tests/fixtures/data/sma-20-close.csv", 1e-6);`

@@ -4,7 +4,7 @@
 
 ### Added
 
-- Stochastic RSI (StochRSI) — applies the Stochastic Oscillator formula to RSI values, producing a 0–100 scale that measures whether RSI is near its recent high or low. Configurable RSI length, stochastic lookback, %K smoothing, and %D smoothing. Standard settings via `StochRsiConfig::default()` (14/14/3/3). Returns `StochRsiValue { k, d }`. Unit tests covering convergence, computation, repaints, bounds, clone, config, display, and value accessor.
+- Stochastic RSI (StochRSI) — applies the Stochastic Oscillator formula to RSI values, producing a 0–100 scale that measures whether RSI is near its recent high or low. Configurable RSI length, stochastic lookback, %K smoothing, and %D smoothing. Standard settings via `StochRsiConfig::default()` (14/14/3/3). Returns `StochRsiValue { k, d }`. Reference tests against talipp (713 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks. Unit tests covering convergence, computation, repaints, bounds, clone, config, display, and value accessor.
 - `to_builder()` on `IndicatorConfig` trait — returns a builder pre-filled with the config's current values, allowing single-field overrides without reconstructing from scratch. Implemented for all 15 indicators.
 - `Default` impl for all 15 indicator configs with industry-standard parameters (matching TradingView defaults and original author specifications). `Default` is now a supertrait bound on `IndicatorConfig`.
 

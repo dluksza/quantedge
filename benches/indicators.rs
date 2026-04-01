@@ -7,7 +7,7 @@ use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_mai
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
     Ema, EmaConfig, Ichimoku, IchimokuConfig, Kc, KcConfig, Macd, MacdConfig, Rsi, RsiConfig, Sma,
-    SmaConfig, Stoch, StochConfig, WillR, WillRConfig,
+    SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, time::Duration};
 
@@ -108,6 +108,26 @@ macro_rules! all_indicators {
                 .kijun_length(nz(104))
                 .senkou_b_length(nz(208))
                 .displacement(nz(104))
+                .build()
+        );
+        $m!(
+            "stochrsi141433",
+            StochRsi,
+            StochRsiConfig::builder()
+                .rsi_length(nz(14))
+                .stoch_length(nz(14))
+                .k_smooth(nz(3))
+                .d_smooth(nz(3))
+                .build()
+        );
+        $m!(
+            "stochrsi1401403030",
+            StochRsi,
+            StochRsiConfig::builder()
+                .rsi_length(nz(140))
+                .stoch_length(nz(140))
+                .k_smooth(nz(30))
+                .d_smooth(nz(30))
                 .build()
         );
     };
