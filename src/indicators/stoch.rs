@@ -374,10 +374,12 @@ impl Indicator for Stoch {
 
 impl Stoch {
     fn k_value(price: f64, highest_high: f64, lowest_low: f64) -> f64 {
-        if (highest_high - lowest_low).abs() < f64::EPSILON {
+        let diff = highest_high - lowest_low;
+
+        if diff.abs() < f64::EPSILON {
             50.0
         } else {
-            ((price - lowest_low) / (highest_high - lowest_low)) * 100.0
+            ((price - lowest_low) / diff) * 100.0
         }
     }
 }
