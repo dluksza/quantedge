@@ -20,7 +20,7 @@ import csv
 import os
 import sys
 
-from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, RSI, SMA, Stoch, StochRSI, KeltnerChannels, DonchianChannels, Williams, Ichimoku
+from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, OBV, RSI, SMA, Stoch, StochRSI, KeltnerChannels, DonchianChannels, Williams, Ichimoku
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -332,6 +332,16 @@ def main():
                     ]
                 )
 
+    # OBV
+    # talipp OBV takes OHLCV. Output: single float (cumulative volume).
+    obv = OBV(input_values=ohlcv_bars)
+    with open(f"{OUTPUT_DIR}/obv-close.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "expected"])
+        for i, val in enumerate(obv):
+            if val is not None:
+                w.writerow([times[i], f"{val:.10f}"])
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -355,6 +365,7 @@ def main():
         and v.cloud_leading_fast_line is not None
         and v.cloud_leading_slow_line is not None
     )
+    obv_count = sum(1 for v in obv if v is not None)
     print(
         f"Generated {sma_count} SMA, "
         f"{ema_count} EMA, "
@@ -370,7 +381,8 @@ def main():
         f"{willr_count} WillR, "
         f"{cci_count} CCI, "
         f"{chop_count} CHOP, "
-        f"{ichimoku_count} Ichimoku reference values "
+        f"{ichimoku_count} Ichimoku, "
+        f"{obv_count} OBV reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

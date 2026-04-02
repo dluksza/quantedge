@@ -4,7 +4,7 @@
 
 ### Added
 
-- On-Balance Volume (OBV) — cumulative volume indicator that adds volume on up-price bars and subtracts on down-price bars. Configurable price source (default Close). Returns `f64`. Convergence after 1 bar. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor.
+- On-Balance Volume (OBV) — cumulative volume indicator that adds volume on up-price bars and subtracts on down-price bars. Configurable price source (default Close). Returns `f64`. Convergence after 1 bar. Reference tests against talipp (744 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor.
 
 ## [0.13.0] - 2026-04-01
 
