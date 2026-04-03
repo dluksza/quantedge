@@ -14,6 +14,7 @@ mod sma;
 mod std_dev;
 mod stoch;
 mod stoch_rsi;
+mod vwap;
 mod willr;
 
 pub use adx::*;
@@ -32,4 +33,5 @@ pub use sma::*;
 pub use std_dev::*;
 pub use stoch::*;
 pub use stoch_rsi::*;
+pub use vwap::*;
 pub use willr::*;
