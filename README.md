@@ -55,6 +55,7 @@ Each indicator defines its own output type via an associated type on the
 `DcValue { upper, middle, lower }`. ADX returns
 `AdxValue { adx, plus_di, minus_di }`. Ichimoku Cloud returns
 `IchimokuValue { tenkan, kijun, senkou_a, senkou_b, chikou_close }`.
+VWAP returns `VwapValue { vwap, band_1, band_2, band_3 }`.
 Williams %R, CCI, CHOP, and OBV return `f64`.
 No downcasting, no enums, full type safety.
 
@@ -162,6 +163,7 @@ trait Indicator: Sized + Clone + Display + Debug {
 // Chop:      Output = f64
 // StochRsi:  Output = StochRsiValue { k: f64, d: Option<f64> }
 // Obv:       Output = f64
+// Vwap:      Output = VwapValue { vwap: f64, band_1: Option<VwapBand>, band_2: Option<VwapBand>, band_3: Option<VwapBand> }
 ```
 
 ### Ohlcv Trait
@@ -258,10 +260,11 @@ to extract from the Ohlcv input:
 | Ichimoku  | `IchimokuValue`| Ichimoku Cloud (tenkan, kijun, senkou A/B, chikou) |
 | StochRSI  | `StochRsiValue`| Stochastic RSI (%K, %D)                  |
 | OBV       | `f64`      | On-Balance Volume                        |
+| VWAP      | `VwapValue`| Volume Weighted Average Price             |
 
 ### Planned
 
-VWAP, Supertrend, Parabolic SAR.
+Supertrend, Parabolic SAR.
 
 ## Benchmarks
 
@@ -313,6 +316,7 @@ on a converged indicator.
 | StochRSI  | 14/14/3/3 | 8.05 µs    | 92.4 Melem/s   |
 | StochRSI  | 140/140/30/30 | 10.6 µs | 69.9 Melem/s   |
 | OBV       | —        | 757 ns        | 982 Melem/s    |
+| VWAP      | Day      | 889 ns        | 837 Melem/s    |
 
 ### Tick — single `compute()` on a converged indicator
 
@@ -349,6 +353,7 @@ on a converged indicator.
 | StochRSI  | 14/14/3/3 | 40.2 ns    |
 | StochRSI  | 140/140/30/30 | 43.9 ns |
 | OBV       | —        | 1.52 ns       |
+| VWAP      | Day      | 4.10 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
@@ -385,6 +390,7 @@ on a converged indicator.
 | StochRSI  | 14/14/3/3 | 40.9 ns    |
 | StochRSI  | 140/140/30/30 | 43.7 ns |
 | OBV       | —        | 1.32 ns       |
+| VWAP      | Day      | 3.76 ns       |
 
 ### Repaint Stream — process 744 bars × 3 ticks from cold start
 
@@ -421,6 +427,7 @@ on a converged indicator.
 | StochRSI  | 14/14/3/3 | 20.1 µs    | 111 Melem/s    |
 | StochRSI  | 140/140/30/30 | 21.0 µs | 107 Melem/s    |
 | OBV       | —        | 3.60 µs       | 620 Melem/s    |
+| VWAP      | Day      | 3.10 µs       | 719 Melem/s    |
 
 Run locally:
 

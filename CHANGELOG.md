@@ -4,7 +4,7 @@
 
 ### Added
 
-- Volume Weighted Average Price (VWAP) — cumulative price-volume average that resets on a configurable anchor period (1h, 2h, 4h, 8h, 12h, Day, or manual User reset). Up to three standard-deviation bands. Default source HLC3, anchor Day. Returns `VwapValue { vwap, band_1, band_2, band_3 }`. Unit tests covering convergence, computation, bands, anchor reset, repaints, live data, clone, config, display, and value accessor.
+- Volume Weighted Average Price (VWAP) — cumulative price-volume average that resets on a configurable anchor period (1h, 2h, 4h, 8h, 12h, Day, or manual User reset). Up to three standard-deviation bands. Default source HLC3, anchor Day. Returns `VwapValue { vwap, band_1, band_2, band_3 }`. Reference tests against pandas_ta (744 BTC/USDT bars, 1e-4 tolerance) and Criterion benchmarks. Unit tests covering convergence, computation, bands, anchor reset, repaints, live data, clone, config, display, and value accessor.
 
 ### Changed
 

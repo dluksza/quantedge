@@ -7,8 +7,10 @@ Uses talipp for indicator computation. Algorithms match TradingView / TA-Lib:
 - BB: SMA middle, population std dev (÷N), 2 sigma bands
 - RSI: Wilder's smoothing (period changes / period seed)
 
+Uses pandas_ta for VWAP (anchored, HLC3 source, daily reset).
+
 Usage:
-    1. pip install talipp
+    1. pip install talipp pandas_ta
     2. Download raw data:
        curl -sL "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-01.zip" -o /tmp/btcusdt.zip
        unzip /tmp/btcusdt.zip -d /tmp
@@ -19,7 +21,13 @@ Usage:
 import csv
 import os
 import sys
+from unittest.mock import MagicMock
 
+import pandas as pd
+# pandas_ta requires numba at import time but only uses it for JIT.
+# Mock it so the script runs on environments without numba (e.g. Python 3.14).
+sys.modules.setdefault("numba", MagicMock())
+import pandas_ta as ta  # noqa: E402
 from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, OBV, RSI, SMA, Stoch, StochRSI, KeltnerChannels, DonchianChannels, Williams, Ichimoku
 from talipp.ohlcv import OHLCV
 
@@ -342,6 +350,22 @@ def main():
             if val is not None:
                 w.writerow([times[i], f"{val:.10f}"])
 
+    # VWAP (anchored daily)
+    # pandas_ta.vwap(high, low, close, volume, anchor="D") uses HLC3 internally.
+    # Requires a DatetimeIndex for anchor-based resets.
+    # Timestamps are microseconds since epoch — convert to datetime.
+    df = pd.DataFrame(rows)
+    df["datetime"] = pd.to_datetime(df["open_time"], unit="us", utc=True)
+    df.set_index("datetime", inplace=True)
+    vwap_series = ta.vwap(df["high"], df["low"], df["close"], df["volume"], anchor="D")
+    with open(f"{OUTPUT_DIR}/vwap-day-hlc3.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "expected"])
+        for i, val in enumerate(vwap_series):
+            if pd.notna(val):
+                w.writerow([times[i], f"{val:.10f}"])
+    vwap_count = int(vwap_series.notna().sum())
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -382,7 +406,8 @@ def main():
         f"{cci_count} CCI, "
         f"{chop_count} CHOP, "
         f"{ichimoku_count} Ichimoku, "
-        f"{obv_count} OBV reference values "
+        f"{obv_count} OBV, "
+        f"{vwap_count} VWAP reference values "
         f"from {len(rows)} OHLCV bars."
     )
 
