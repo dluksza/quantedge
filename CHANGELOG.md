@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.15.0] - 2026-04-03
+## [0.15.1] - 2026-04-03
 
 ### Added
 
@@ -160,7 +160,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
-[0.15.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.0
+[0.15.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.1
 [0.14.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.14.0
 [0.13.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.13.0
 [0.12.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.12.0
