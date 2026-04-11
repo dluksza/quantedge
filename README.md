@@ -56,6 +56,7 @@ Each indicator defines its own output type via an associated type on the
 `AdxValue { adx, plus_di, minus_di }`. Ichimoku Cloud returns
 `IchimokuValue { tenkan, kijun, senkou_a, senkou_b, chikou_close }`.
 VWAP returns `VwapValue { vwap, band_1, band_2, band_3 }`.
+Supertrend returns `SupertrendValue { value, is_bullish }`.
 Williams %R, CCI, CHOP, and OBV return `f64`.
 No downcasting, no enums, full type safety.
 
@@ -163,7 +164,8 @@ trait Indicator: Sized + Clone + Display + Debug {
 // Chop:      Output = f64
 // StochRsi:  Output = StochRsiValue { k: f64, d: Option<f64> }
 // Obv:       Output = f64
-// Vwap:      Output = VwapValue { vwap: f64, band_1: Option<VwapBand>, band_2: Option<VwapBand>, band_3: Option<VwapBand> }
+// Vwap:       Output = VwapValue { vwap: f64, band_1: Option<VwapBand>, band_2: Option<VwapBand>, band_3: Option<VwapBand> }
+// Supertrend: Output = SupertrendValue { value: f64, is_bullish: bool }
 ```
 
 ### Ohlcv Trait
@@ -244,27 +246,28 @@ to extract from the Ohlcv input:
 
 | Indicator | Output     | Description                                  |
 |-----------|------------|----------------------------------------------|
-| SMA       | `f64`      | Simple Moving Average                        |
-| EMA       | `f64`      | Exponential Moving Average                   |
-| RSI       | `f64`      | Relative Strength Index (Wilder's smoothing) |
-| BB        | `BbValue`  | Bollinger Bands (upper, mid, lower)          |
-| MACD      | `MacdValue`| Moving Average Convergence Divergence        |
-| ATR       | `f64`      | Average True Range                           |
-| Stoch     | `StochValue`| Stochastic Oscillator (%K, %D)              |
-| KC        | `KcValue`  | Keltner Channel (upper, mid, lower)          |
-| DC        | `DcValue`  | Donchian Channel (upper, mid, lower)         |
-| ADX       | `AdxValue` | Average Directional Index (+DI, −DI, ADX)    |
-| WillR     | `f64`      | Williams %R                                  |
-| CCI       | `f64`      | Commodity Channel Index                      |
-| CHOP      | `f64`      | Choppiness Index                             |
-| Ichimoku  | `IchimokuValue`| Ichimoku Cloud (tenkan, kijun, senkou A/B, chikou) |
-| StochRSI  | `StochRsiValue`| Stochastic RSI (%K, %D)                  |
-| OBV       | `f64`      | On-Balance Volume                        |
-| VWAP      | `VwapValue`| Volume Weighted Average Price             |
+| SMA        | `f64`      | Simple Moving Average                       |
+| EMA        | `f64`      | Exponential Moving Average                  |
+| RSI        | `f64`      | Relative Strength Index (Wilder's smoothing)|
+| BB         | `BbValue`  | Bollinger Bands (upper, mid, lower)         |
+| MACD       | `MacdValue`| Moving Average Convergence Divergence       |
+| ATR        | `f64`      | Average True Range                          |
+| Stoch      | `StochValue`| Stochastic Oscillator (%K, %D)             |
+| KC         | `KcValue`  | Keltner Channel (upper, mid, lower)         |
+| DC         | `DcValue`  | Donchian Channel (upper, mid, lower)        |
+| ADX        | `AdxValue` | Average Directional Index (+DI, −DI, ADX)   |
+| WillR      | `f64`      | Williams %R                                 |
+| CCI        | `f64`      | Commodity Channel Index                     |
+| CHOP       | `f64`      | Choppiness Index                            |
+| Ichimoku   | `IchimokuValue`| Ichimoku Cloud (tenkan, kijun, senkou A/B, chikou) |
+| StochRSI   | `StochRsiValue`| Stochastic RSI (%K, %D)                 |
+| OBV        | `f64`      | On-Balance Volume                           |
+| VWAP       | `VwapValue`| Volume Weighted Average Price               |
+| Supertrend | `SupertrendValue` | Supertrend (trend line + direction)  |
 
 ### Planned
 
-Supertrend, Parabolic SAR.
+Parabolic SAR.
 
 ## Benchmarks
 

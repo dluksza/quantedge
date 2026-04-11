@@ -106,6 +106,7 @@ impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
 impl_inherent_methods!(Obv, ObvConfig, ObvConfigBuilder);
 impl_inherent_methods!(Stoch, StochConfig, StochConfigBuilder);
 impl_inherent_methods!(StochRsi, StochRsiConfig, StochRsiConfigBuilder);
+impl_inherent_methods!(Supertrend, SupertrendConfig, SupertrendConfigBuilder);
 impl_inherent_methods!(Vwap, VwapConfig, VwapConfigBuilder);
 impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Supertrend — trend-following indicator that combines Wilder-smoothed ATR bands with directional logic. Produces a single trend line that flips between support (bullish) and resistance (bearish) when price crosses the active band. Configurable ATR length and band multiplier. Default length 20, multiplier 3.0. Returns `SupertrendValue { value, is_bullish }`. Reference tests against talipp (734 BTC/USDT bars, 1e-6 tolerance). Unit tests covering convergence, computation (direction transitions, band clamping), repaints, live data, clone, config, display, and value accessor.
+
 ## [0.15.1] - 2026-04-03
 
 ### Added

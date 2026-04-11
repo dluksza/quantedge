@@ -13,6 +13,7 @@ mod rsi;
 mod sma;
 mod stoch;
 mod stoch_rsi;
+mod supertrend;
 mod vwap;
 mod willr;
 
@@ -31,5 +32,6 @@ pub use rsi::*;
 pub use sma::*;
 pub use stoch::*;
 pub use stoch_rsi::*;
+pub use supertrend::*;
 pub use vwap::*;
 pub use willr::*;
