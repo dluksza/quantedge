@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-04-11
+
 ### Changed
 
 - Supertrend trend-flip check now reads `previous.is_bullish` directly instead of comparing the previous value against `prev_upper` with an epsilon guard. Branches reordered to put the bullish path first, eliminating the `!` on the hot path. Repaint stream throughput improved ~17–20% (5.71 µs / 391 Melem/s at length 20, 5.67 µs / 394 Melem/s at length 200); tick and single-repaint latency improved ~10% (2.80 ns tick, 2.55 ns repaint at length 20).
@@ -174,6 +176,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.16.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.1
 [0.16.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.0
 [0.15.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.1
 [0.14.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.14.0
