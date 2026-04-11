@@ -323,19 +323,17 @@ impl Indicator for Supertrend {
                     self.current_upper = Some(upper);
                     self.current_lower = Some(lower);
 
-                    self.prev_upper.map_or(bearish, |prev_upper| {
-                        if (previous.value - prev_upper).abs() < f64::EPSILON {
-                            if ohlcv.close() <= upper {
-                                bearish
-                            } else {
-                                Self::bullish(lower)
-                            }
-                        } else if ohlcv.close() >= lower {
+                    if previous.is_bullish {
+                        if ohlcv.close() >= lower {
                             Self::bullish(lower)
                         } else {
                             bearish
                         }
-                    })
+                    } else if ohlcv.close() <= upper {
+                        bearish
+                    } else {
+                        Self::bullish(lower)
+                    }
                 });
 
                 Some(value)
