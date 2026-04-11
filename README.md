@@ -318,6 +318,8 @@ on a converged indicator.
 | Ichimoku  | 36/104/208/104 | 25.1 µs | 29.7 Melem/s  |
 | StochRSI  | 14/14/3/3 | 8.05 µs    | 92.4 Melem/s   |
 | StochRSI  | 140/140/30/30 | 10.6 µs | 69.9 Melem/s   |
+| Supertrend | 20      | 2.32 µs       | 321 Melem/s    |
+| Supertrend | 200     | 2.05 µs       | 363 Melem/s    |
 | OBV       | —        | 757 ns        | 982 Melem/s    |
 | VWAP      | Day      | 889 ns        | 837 Melem/s    |
 
@@ -355,6 +357,8 @@ on a converged indicator.
 | Ichimoku  | 36/104/208/104 | 115 ns |
 | StochRSI  | 14/14/3/3 | 40.2 ns    |
 | StochRSI  | 140/140/30/30 | 43.9 ns |
+| Supertrend | 20      | 3.10 ns       |
+| Supertrend | 200     | 3.10 ns       |
 | OBV       | —        | 1.52 ns       |
 | VWAP      | Day      | 4.10 ns       |
 
@@ -392,6 +396,8 @@ on a converged indicator.
 | Ichimoku  | 36/104/208/104 | 115 ns |
 | StochRSI  | 14/14/3/3 | 40.9 ns    |
 | StochRSI  | 140/140/30/30 | 43.7 ns |
+| Supertrend | 20      | 2.81 ns       |
+| Supertrend | 200     | 2.84 ns       |
 | OBV       | —        | 1.32 ns       |
 | VWAP      | Day      | 3.76 ns       |
 
@@ -429,6 +435,8 @@ on a converged indicator.
 | Ichimoku  | 36/104/208/104 | 36.1 µs | 61.9 Melem/s  |
 | StochRSI  | 14/14/3/3 | 20.1 µs    | 111 Melem/s    |
 | StochRSI  | 140/140/30/30 | 21.0 µs | 107 Melem/s    |
+| Supertrend | 20      | 6.86 µs       | 325 Melem/s    |
+| Supertrend | 200     | 6.21 µs       | 359 Melem/s    |
 | OBV       | —        | 3.60 µs       | 620 Melem/s    |
 | VWAP      | Day      | 3.10 µs       | 719 Melem/s    |
 

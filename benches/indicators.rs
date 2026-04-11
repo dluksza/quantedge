@@ -7,8 +7,8 @@ use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_mai
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
     Ema, EmaConfig, Ichimoku, IchimokuConfig, Kc, KcConfig, Macd, MacdConfig, Obv, ObvConfig, Rsi,
-    RsiConfig, Sma, SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Vwap, VwapConfig,
-    WillR, WillRConfig,
+    RsiConfig, Sma, SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend,
+    SupertrendConfig, Vwap, VwapConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, time::Duration};
 
@@ -133,6 +133,12 @@ macro_rules! all_indicators {
         );
         $m!("obv", Obv, ObvConfig::builder().build());
         $m!("vwap", Vwap, VwapConfig::builder().build());
+        $m!("supertrend20", Supertrend, SupertrendConfig::default());
+        $m!(
+            "supertrend200",
+            Supertrend,
+            SupertrendConfig::builder().length(nz(200)).build()
+        );
     };
 }
 

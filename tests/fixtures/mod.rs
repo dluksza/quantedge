@@ -99,6 +99,14 @@ pub struct RefMacdValue {
     pub histogram: f64,
 }
 
+/// Reference Supertrend value with timestamp (value and direction).
+#[derive(Debug, Deserialize)]
+pub struct RefSupertrendValue {
+    pub open_time: u64,
+    pub value: f64,
+    pub is_bullish: u8,
+}
+
 const OHLCV_PATH: &str = "tests/fixtures/data/btcusdt-1h.csv";
 
 /// Load reference OHLCV bars from Binance.
@@ -134,6 +142,11 @@ pub fn load_ichimoku_ref(path: &str) -> Vec<RefIchimokuValue> {
 /// Load MACD reference data (macd, signal, histogram).
 pub fn load_macd_ref(path: &str) -> Vec<RefMacdValue> {
     load_records(path, "invalid MACD reference record")
+}
+
+/// Load Supertrend reference data (value, `is_bullish`).
+pub fn load_supertrend_ref(path: &str) -> Vec<RefSupertrendValue> {
+    load_records(path, "invalid Supertrend reference record")
 }
 
 /// Assert two f64 values are within tolerance.
@@ -412,6 +425,39 @@ pub fn assert_stoch_values_match(
         }
         (c, r) => {
             panic!("Stoch convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
+        }
+    }
+}
+
+/// Assert Supertrend values match between closed and repainted indicators.
+pub fn assert_supertrend_values_match(
+    bar_idx: usize,
+    closed: Option<quantedge_ta::SupertrendValue>,
+    repainted: Option<quantedge_ta::SupertrendValue>,
+    tolerance: f64,
+) {
+    match (closed, repainted) {
+        (None, None) => {}
+        (Some(c), Some(r)) => {
+            let diff = (c.value() - r.value()).abs();
+            assert!(
+                diff <= tolerance,
+                "Supertrend value diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
+                c.value(),
+                r.value()
+            );
+            assert_eq!(
+                c.is_bullish(),
+                r.is_bullish(),
+                "Supertrend direction diverged at bar {bar_idx}: closed={}, repainted={}",
+                c.is_bullish(),
+                r.is_bullish()
+            );
+        }
+        (c, r) => {
+            panic!(
+                "Supertrend convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}"
+            );
         }
     }
 }

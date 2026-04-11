@@ -28,7 +28,7 @@ import pandas as pd
 # Mock it so the script runs on environments without numba (e.g. Python 3.14).
 sys.modules.setdefault("numba", MagicMock())
 import pandas_ta as ta  # noqa: E402
-from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, OBV, RSI, SMA, Stoch, StochRSI, KeltnerChannels, DonchianChannels, Williams, Ichimoku
+from talipp.indicators import ADX, ATR, BB, CCI, CHOP, EMA, MACD, OBV, RSI, SMA, Stoch, StochRSI, SuperTrend, KeltnerChannels, DonchianChannels, Williams, Ichimoku
 from talipp.ohlcv import OHLCV
 
 PERIOD = 20
@@ -48,6 +48,8 @@ ADX_PERIOD = 14
 WILLR_PERIOD = 14
 CCI_PERIOD = 20
 CHOP_PERIOD = 14
+SUPERTREND_ATR_PERIOD = 10
+SUPERTREND_MULT = 3
 ICHIMOKU_TENKAN = 9
 ICHIMOKU_KIJUN = 26
 ICHIMOKU_SENKOU_B = 52
@@ -305,6 +307,21 @@ def main():
             if val is not None:
                 w.writerow([times[i], f"{val:.10f}"])
 
+    # Supertrend
+    # talipp SuperTrend(atr_period, mult) takes OHLCV.
+    # Output: SuperTrendVal(value, trend). trend is Trend.UP or Trend.DOWN.
+    # The first non-None value has value=0 (sentinel) — skip it.
+    # This maps to Rust Supertrend(length=10, multiplier=3.0).
+    from talipp.indicators.SuperTrend import Trend
+    supertrend = SuperTrend(atr_period=SUPERTREND_ATR_PERIOD, mult=SUPERTREND_MULT, input_values=ohlcv_bars)
+    with open(f"{OUTPUT_DIR}/supertrend-10-3.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "value", "is_bullish"])
+        for i, val in enumerate(supertrend):
+            if val is not None and val.value != 0:
+                is_bullish = 1 if val.trend == Trend.UP else 0
+                w.writerow([times[i], f"{val.value:.10f}", is_bullish])
+
     # Ichimoku Cloud
     # talipp Ichimoku params: tenkan_period, kijun_period, senkou_slow_period,
     # senkou_lookup_period (displacement), chikou_lag_period.
@@ -380,6 +397,7 @@ def main():
     willr_count = sum(1 for v in willr if v is not None)
     cci_count = sum(1 for v in cci if v is not None)
     chop_count = sum(1 for v in chop if v is not None)
+    supertrend_count = sum(1 for v in supertrend if v is not None and v.value != 0)
     ichimoku_count = sum(
         1
         for v in ichimoku
@@ -405,6 +423,7 @@ def main():
         f"{willr_count} WillR, "
         f"{cci_count} CCI, "
         f"{chop_count} CHOP, "
+        f"{supertrend_count} Supertrend, "
         f"{ichimoku_count} Ichimoku, "
         f"{obv_count} OBV, "
         f"{vwap_count} VWAP reference values "
