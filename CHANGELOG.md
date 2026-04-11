@@ -2,13 +2,15 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-04-11
+
 ### Added
 
 - Supertrend — trend-following indicator that combines Wilder-smoothed ATR bands with directional logic. Produces a single trend line that flips between support (bullish) and resistance (bearish) when price crosses the active band. Configurable ATR length and band multiplier. Default length 20, multiplier 3.0. Returns `SupertrendValue { value, is_bullish }`. Reference tests against talipp (734 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks. Unit tests covering convergence, computation (direction transitions, band clamping), repaints, live data, clone, config, display, and value accessor.
 
 ### Changed
 
-- **Breaking:** Removed `StdDev` in favor of the shared `Multiplier` type. `BbConfigBuilder::std_dev` and `VwapConfigBuilder::band_1/2/3` now take `Multiplier`. `StdDev` was a duplicate of `Multiplier` with the same invariants (positive, non-NaN `f64`); both BB and VWAP semantically multiply a standard deviation, so `Multiplier` is the accurate name. Call sites change from `StdDev::new(x)` to `Multiplier::new(x)`.
+- **Breaking:** Removed `StdDev` and `KcMultiplier` in favor of the shared `Multiplier` type. `BbConfigBuilder::std_dev`, `VwapConfigBuilder::band_1/2/3`, and `KcConfigBuilder::multiplier` now take `Multiplier`; the corresponding accessors return `Multiplier`. All three wrappers were structurally identical positive, non-NaN `f64` newtypes, and BB, VWAP, KC, and Supertrend all semantically scale a volatility measure by a constant factor. Call sites change from `StdDev::new(x)` / `KcMultiplier::new(x)` to `Multiplier::new(x)`. `Multiplier::value()` takes `self` by value (source-compatible via `Copy`).
 
 ## [0.15.1] - 2026-04-03
 
@@ -168,6 +170,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.16.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.0
 [0.15.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.1
 [0.14.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.14.0
 [0.13.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.13.0
