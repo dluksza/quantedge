@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-04-12
+
 ### Added
 
 - Parabolic SAR (Stop and Reverse) — trend-following overlay that places adaptive trailing stops using Wilder's acceleration factor. SAR trails below price in uptrends and above in downtrends, reversing when price penetrates the stop level. Configurable acceleration step and maximum (`af_step`, `af_max`). Default step 0.02, max 0.2. Returns `ParabolicSarValue { sar, is_long }`. Convergence after 2 bars. Initial direction via directional movement (−DM vs +DM), matching TA-Lib. Reference tests against TA-Lib (743 BTC/USDT bars, 1e-6 tolerance) and Criterion benchmarks. Unit tests covering convergence, initialization, computation (AF increments, AF cap, reversals), repaints, live data, clone, config, display, and value accessor.
@@ -180,6 +182,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.17.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.17.0
 [0.16.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.1
 [0.16.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.0
 [0.15.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.1
