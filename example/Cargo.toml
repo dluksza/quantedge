@@ -1,0 +1,10 @@
+[package]
+name = "quantedge-ta-example"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+binance = "^0.21.0"
+chrono = "^0.4.0"
+ctrlc = "^3.5.0"
+quantedge-ta = { path = "../" }
