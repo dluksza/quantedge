@@ -311,10 +311,10 @@ fn repaint_benchmarks(c: &mut Criterion) {
 }
 
 fn repaint_stream_benchmarks(c: &mut Criterion) {
-    let (warmup_bars, measured_bars) = split_at_warmup(reference_bars());
+    let (warmup, measured) = split_at_warmup(reference_bars());
     // Split on bar boundaries so each repaint triple stays whole.
-    let warmup_sequences: Vec<_> = warmup_bars.iter().flat_map(repaint_sequence).collect();
-    let measured_sequences: Vec<_> = measured_bars.iter().flat_map(repaint_sequence).collect();
+    let warmup_sequences: Vec<_> = warmup.iter().flat_map(repaint_sequence).collect();
+    let measured_sequences: Vec<_> = measured.iter().flat_map(repaint_sequence).collect();
 
     let mut group = c.benchmark_group("repaint_stream");
     group.throughput(Throughput::Elements(measured_sequences.len() as u64));
