@@ -156,14 +156,29 @@ macro_rules! all_indicators {
     };
 }
 
-/// Maximum `convergence()` across every config in `all_indicators!`. Used to
-/// size the warmup prefix so stream benches time only post-convergence ticks.
+/// Largest bar index across every config in `all_indicators!` at which the
+/// hot path of `compute()` still takes a pre-steady-state branch. For `Macd`
+/// and `StochRsi` the signal/D line keeps seeding past the first `Some`
+/// output; for every other indicator the nominal `convergence()` is also the
+/// point where all output branches stabilize.
 fn max_convergence() -> usize {
     let mut max_conv = 0usize;
+    macro_rules! hot_path_conv {
+        (Macd, $cfg:expr) => {
+            $cfg.full_convergence()
+        };
+        (StochRsi, $cfg:expr) => {
+            $cfg.rsi_length() + $cfg.stoch_length() + $cfg.k_smooth() + $cfg.d_smooth() - 1
+        };
+        ($_t:ident, $cfg:expr) => {
+            IndicatorConfig::convergence(&$cfg)
+        };
+    }
     macro_rules! collect_conv {
-        ($name:expr, $ind_type:ty, $config:expr) => {{
+        ($name:expr, $ind_type:ident, $config:expr) => {{
             let _ = $name;
-            let c = IndicatorConfig::convergence(&$config);
+            let cfg = $config;
+            let c = hot_path_conv!($ind_type, cfg);
             if c > max_conv {
                 max_conv = c;
             }
