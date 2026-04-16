@@ -16,4 +16,4 @@ Type "cargo run"
 Enter
 Sleep 14s
 Ctrl+C
-Sleep 500ms
+Sleep 4s
