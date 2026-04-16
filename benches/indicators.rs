@@ -1,7 +1,7 @@
 #[path = "../tests/fixtures/mod.rs"]
 mod fixtures;
 
-use crate::fixtures::{load_reference_ohlcvs, repaint_sequence};
+use crate::fixtures::{RefBar, load_reference_ohlcvs, repaint_sequence};
 
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use quantedge_ta::{
@@ -11,10 +11,16 @@ use quantedge_ta::{
     Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend, SupertrendConfig, Vwap, VwapConfig,
     WillR, WillRConfig,
 };
-use std::{hint::black_box, num::NonZero, time::Duration};
+use std::{hint::black_box, num::NonZero, sync::OnceLock, time::Duration};
 
 fn nz(n: usize) -> NonZero<usize> {
     NonZero::new(n).expect("non zero value")
+}
+
+/// CSV-backed reference bars, parsed on first access.
+fn bars() -> &'static [RefBar] {
+    static BARS: OnceLock<Vec<RefBar>> = OnceLock::new();
+    BARS.get_or_init(load_reference_ohlcvs)
 }
 
 /// Calls `$m!(name, Type, config)` for every indicator configuration.
@@ -189,7 +195,7 @@ fn max_convergence() -> usize {
 }
 
 fn stream_benchmarks(c: &mut Criterion) {
-    let bars = load_reference_ohlcvs();
+    let bars = bars();
     let warmup_len = max_convergence();
     assert!(
         warmup_len < bars.len(),
@@ -229,7 +235,7 @@ fn stream_benchmarks(c: &mut Criterion) {
 }
 
 fn tick_benchmarks(c: &mut Criterion) {
-    let bars = load_reference_ohlcvs();
+    let bars = bars();
     let warmup_len = max_convergence();
     assert!(
         warmup_len < bars.len(),
@@ -270,7 +276,7 @@ fn tick_benchmarks(c: &mut Criterion) {
 }
 
 fn repaint_benchmarks(c: &mut Criterion) {
-    let bars = load_reference_ohlcvs();
+    let bars = bars();
     let warmup_len = max_convergence();
     assert!(
         warmup_len < bars.len(),
@@ -316,7 +322,7 @@ fn repaint_benchmarks(c: &mut Criterion) {
 }
 
 fn repaint_stream_benchmarks(c: &mut Criterion) {
-    let bars = load_reference_ohlcvs();
+    let bars = bars();
     let warmup_len = max_convergence();
     assert!(
         warmup_len < bars.len(),
