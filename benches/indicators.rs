@@ -181,8 +181,7 @@ fn max_convergence() -> usize {
         };
     }
     macro_rules! collect_conv {
-        ($name:expr, $ind_type:ident, $config:expr) => {{
-            let _ = $name;
+        ($_name:expr, $ind_type:ident, $config:expr) => {{
             let cfg = $config;
             let c = hot_path_conv!($ind_type, cfg);
             if c > max_conv {
