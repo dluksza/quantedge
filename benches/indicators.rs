@@ -206,14 +206,12 @@ fn stream_benchmarks(c: &mut Criterion) {
     macro_rules! stream_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
             group.bench_function($name, |b| {
+                let mut seed = <$ind_type>::new($config);
+                for bar in warmup {
+                    seed.compute(bar);
+                }
                 b.iter_batched(
-                    || {
-                        let mut ind = <$ind_type>::new($config);
-                        for bar in warmup {
-                            ind.compute(bar);
-                        }
-                        ind
-                    },
+                    || seed.clone(),
                     |mut ind| {
                         for bar in measured {
                             black_box(ind.compute(bar));
@@ -244,14 +242,12 @@ fn tick_benchmarks(c: &mut Criterion) {
     macro_rules! tick_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
             group.bench_function($name, |b| {
+                let mut seed = <$ind_type>::new($config);
+                for bar in warmup {
+                    seed.compute(bar);
+                }
                 b.iter_batched(
-                    || {
-                        let mut ind = <$ind_type>::new($config);
-                        for bar in warmup {
-                            ind.compute(bar);
-                        }
-                        ind
-                    },
+                    || seed.clone(),
                     |mut ind| {
                         black_box(ind.compute(&last[0]));
                     },
@@ -285,14 +281,12 @@ fn repaint_benchmarks(c: &mut Criterion) {
     macro_rules! repaint_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
             group.bench_function($name, |b| {
+                let mut seed = <$ind_type>::new($config);
+                for bar in &bars {
+                    seed.compute(bar);
+                }
                 b.iter_batched(
-                    || {
-                        let mut ind = <$ind_type>::new($config);
-                        for bar in &bars {
-                            ind.compute(bar);
-                        }
-                        ind
-                    },
+                    || seed.clone(),
                     |mut ind| {
                         black_box(ind.compute(&repaint_bar));
                     },
@@ -329,14 +323,12 @@ fn repaint_stream_benchmarks(c: &mut Criterion) {
     macro_rules! repaint_stream_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
             group.bench_function($name, |b| {
+                let mut seed = <$ind_type>::new($config);
+                for bar in &warmup_sequences {
+                    seed.compute(bar);
+                }
                 b.iter_batched(
-                    || {
-                        let mut ind = <$ind_type>::new($config);
-                        for bar in &warmup_sequences {
-                            ind.compute(bar);
-                        }
-                        ind
-                    },
+                    || seed.clone(),
                     |mut ind| {
                         for bar in &measured_sequences {
                             black_box(ind.compute(bar));
