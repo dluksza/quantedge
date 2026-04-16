@@ -230,14 +230,21 @@ fn stream_benchmarks(c: &mut Criterion) {
 
 fn tick_benchmarks(c: &mut Criterion) {
     let bars = load_reference_ohlcvs();
+    let warmup_len = max_convergence();
+    assert!(
+        warmup_len < bars.len(),
+        "fixture has {} bars, needs > {} for steady-state measurement",
+        bars.len(),
+        warmup_len,
+    );
+    let warmup = &bars[..warmup_len];
+    let next = &bars[warmup_len];
+
     let mut group = c.benchmark_group("tick");
     group.sample_size(200);
     group.noise_threshold(0.03);
     group.warm_up_time(Duration::from_secs(5));
     group.measurement_time(Duration::from_secs(10));
-
-    // Pre-feed all bars except the last, then benchmark a single compute() call.
-    let (warmup, last) = bars.split_at(bars.len() - 1);
 
     macro_rules! tick_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
@@ -249,7 +256,7 @@ fn tick_benchmarks(c: &mut Criterion) {
                 b.iter_batched(
                     || seed.clone(),
                     |mut ind| {
-                        black_box(ind.compute(&last[0]));
+                        black_box(ind.compute(next));
                     },
                     BatchSize::SmallInput,
                 );
@@ -264,25 +271,32 @@ fn tick_benchmarks(c: &mut Criterion) {
 
 fn repaint_benchmarks(c: &mut Criterion) {
     let bars = load_reference_ohlcvs();
+    let warmup_len = max_convergence();
+    assert!(
+        warmup_len < bars.len(),
+        "fixture has {} bars, needs > {} for steady-state measurement",
+        bars.len(),
+        warmup_len,
+    );
+    let warmup = &bars[..warmup_len];
+    // Repaint the last warmed bar (same open_time, perturbed close).
+    let repaint_bar = {
+        let mut b = warmup.last().unwrap().clone();
+        b.close *= 1.001;
+        b
+    };
+
     let mut group = c.benchmark_group("repaint");
     group.sample_size(200);
     group.noise_threshold(0.03);
     group.warm_up_time(Duration::from_secs(5));
     group.measurement_time(Duration::from_secs(10));
 
-    // Pre-feed all bars, then benchmark a single repaint tick (same open_time, perturbed close).
-    let last = bars.last().unwrap();
-    let repaint_bar = {
-        let mut b = last.clone();
-        b.close *= 1.001;
-        b
-    };
-
     macro_rules! repaint_bench {
         ($name:expr, $ind_type:ty, $config:expr) => {
             group.bench_function($name, |b| {
                 let mut seed = <$ind_type>::new($config);
-                for bar in &bars {
+                for bar in warmup {
                     seed.compute(bar);
                 }
                 b.iter_batched(
