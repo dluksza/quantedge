@@ -1,0 +1,30 @@
+[package]
+name = "quantedge-ta"
+version = "0.18.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "A streaming technical analysis library for Rust"
+keywords = ["technical-analysis", "trading", "indicators", "finance"]
+categories = ["finance", "mathematics", "algorithms"]
+readme = "README.md"
+exclude = ["tests/"]
+
+[dev-dependencies]
+csv = "1"
+serde = { version = "1", features = ["derive"] }
+criterion = { version = "0.8", default-features = false, features = [
+  "html_reports",
+] }
+
+[[bench]]
+name = "indicators"
+harness = false
+
+[lib]
+bench = false
+
+[lints]
+workspace = true

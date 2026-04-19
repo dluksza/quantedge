@@ -30,7 +30,7 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-targets --all-features
+      - run: cargo clippy --workspace --all-targets --all-features
 
   test:
     name: Test
@@ -40,7 +40,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@nextest
-      - run: cargo nextest run --all-features
+      - run: cargo nextest run --workspace --all-features
 
   wasm:
     name: WASM
@@ -51,8 +51,8 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@wasmtime
-      - run: cargo build --lib --target wasm32-unknown-unknown
-      - run: cargo test --target wasm32-wasip1
+      - run: cargo build -p quantedge-ta --lib --target wasm32-unknown-unknown
+      - run: cargo test -p quantedge-ta --target wasm32-wasip1
 
   coverage:
     name: Coverage

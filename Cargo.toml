@@ -1,38 +1,27 @@
+[workspace]
+resolver = "3"
+members = ["crates/ta"]
 
-[package]
-name = "quantedge-ta"
-version = "0.18.0"
+[workspace.package]
 edition = "2024"
 rust-version = "1.93"
 license = "MIT OR Apache-2.0"
-description = "A streaming technical analysis library for Rust"
-repository = "https://github.com/dluksza/quantedge-ta"
-keywords = ["technical-analysis", "trading", "indicators", "finance"]
-categories = ["finance", "mathematics", "algorithms"]
-readme = "README.md"
-exclude = [".github/", "tests/"]
+repository = "https://github.com/dluksza/quantedge"
+authors = ["Darek Luksza <dariusz@luksza.org>"]
 
-[dev-dependencies]
-csv = "1"
-serde = { version = "1", features = ["derive"] }
-criterion = { version = "0.8", default-features = false, features = [
-  "html_reports",
-] }
-
-[[bench]]
-name = "indicators"
-harness = false
-
-[lib]
-bench = false
-
-[profile.bench]
-codegen-units = 1
-lto = "thin"
-
-[lints.rust]
+[workspace.lints.rust]
 unsafe_code = "forbid"
 
-[lints.clippy]
-all = "warn"
-pedantic = "warn"
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
+[profile.bench]
+lto = "fat"
+codegen-units = 1
