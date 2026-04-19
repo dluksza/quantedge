@@ -42,6 +42,17 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - run: cargo nextest run --workspace --all-features
 
+  example-ta:
+    name: quantedge-ta example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/ta/example
+      - run: cargo check --manifest-path crates/ta/example/Cargo.toml --locked
+
   wasm:
     name: WASM
     runs-on: ubuntu-latest
