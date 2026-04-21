@@ -3,14 +3,19 @@ name: Publish
 on:
   push:
     tags:
+      - "quantedge-core-v*"
       - "quantedge-ta-v*"
+
+concurrency:
+  group: publish-${{ github.sha }}
+  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   publish:
-    name: Publish quantedge-ta to crates.io
+    name: Publish to crates.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -18,39 +23,88 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Verify tag signature
+      - name: Discover release tags on HEAD
+        id: discover
+        run: |
+          TAGS=$(git tag --points-at HEAD \
+            | grep -E '^quantedge-(core|ta)-v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+          if [ -z "$TAGS" ]; then
+            echo "::error::No quantedge-*-v* tags point at ${{ github.sha }}"
+            exit 1
+          fi
+          echo "Found tags:"
+          echo "$TAGS"
+          {
+            echo "tags<<__EOT__"
+            echo "$TAGS"
+            echo "__EOT__"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify every tag is signed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          TAG_SHA=$(git rev-list -n 1 "$TAG_NAME")
-          RESPONSE=$(gh api "repos/${{ github.repository }}/git/tags" --paginate --jq ".[] | select(.tag == \"$TAG_NAME\") | .verification.verified" 2>/dev/null || echo "")
+          while IFS= read -r TAG_NAME; do
+            [ -z "$TAG_NAME" ] && continue
+            TAG_SHA=$(git rev-list -n 1 "$TAG_NAME")
+            RESPONSE=$(gh api "repos/${{ github.repository }}/git/tags" \
+              --paginate \
+              --jq ".[] | select(.tag == \"$TAG_NAME\") | .verification.verified" \
+              2>/dev/null || echo "")
+            if [ "$RESPONSE" != "true" ]; then
+              # Lightweight tags or API miss: check the commit signature instead
+              VERIFIED=$(gh api "repos/${{ github.repository }}/git/commits/$TAG_SHA" \
+                --jq '.verification.verified')
+              if [ "$VERIFIED" != "true" ]; then
+                echo "::error::Tag $TAG_NAME is not signed or signature could not be verified."
+                exit 1
+              fi
+            fi
+            echo "Tag $TAG_NAME signature verified."
+          done <<< "${{ steps.discover.outputs.tags }}"
 
-          if [ "$RESPONSE" != "true" ]; then
-            # Lightweight tags or API miss: check the commit signature instead
-            VERIFIED=$(gh api "repos/${{ github.repository }}/git/commits/$TAG_SHA" --jq '.verification.verified')
-            if [ "$VERIFIED" != "true" ]; then
-              echo "::error::Tag $TAG_NAME is not signed or signature could not be verified. Aborting publish."
+      - name: Verify tag versions match Cargo.toml
+        run: |
+          while IFS= read -r TAG_NAME; do
+            [ -z "$TAG_NAME" ] && continue
+            CRATE_DIR=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta)-v.*$/\1/')
+            TAG_VERSION=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta)-v(.*)$/\2/')
+            CARGO_VERSION=$(grep '^version' "crates/$CRATE_DIR/Cargo.toml" \
+              | head -1 | sed 's/.*"\(.*\)".*/\1/')
+            if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
+              echo "::error::Tag $TAG_NAME ($TAG_VERSION) does not match crates/$CRATE_DIR/Cargo.toml ($CARGO_VERSION)"
               exit 1
             fi
-          fi
-
-          echo "Tag $TAG_NAME signature verified."
-
-      - name: Verify tag version matches Cargo.toml
-        run: |
-          TAG_VERSION="${GITHUB_REF#refs/tags/quantedge-ta-v}"
-          CARGO_VERSION=$(grep '^version' crates/ta/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
-          if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match crates/ta/Cargo.toml version ($CARGO_VERSION)"
-            exit 1
-          fi
-          echo "Version $TAG_VERSION confirmed."
+            echo "$TAG_NAME matches Cargo.toml ($TAG_VERSION)."
+          done <<< "${{ steps.discover.outputs.tags }}"
 
       - uses: dtolnay/rust-toolchain@1.93
       - uses: Swatinem/rust-cache@v2
 
-      - name: Publish
+      - name: Publish in dependency order
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
-        run: cargo publish -p quantedge-ta
+          TAGS: ${{ steps.discover.outputs.tags }}
+        run: |
+          publish_if_tagged() {
+            local crate_dir="$1"
+            local crate_name="quantedge-$crate_dir"
+            if ! echo "$TAGS" | grep -q "^${crate_name}-v"; then
+              echo "No tag for $crate_name on HEAD; skipping."
+              return
+            fi
+            local version
+            version=$(grep '^version' "crates/$crate_dir/Cargo.toml" \
+              | head -1 | sed 's/.*"\(.*\)".*/\1/')
+            if curl -sf "https://crates.io/api/v1/crates/$crate_name" \
+              | jq -e --arg v "$version" '.versions[] | select(.num == $v)' \
+              > /dev/null; then
+              echo "$crate_name@$version already on crates.io; skipping."
+              return
+            fi
+            echo "Publishing $crate_name@$version..."
+            cargo publish -p "$crate_name"
+          }
+
+          publish_if_tagged core
+          publish_if_tagged ta
