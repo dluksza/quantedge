@@ -12,6 +12,9 @@ categories = ["finance", "mathematics", "algorithms"]
 readme = "README.md"
 exclude = ["tests/"]
 
+[dependencies]
+quantedge-core = { workspace = true }
+
 [dev-dependencies]
 csv = "1"
 serde = { version = "1", features = ["derive"] }

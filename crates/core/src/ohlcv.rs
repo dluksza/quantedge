@@ -7,7 +7,7 @@ pub type Price = f64;
 /// Bar open timestamp or sequence number.
 ///
 /// Used for bar boundary detection. Must be non-decreasing
-/// between consecutive calls to [`Indicator::compute`].
+/// across successive bars.
 ///
 /// Recommended: microseconds since Unix epoch, monotonically increasing.
 /// This is **required** for the VWAP indicator, which uses timestamps
@@ -17,8 +17,7 @@ pub type Timestamp = u64;
 /// OHLCV bar data used as input to all indicators.
 ///
 /// Implement this on your own kline/candle type to avoid per-tick
-/// conversion. Indicators accept `&impl Ohlcv` and extract the
-/// configured [`PriceSource`] internally.
+/// conversion.
 ///
 /// # Bar boundaries
 ///
@@ -29,7 +28,7 @@ pub type Timestamp = u64;
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Price, Timestamp};
+/// use quantedge_core::{Ohlcv, Price, Timestamp};
 ///
 /// struct MyKline {
 ///     o: f64, h: f64, l: f64, c: f64,

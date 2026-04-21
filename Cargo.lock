@@ -257,11 +257,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "quantedge-core"
+version = "0.1.0"
+
+[[package]]
 name = "quantedge-ta"
 version = "0.18.1"
 dependencies = [
  "criterion",
  "csv",
+ "quantedge-core",
  "serde",
 ]
 

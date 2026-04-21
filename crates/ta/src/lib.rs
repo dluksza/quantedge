@@ -9,16 +9,16 @@
 //! import needed. Import [`Indicator`], [`IndicatorConfig`], or
 //! [`IndicatorConfigBuilder`] only for generic code.
 
+pub use quantedge_core::{Ohlcv, Price, Timestamp};
+
 mod indicators;
 mod internals;
 mod types;
 
 mod indicator;
-mod ohlcv;
 mod price_source;
 
 pub use crate::indicator::{Indicator, IndicatorConfig, IndicatorConfigBuilder};
-pub use crate::ohlcv::{Ohlcv, Price, Timestamp};
 pub use crate::price_source::PriceSource;
 
 pub use crate::indicators::*;

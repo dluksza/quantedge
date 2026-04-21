@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `Ohlcv`, `Price`, and `Timestamp` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers.
+
 ## [0.18.1] - 2026-04-21
 
 ### Changed
