@@ -9,7 +9,7 @@ Today: 19 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 | Crate              | Version       | Status        | Purpose                                              |
 |--------------------|---------------|---------------|------------------------------------------------------|
 | `quantedge-ta`     | `0.18.1`      | pre-publish   | Streaming technical analysis indicators              |
-| `quantedge-core`   | —             | planned       | Shared structs, traits, and public interfaces        |
+| `quantedge-core`   | `0.1.0`       | published     | Shared structs, traits, and public interfaces        |
 | `quantedge-engine` | —             | planned       | Streaming runtime — event loop, multi-TF state, execution |
 | `quantedge-sim`    | —             | planned       | Backtester and forward-tester with honest fill models |
 | `quantedge-ob`     | —             | planned       | Order book reconstruction and L2/L3 event handling   |
@@ -40,11 +40,12 @@ Design notes and per-indicator writeups at [luksza.org/category/quantedge](https
 
 ```
 crates/
+  core/         # shared types (Ohlcv, Price, Timestamp)
   ta/           # technical analysis indicators
     example/    # runnable WebSocket demo
 ```
 
-More crates (`core`, `engine`, `sim`, `ob`) will land here as they're built.
+More crates (`engine`, `sim`, `ob`) will land here as they're built.
 
 ## Roadmap
 
