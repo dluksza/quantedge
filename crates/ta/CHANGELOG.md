@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-04-21
+
 ### Changed
 
 - `Ohlcv`, `Price`, and `Timestamp` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers.
@@ -203,6 +205,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.19.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.19.0
 [0.18.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.18.1
 [0.18.0]: https://github.com/dluksza/quantedge/releases/tag/v0.18.0
 [0.17.0]: https://github.com/dluksza/quantedge/releases/tag/v0.17.0

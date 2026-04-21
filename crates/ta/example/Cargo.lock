@@ -1007,7 +1007,7 @@ version = "0.1.0"
 
 [[package]]
 name = "quantedge-ta"
-version = "0.18.1"
+version = "0.19.0"
 dependencies = [
  "quantedge-core",
 ]
