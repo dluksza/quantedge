@@ -8,7 +8,7 @@ Today: 19 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 
 | Crate              | Version       | Status        | Purpose                                              |
 |--------------------|---------------|---------------|------------------------------------------------------|
-| `quantedge-ta`     | `0.18.0`      | pre-publish   | Streaming technical analysis indicators              |
+| `quantedge-ta`     | `0.18.1`      | pre-publish   | Streaming technical analysis indicators              |
 | `quantedge-core`   | —             | planned       | Shared structs, traits, and public interfaces        |
 | `quantedge-engine` | —             | planned       | Streaming runtime — event loop, multi-TF state, execution |
 | `quantedge-sim`    | —             | planned       | Backtester and forward-tester with honest fill models |

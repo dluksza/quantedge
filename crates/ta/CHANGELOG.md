@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.18.1] - 2026-04-21
+
+### Changed
+
+- Repository migrated to the `dluksza/quantedge` monorepo. Crate sources now live at `crates/ta/` and `Cargo.toml` inherits `edition`, `rust-version`, `license`, `repository`, and `authors` from the workspace. No library code, API, or behavior changes — published crate metadata is identical to 0.18.0.
+
 ## [0.18.0] - 2026-04-18
 
 ### Added
@@ -193,22 +199,23 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
-[0.18.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.18.0
-[0.17.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.17.0
-[0.16.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.1
-[0.16.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.16.0
-[0.15.1]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.15.1
-[0.14.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.14.0
-[0.13.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.13.0
-[0.12.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.12.0
-[0.11.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.11.0
-[0.10.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.10.0
-[0.9.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.9.0
-[0.8.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.8.0
-[0.7.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.7.0
-[0.6.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.6.0
-[0.5.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.5.0
-[0.4.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.4.0
-[0.3.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.3.0
-[0.2.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.2.0
-[0.1.0]: https://github.com/dluksza/quantedge-ta/releases/tag/v0.1.0
+[0.18.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.18.1
+[0.18.0]: https://github.com/dluksza/quantedge/releases/tag/v0.18.0
+[0.17.0]: https://github.com/dluksza/quantedge/releases/tag/v0.17.0
+[0.16.1]: https://github.com/dluksza/quantedge/releases/tag/v0.16.1
+[0.16.0]: https://github.com/dluksza/quantedge/releases/tag/v0.16.0
+[0.15.1]: https://github.com/dluksza/quantedge/releases/tag/v0.15.1
+[0.14.0]: https://github.com/dluksza/quantedge/releases/tag/v0.14.0
+[0.13.0]: https://github.com/dluksza/quantedge/releases/tag/v0.13.0
+[0.12.0]: https://github.com/dluksza/quantedge/releases/tag/v0.12.0
+[0.11.0]: https://github.com/dluksza/quantedge/releases/tag/v0.11.0
+[0.10.0]: https://github.com/dluksza/quantedge/releases/tag/v0.10.0
+[0.9.0]: https://github.com/dluksza/quantedge/releases/tag/v0.9.0
+[0.8.0]: https://github.com/dluksza/quantedge/releases/tag/v0.8.0
+[0.7.0]: https://github.com/dluksza/quantedge/releases/tag/v0.7.0
+[0.6.0]: https://github.com/dluksza/quantedge/releases/tag/v0.6.0
+[0.5.0]: https://github.com/dluksza/quantedge/releases/tag/v0.5.0
+[0.4.0]: https://github.com/dluksza/quantedge/releases/tag/v0.4.0
+[0.3.0]: https://github.com/dluksza/quantedge/releases/tag/v0.3.0
+[0.2.0]: https://github.com/dluksza/quantedge/releases/tag/v0.2.0
+[0.1.0]: https://github.com/dluksza/quantedge/releases/tag/v0.1.0
