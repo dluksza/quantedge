@@ -1,0 +1,7 @@
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: quantedge-ta
+      paths:
+        - crates/ta/
