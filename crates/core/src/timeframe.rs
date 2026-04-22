@@ -120,7 +120,7 @@ impl Timeframe {
 
     /// Constructs a [`Timeframe`] from a `count` and `unit`, canonicalizing
     /// where possible: `60s -> 1 minute`, `60min -> 1 hour`, `24h -> 1 day`,
-    /// `7d -> 1 week`. Rules apply recursively.
+    /// `7d -> 1 week`, `12M -> 1 year`. Rules apply recursively.
     // Each `NonZero::new(n / k).expect("always positive")` is guarded by the
     // preceding `n.is_multiple_of(k)` arm, which for `n >= 1` and `k >= 2`
     // guarantees `n / k >= 1`, the `.expect` is unreachable.
@@ -145,6 +145,10 @@ impl Timeframe {
             TimeUnit::Day if n.is_multiple_of(7) => Self::new(
                 NonZero::new(n / 7).expect("always positive"),
                 TimeUnit::Week,
+            ),
+            TimeUnit::Month if n.is_multiple_of(12) => Self::new(
+                NonZero::new(n / 12).expect("always positive"),
+                TimeUnit::Year,
             ),
             TimeUnit::Second => Self {
                 count,
@@ -611,6 +615,12 @@ mod tests {
         // 168 hours canonicalizes to 1 week.
         let tf = Timeframe::new(NonZero::new(168).unwrap(), TimeUnit::Hour);
         assert_eq!(tf.to_string(), "1w");
+        // 12 months canonicalizes to 1 year.
+        let tf = Timeframe::new(NonZero::new(12).unwrap(), TimeUnit::Month);
+        assert_eq!(tf.to_string(), "1Y");
+        // 24 months canonicalizes to 2 years.
+        let tf = Timeframe::new(NonZero::new(24).unwrap(), TimeUnit::Month);
+        assert_eq!(tf.to_string(), "2Y");
     }
 
     fn parse(s: &str) -> u64 {
