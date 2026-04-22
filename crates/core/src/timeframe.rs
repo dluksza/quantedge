@@ -49,6 +49,13 @@ pub enum TimeUnit {
 pub struct Timeframe {
     unit: TimeUnit,
     count: NonZero<u64>,
+    // Pre-computed dispatch value, set in `new`:
+    // - Fixed units (Second..Week): period in μs (`count * unit_micros`).
+    // - Month: `count`.
+    // - Year:  `count * 12` (total months).
+    // Dual-purpose to keep the struct at one cache line and remove
+    // the per-call multiplication in the hot path.
+    period: u64,
 }
 
 const SEC_IN_MICROS: u64 = 1_000_000;
@@ -122,20 +129,48 @@ impl Timeframe {
             TimeUnit::Second if n % 60 == 0 => {
                 Self::new(NonZero::new(n / 60).unwrap(), TimeUnit::Minute)
             }
-            TimeUnit::Second => Self { count, unit },
             TimeUnit::Minute if n % 60 == 0 => {
                 Self::new(NonZero::new(n / 60).unwrap(), TimeUnit::Hour)
             }
-            TimeUnit::Minute => Self { count, unit },
             TimeUnit::Hour if n % 24 == 0 => {
                 Self::new(NonZero::new(n / 24).unwrap(), TimeUnit::Day)
             }
-            TimeUnit::Hour => Self { count, unit },
-            TimeUnit::Day if n % 7 == 0 => Self {
-                count: NonZero::new(n / 7).unwrap(),
-                unit: TimeUnit::Week,
+            TimeUnit::Day if n % 7 == 0 => Self::new(NonZero::new(n / 7).unwrap(), TimeUnit::Week),
+            TimeUnit::Second => Self {
+                count,
+                unit,
+                period: n * SEC_IN_MICROS,
             },
-            _ => Self { count, unit },
+            TimeUnit::Minute => Self {
+                count,
+                unit,
+                period: n * MIN_IN_MICROS,
+            },
+            TimeUnit::Hour => Self {
+                count,
+                unit,
+                period: n * HOUR_IN_MICROS,
+            },
+            TimeUnit::Day => Self {
+                count,
+                unit,
+                period: n * DAY_IN_MICROS,
+            },
+            TimeUnit::Week => Self {
+                count,
+                unit,
+                period: n * WEEK_IN_MICROS,
+            },
+            TimeUnit::Month => Self {
+                count,
+                unit,
+                period: n,
+            },
+            TimeUnit::Year => Self {
+                count,
+                unit,
+                period: n * 12,
+            },
         }
     }
 
@@ -161,19 +196,22 @@ impl Timeframe {
     /// Start of the bar period containing `timestamp` (inclusive).
     ///
     /// Idempotent: `open_time(open_time(t)) == open_time(t)`.
+    ///
+    /// If you need both [`open_time`](Self::open_time) and
+    /// [`close_time`](Self::close_time) for the same `timestamp`, prefer
+    /// [`bounds`](Self::bounds), it shares work between the two.
     #[must_use]
     pub fn open_time(&self, timestamp: Timestamp) -> Timestamp {
-        let count = self.count.get() as u32;
-
         match self.unit {
-            TimeUnit::Second => self.open_time_epoch_aligned(SEC_IN_MICROS, timestamp),
-            TimeUnit::Minute => self.open_time_epoch_aligned(MIN_IN_MICROS, timestamp),
-            TimeUnit::Hour => self.open_time_epoch_aligned(HOUR_IN_MICROS, timestamp),
-            TimeUnit::Day => self.open_time_monday_aligned(DAY_IN_MICROS, timestamp),
-            TimeUnit::Week => self.open_time_monday_aligned(WEEK_IN_MICROS, timestamp),
-            TimeUnit::Month if count == 1 => month_start_micros(timestamp),
-            TimeUnit::Month => n_month_start_micros(timestamp, count),
-            TimeUnit::Year => n_month_start_micros(timestamp, count * 12),
+            TimeUnit::Second | TimeUnit::Minute | TimeUnit::Hour => {
+                timestamp - timestamp % self.period
+            }
+            TimeUnit::Day | TimeUnit::Week => {
+                let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
+                shifted - shifted % self.period + EPOCH_TO_MONDAY_OFFSET
+            }
+            TimeUnit::Month if self.period == 1 => month_start_micros(timestamp),
+            TimeUnit::Month | TimeUnit::Year => n_month_start_micros(timestamp, self.period as u32),
         }
     }
 
@@ -183,46 +221,49 @@ impl Timeframe {
     /// `close_time(t) + 1` equals the [`open_time`](Self::open_time) of the
     /// next period, so adjacent bars form a contiguous, non-overlapping cover
     /// of the timeline.
+    ///
+    /// If you need both [`open_time`](Self::open_time) and
+    /// [`close_time`](Self::close_time) for the same `timestamp`, prefer
+    /// [`bounds`](Self::bounds), it shares work between the two.
     #[must_use]
     pub fn close_time(&self, timestamp: Timestamp) -> Timestamp {
-        let count = self.count.get() as u32;
-
         match self.unit {
-            TimeUnit::Second => self.close_time_epoch_aligned(SEC_IN_MICROS, timestamp),
-            TimeUnit::Minute => self.close_time_epoch_aligned(MIN_IN_MICROS, timestamp),
-            TimeUnit::Hour => self.close_time_epoch_aligned(HOUR_IN_MICROS, timestamp),
-            TimeUnit::Day => self.close_time_monday_aligned(DAY_IN_MICROS, timestamp),
-            TimeUnit::Week => self.close_time_monday_aligned(WEEK_IN_MICROS, timestamp),
-            TimeUnit::Month if count == 1 => month_close_micros(timestamp),
-            TimeUnit::Month => n_month_close_micros(timestamp, count),
-            TimeUnit::Year => n_month_close_micros(timestamp, count * 12),
+            TimeUnit::Second | TimeUnit::Minute | TimeUnit::Hour => {
+                timestamp - timestamp % self.period + self.period - 1
+            }
+            TimeUnit::Day | TimeUnit::Week => {
+                let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
+                shifted - shifted % self.period + self.period - 1 + EPOCH_TO_MONDAY_OFFSET
+            }
+            TimeUnit::Month if self.period == 1 => month_close_micros(timestamp),
+            TimeUnit::Month | TimeUnit::Year => n_month_close_micros(timestamp, self.period as u32),
         }
     }
 
-    fn open_time_epoch_aligned(&self, unit_micros: u64, timestamp: Timestamp) -> Timestamp {
-        let period = self.count.get() * unit_micros;
-
-        timestamp - timestamp % period
-    }
-
-    fn open_time_monday_aligned(&self, unit_micros: u64, timestamp: Timestamp) -> Timestamp {
-        let period = self.count.get() * unit_micros;
-        let timestamp = timestamp - EPOCH_TO_MONDAY_OFFSET;
-
-        timestamp - timestamp % period + EPOCH_TO_MONDAY_OFFSET
-    }
-
-    fn close_time_epoch_aligned(&self, unit_micros: u64, timestamp: Timestamp) -> Timestamp {
-        let period = self.count.get() * unit_micros;
-
-        timestamp - timestamp % period + period - 1
-    }
-
-    fn close_time_monday_aligned(&self, unit_micros: u64, timestamp: Timestamp) -> Timestamp {
-        let period = self.count.get() * unit_micros;
-        let timestamp = timestamp - EPOCH_TO_MONDAY_OFFSET;
-
-        timestamp - timestamp % period + period - 1 + EPOCH_TO_MONDAY_OFFSET
+    /// Returns `(open_time, close_time)` for the period containing `timestamp`,
+    /// sharing computation between the two.
+    ///
+    /// For uniform units (Second..Week) the modulo is computed once. For
+    /// [`Month`](TimeUnit::Month) and [`Year`](TimeUnit::Year) the
+    /// `civil_from_days` forward pass is shared, meaningful when the same
+    /// `timestamp` is mapped to many timeframes per tick.
+    #[must_use]
+    pub fn bounds(&self, timestamp: Timestamp) -> (Timestamp, Timestamp) {
+        match self.unit {
+            TimeUnit::Second | TimeUnit::Minute | TimeUnit::Hour => {
+                let open = timestamp - timestamp % self.period;
+                (open, open + self.period - 1)
+            }
+            TimeUnit::Day | TimeUnit::Week => {
+                let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
+                let open = shifted - shifted % self.period + EPOCH_TO_MONDAY_OFFSET;
+                (open, open + self.period - 1)
+            }
+            TimeUnit::Month if self.period == 1 => month_bounds_micros(timestamp),
+            TimeUnit::Month | TimeUnit::Year => {
+                n_month_bounds_micros(timestamp, self.period as u32)
+            }
+        }
     }
 }
 
@@ -258,6 +299,7 @@ fn civil_from_days_core(ts: Timestamp) -> (u32, u32, u32) {
 /// The reverse `days_from_civil` pass is skipped: `(153*mp + 2) / 5` is
 /// exactly the `doy − d + 1` term baked into `civil_from_days`, giving
 /// start-of-month day-of-year directly.
+#[inline]
 fn month_start_parts(ts: Timestamp) -> (u32, u32, u32) {
     let (era, yoe, mp) = civil_from_days_core(ts);
     let som_doy = (153 * mp + 2) / 5;
@@ -269,10 +311,12 @@ fn month_start_parts(ts: Timestamp) -> (u32, u32, u32) {
     (som_z, mp, civil_year_feb)
 }
 
+#[inline]
 fn is_leap(year: u32) -> bool {
     (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
 }
 
+#[inline]
 fn month_length(mp: u32, civil_year_feb: u32) -> u32 {
     MONTH_LEN[mp as usize]
         + if mp == 11 && is_leap(civil_year_feb) {
@@ -282,12 +326,14 @@ fn month_length(mp: u32, civil_year_feb: u32) -> u32 {
         }
 }
 
+#[inline]
 fn month_start_micros(ts: Timestamp) -> Timestamp {
     let (som_z, _, _) = month_start_parts(ts);
 
     (som_z as u64) * DAY_IN_MICROS
 }
 
+#[inline]
 fn month_close_micros(ts: Timestamp) -> Timestamp {
     let (som_z, mp, civil_year_feb) = month_start_parts(ts);
     let len = month_length(mp, civil_year_feb);
@@ -295,7 +341,20 @@ fn month_close_micros(ts: Timestamp) -> Timestamp {
     (som_z as u64 + len as u64) * DAY_IN_MICROS - 1
 }
 
+/// Combined `(open, close)` for the calendar month containing `ts`.
+/// Shares the `civil_from_days` forward pass between both halves.
+#[inline]
+fn month_bounds_micros(ts: Timestamp) -> (Timestamp, Timestamp) {
+    let (som_z, mp, civil_year_feb) = month_start_parts(ts);
+    let len = month_length(mp, civil_year_feb);
+    let open = (som_z as u64) * DAY_IN_MICROS;
+    let close = (som_z as u64 + len as u64) * DAY_IN_MICROS - 1;
+
+    (open, close)
+}
+
 /// Civil `(year, month_1_indexed)` containing `ts`.
+#[inline]
 fn civil_year_month(ts: Timestamp) -> (u32, u32) {
     let (era, yoe, mp) = civil_from_days_core(ts);
     let m = if mp < 10 { mp + 3 } else { mp - 9 };
@@ -307,6 +366,7 @@ fn civil_year_month(ts: Timestamp) -> (u32, u32) {
 /// Days since Unix epoch for the 1st of `(year, month)`. Hinnant's
 /// `days_from_civil` with `d = 1` folded into the formula. Requires
 /// `year >= 1970`.
+#[inline]
 fn days_from_civil_month_start(y: u32, m: u32) -> u32 {
     let ay = y - if m <= 2 { 1 } else { 0 };
     let era = ay / 400;
@@ -322,6 +382,7 @@ fn days_from_civil_month_start(y: u32, m: u32) -> u32 {
 /// and `(next_year, next_month)` of the N-month period containing `ts`.
 /// Aligned on months-since-1970-01 mod N. For N dividing 12, matches
 /// calendar-year-anchored quarters/halves.
+#[inline]
 fn n_month_period(ts: Timestamp, n: u32) -> (u32, u32, u32, u32) {
     let (y, m) = civil_year_month(ts);
     let mse = (y - 1970) * 12 + (m - 1);
@@ -335,16 +396,30 @@ fn n_month_period(ts: Timestamp, n: u32) -> (u32, u32, u32, u32) {
     (sy, sm, ny, nm)
 }
 
+#[inline]
 fn n_month_start_micros(ts: Timestamp, n: u32) -> Timestamp {
     let (sy, sm, _, _) = n_month_period(ts, n);
 
     days_from_civil_month_start(sy, sm) as u64 * DAY_IN_MICROS
 }
 
+#[inline]
 fn n_month_close_micros(ts: Timestamp, n: u32) -> Timestamp {
     let (_, _, ny, nm) = n_month_period(ts, n);
 
     days_from_civil_month_start(ny, nm) as u64 * DAY_IN_MICROS - 1
+}
+
+/// Combined `(open, close)` for the N-month period containing `ts`. Shares
+/// the forward Hinnant pass that `n_month_period` runs internally — saves
+/// one `civil_from_days` pass vs. calling `_start` and `_close` separately.
+#[inline]
+fn n_month_bounds_micros(ts: Timestamp, n: u32) -> (Timestamp, Timestamp) {
+    let (sy, sm, ny, nm) = n_month_period(ts, n);
+    let open = days_from_civil_month_start(sy, sm) as u64 * DAY_IN_MICROS;
+    let close = days_from_civil_month_start(ny, nm) as u64 * DAY_IN_MICROS - 1;
+
+    (open, close)
 }
 
 #[cfg(test)]
@@ -408,15 +483,16 @@ mod tests {
     fn boundaries() {
         for &(tf, input, open, close) in CASES {
             let t = parse(input);
+            let expected = (parse(open), parse(close));
             assert_eq!(
-                tf.open_time(t),
-                parse(open),
-                "open_time mismatch: tf={tf:?} input={input}"
+                (tf.open_time(t), tf.close_time(t)),
+                expected,
+                "open/close mismatch: tf={tf:?} input={input}"
             );
             assert_eq!(
-                tf.close_time(t),
-                parse(close),
-                "close_time mismatch: tf={tf:?} input={input}"
+                tf.bounds(t),
+                expected,
+                "bounds mismatch: tf={tf:?} input={input}"
             );
         }
     }
