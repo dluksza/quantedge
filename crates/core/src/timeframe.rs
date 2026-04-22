@@ -301,6 +301,7 @@ impl Timeframe {
     #[inline]
     #[allow(clippy::cast_possible_truncation)]
     fn period_months(&self) -> u32 {
+        debug_assert!(u32::try_from(self.period).is_ok());
         self.period as u32
     }
 }
