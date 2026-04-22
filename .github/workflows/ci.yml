@@ -88,10 +88,17 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - run: cargo llvm-cov --locked nextest -p quantedge-ta --all-features --lcov --output-path lcov.info
+      - run: cargo llvm-cov --locked nextest -p quantedge-core --all-features --lcov --output-path lcov-core.info
       - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: lcov.info
+          files: lcov-core.info
+          flags: quantedge-core
+          fail_ci_if_error: false
+      - run: cargo llvm-cov --locked nextest -p quantedge-ta --all-features --lcov --output-path lcov-ta.info
+      - uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov-ta.info
           flags: quantedge-ta
           fail_ci_if_error: false
