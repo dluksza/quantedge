@@ -6,7 +6,7 @@
 //! [`close_time`](Timeframe::close_time) for the last μs before the
 //! next bar starts.
 
-use std::num::NonZero;
+use std::{fmt, num::NonZero};
 
 use crate::Timestamp;
 
@@ -264,6 +264,23 @@ impl Timeframe {
                 n_month_bounds_micros(timestamp, self.period as u32)
             }
         }
+    }
+}
+
+/// Binance-style compact notation: `5m`, `1h`, `1d`, `1w`, `3M`, `1Y`.
+/// Uppercase `M`/`Y` disambiguate month/year from minute.
+impl fmt::Display for Timeframe {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let suffix = match self.unit {
+            TimeUnit::Second => 's',
+            TimeUnit::Minute => 'm',
+            TimeUnit::Hour => 'h',
+            TimeUnit::Day => 'd',
+            TimeUnit::Week => 'w',
+            TimeUnit::Month => 'M',
+            TimeUnit::Year => 'Y',
+        };
+        write!(f, "{}{}", self.count.get(), suffix)
     }
 }
 
@@ -534,6 +551,29 @@ mod tests {
             Timeframe::MONTH_1.open_time(1_745_798_400_000_000),
             1_743_465_600_000_000
         );
+    }
+
+    #[test]
+    fn display_covers_every_unit() {
+        assert_eq!(Timeframe::SEC_5.to_string(), "5s");
+        assert_eq!(Timeframe::MIN_1.to_string(), "1m");
+        assert_eq!(Timeframe::MIN_15.to_string(), "15m");
+        assert_eq!(Timeframe::HOUR_4.to_string(), "4h");
+        assert_eq!(Timeframe::DAY_1.to_string(), "1d");
+        assert_eq!(Timeframe::WEEK_1.to_string(), "1w");
+        assert_eq!(Timeframe::MONTH_1.to_string(), "1M");
+        assert_eq!(Timeframe::MONTH_3.to_string(), "3M");
+        assert_eq!(Timeframe::YEAR_1.to_string(), "1Y");
+    }
+
+    #[test]
+    fn display_reflects_canonicalization() {
+        // 120 seconds canonicalizes to 2 minutes.
+        let tf = Timeframe::new(NonZero::new(120).unwrap(), TimeUnit::Second);
+        assert_eq!(tf.to_string(), "2m");
+        // 168 hours canonicalizes to 1 week.
+        let tf = Timeframe::new(NonZero::new(168).unwrap(), TimeUnit::Hour);
+        assert_eq!(tf.to_string(), "1w");
     }
 
     fn parse(s: &str) -> u64 {
