@@ -8,7 +8,7 @@
 
 Core types shared across the [quantedge](https://github.com/dluksza/quantedge) crates.
 
-Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases so downstream crates can share a single bar abstraction without depending on the full indicator library.
+Defines the `Ohlcv` bar trait, its `Price` and `Timestamp` aliases, and the `Timeframe` type for bar boundary alignment, so downstream crates can share a single bar abstraction without depending on the full indicator library.
 
 ## Features
 
@@ -16,15 +16,23 @@ Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases so downstr
 
 Implement `Ohlcv` on your existing kline/candle type to feed it into any consumer crate without per-tick conversion. `volume()` has a default implementation for data sources that don't provide it.
 
-### Zero dependencies
+### Bar timeframes
 
-No runtime dependencies. Pure type definitions.
+`Timeframe` maps a Unix-μs timestamp to bar boundaries: `open_time` returns the start of the containing period, `close_time` the last μs before the next period starts. Adjacent bars form a contiguous cover of the timeline (`close_time(t) + 1 == open_time` of the next period). Use `bounds(t)` to get both at once, it shares computation between the two halves, worth ~30% for monthly/yearly dispatch.
+
+Handles second-through-year units with calendar-correct month and year arithmetic, using Howard Hinnant's [`civil_from_days`](https://howardhinnant.github.io/date_algorithms.html) — no `chrono` at runtime. Multi-month periods are epoch-anchored from January 1970, matching calendar quarters (`MONTH_3`) and halves (`MONTH_6`) for any N dividing 12.
+
+### Zero runtime dependencies
+
+Pure Rust, no runtime deps.
 
 ### WASM compatible
 
 Compiles for `wasm32-unknown-unknown` and `wasm32-wasip1`. No filesystem or OS calls.
 
 ## Usage
+
+### Ohlcv
 
 ```rust
 use quantedge_core::{Ohlcv, Price, Timestamp};
@@ -45,6 +53,23 @@ impl Ohlcv for MyKline {
     fn open_time(&self) -> Timestamp { self.open_time }
     // fn volume(&self) -> f64 { 0.0 }  -- default, override when volume is required
 }
+```
+
+### Timeframe
+
+```rust
+use quantedge_core::Timeframe;
+
+let ts = 1_745_798_730_123_000; // Mon Apr 28 2025 00:05:30.123 UTC
+
+let (open, close) = Timeframe::HOUR_1.bounds(ts);
+// open  == 1_745_798_400_000_000  (00:00:00)
+// close == 1_745_801_999_999_999  (00:59:59.999999)
+
+// Constants for common bar sizes: SEC_*, MIN_*, HOUR_*, DAY_*,
+// WEEK_1, MONTH_{1,2,3,6}, YEAR_1. Build any (count, unit) pair
+// via `Timeframe::new(NonZero::new(n).unwrap(), TimeUnit::X)`;
+// canonicalizes `60s → 1 minute`, `7d → 1 week`, etc.
 ```
 
 ### Bar boundaries
