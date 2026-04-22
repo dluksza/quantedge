@@ -210,6 +210,11 @@ impl Timeframe {
     /// If you need both [`open_time`](Self::open_time) and
     /// [`close_time`](Self::close_time) for the same `timestamp`, prefer
     /// [`bounds`](Self::bounds), it shares work between the two.
+    ///
+    /// # Precondition
+    /// Day/Week paths require `timestamp >= EPOCH_TO_MONDAY_OFFSET`
+    /// (Jan 5 1970 00:00 UTC). Earlier timestamps underflow `u64`;
+    /// checked in debug, wraps in release.
     #[must_use]
     pub fn open_time(&self, timestamp: Timestamp) -> Timestamp {
         match self.unit {
@@ -217,6 +222,7 @@ impl Timeframe {
                 timestamp - timestamp % self.period
             }
             TimeUnit::Day | TimeUnit::Week => {
+                debug_assert!(timestamp >= EPOCH_TO_MONDAY_OFFSET);
                 let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
                 shifted - shifted % self.period + EPOCH_TO_MONDAY_OFFSET
             }
@@ -237,6 +243,9 @@ impl Timeframe {
     /// If you need both [`open_time`](Self::open_time) and
     /// [`close_time`](Self::close_time) for the same `timestamp`, prefer
     /// [`bounds`](Self::bounds), it shares work between the two.
+    ///
+    /// # Precondition
+    /// Same as [`open_time`](Self::open_time).
     #[must_use]
     pub fn close_time(&self, timestamp: Timestamp) -> Timestamp {
         match self.unit {
@@ -244,6 +253,7 @@ impl Timeframe {
                 timestamp - timestamp % self.period + self.period - 1
             }
             TimeUnit::Day | TimeUnit::Week => {
+                debug_assert!(timestamp >= EPOCH_TO_MONDAY_OFFSET);
                 let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
                 shifted - shifted % self.period + self.period - 1 + EPOCH_TO_MONDAY_OFFSET
             }
@@ -261,6 +271,9 @@ impl Timeframe {
     /// [`Month`](TimeUnit::Month) and [`Year`](TimeUnit::Year) the
     /// `civil_from_days` forward pass is shared, meaningful when the same
     /// `timestamp` is mapped to many timeframes per tick.
+    ///
+    /// # Precondition
+    /// Same as [`open_time`](Self::open_time).
     #[must_use]
     pub fn bounds(&self, timestamp: Timestamp) -> (Timestamp, Timestamp) {
         match self.unit {
@@ -269,6 +282,7 @@ impl Timeframe {
                 (open, open + self.period - 1)
             }
             TimeUnit::Day | TimeUnit::Week => {
+                debug_assert!(timestamp >= EPOCH_TO_MONDAY_OFFSET);
                 let shifted = timestamp - EPOCH_TO_MONDAY_OFFSET;
                 let open = shifted - shifted % self.period + EPOCH_TO_MONDAY_OFFSET;
                 (open, open + self.period - 1)
