@@ -62,6 +62,8 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@wasmtime
+      - run: cargo build --locked -p quantedge-core --lib --target wasm32-unknown-unknown
+      - run: cargo test --locked -p quantedge-core --target wasm32-wasip1
       - run: cargo build --locked -p quantedge-ta --lib --target wasm32-unknown-unknown
       - run: cargo test --locked -p quantedge-ta --target wasm32-wasip1
 
