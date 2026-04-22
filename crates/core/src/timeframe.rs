@@ -121,21 +121,31 @@ impl Timeframe {
     /// Constructs a [`Timeframe`] from a `count` and `unit`, canonicalizing
     /// where possible: `60s -> 1 minute`, `60min -> 1 hour`, `24h -> 1 day`,
     /// `7d -> 1 week`. Rules apply recursively.
+    // Each `NonZero::new(n / k).expect("always positive")` is guarded by the
+    // preceding `n.is_multiple_of(k)` arm, which for `n >= 1` and `k >= 2`
+    // guarantees `n / k >= 1`, the `.expect` is unreachable.
+    #[allow(clippy::missing_panics_doc)]
     #[must_use]
     pub const fn new(count: NonZero<u64>, unit: TimeUnit) -> Self {
         let n = count.get();
 
         match unit {
-            TimeUnit::Second if n % 60 == 0 => {
-                Self::new(NonZero::new(n / 60).unwrap(), TimeUnit::Minute)
-            }
-            TimeUnit::Minute if n % 60 == 0 => {
-                Self::new(NonZero::new(n / 60).unwrap(), TimeUnit::Hour)
-            }
-            TimeUnit::Hour if n % 24 == 0 => {
-                Self::new(NonZero::new(n / 24).unwrap(), TimeUnit::Day)
-            }
-            TimeUnit::Day if n % 7 == 0 => Self::new(NonZero::new(n / 7).unwrap(), TimeUnit::Week),
+            TimeUnit::Second if n.is_multiple_of(60) => Self::new(
+                NonZero::new(n / 60).expect("always positive"),
+                TimeUnit::Minute,
+            ),
+            TimeUnit::Minute if n.is_multiple_of(60) => Self::new(
+                NonZero::new(n / 60).expect("always positive"),
+                TimeUnit::Hour,
+            ),
+            TimeUnit::Hour if n.is_multiple_of(24) => Self::new(
+                NonZero::new(n / 24).expect("always positive"),
+                TimeUnit::Day,
+            ),
+            TimeUnit::Day if n.is_multiple_of(7) => Self::new(
+                NonZero::new(n / 7).expect("always positive"),
+                TimeUnit::Week,
+            ),
             TimeUnit::Second => Self {
                 count,
                 unit,
@@ -211,7 +221,9 @@ impl Timeframe {
                 shifted - shifted % self.period + EPOCH_TO_MONDAY_OFFSET
             }
             TimeUnit::Month if self.period == 1 => month_start_micros(timestamp),
-            TimeUnit::Month | TimeUnit::Year => n_month_start_micros(timestamp, self.period as u32),
+            TimeUnit::Month | TimeUnit::Year => {
+                n_month_start_micros(timestamp, self.period_months())
+            }
         }
     }
 
@@ -236,7 +248,9 @@ impl Timeframe {
                 shifted - shifted % self.period + self.period - 1 + EPOCH_TO_MONDAY_OFFSET
             }
             TimeUnit::Month if self.period == 1 => month_close_micros(timestamp),
-            TimeUnit::Month | TimeUnit::Year => n_month_close_micros(timestamp, self.period as u32),
+            TimeUnit::Month | TimeUnit::Year => {
+                n_month_close_micros(timestamp, self.period_months())
+            }
         }
     }
 
@@ -261,9 +275,19 @@ impl Timeframe {
             }
             TimeUnit::Month if self.period == 1 => month_bounds_micros(timestamp),
             TimeUnit::Month | TimeUnit::Year => {
-                n_month_bounds_micros(timestamp, self.period as u32)
+                n_month_bounds_micros(timestamp, self.period_months())
             }
         }
+    }
+
+    /// Narrows `self.period` (total months for Month/Year) to `u32` for the
+    /// Hinnant helpers. Realistic counts are small (<= 12 per unit); any
+    /// pathological caller passing `count > u32::MAX / 12` would get garbage,
+    /// but never UB.
+    #[inline]
+    #[allow(clippy::cast_possible_truncation)]
+    fn period_months(&self) -> u32 {
+        self.period as u32
     }
 }
 
@@ -316,6 +340,9 @@ fn civil_from_days_core(ts: Timestamp) -> (u32, u32, u32) {
 /// The reverse `days_from_civil` pass is skipped: `(153*mp + 2) / 5` is
 /// exactly the `doy − d + 1` term baked into `civil_from_days`, giving
 /// start-of-month day-of-year directly.
+// `som_doe` (day-of-era) vs `som_doy` (day-of-year) are Hinnant's canonical
+// names — renaming them away from the paper harms readability.
+#[allow(clippy::similar_names)]
 #[inline]
 fn month_start_parts(ts: Timestamp) -> (u32, u32, u32) {
     let (era, yoe, mp) = civil_from_days_core(ts);
@@ -330,24 +357,19 @@ fn month_start_parts(ts: Timestamp) -> (u32, u32, u32) {
 
 #[inline]
 fn is_leap(year: u32) -> bool {
-    (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+    (year.is_multiple_of(4) && !year.is_multiple_of(100)) || year.is_multiple_of(400)
 }
 
 #[inline]
 fn month_length(mp: u32, civil_year_feb: u32) -> u32 {
-    MONTH_LEN[mp as usize]
-        + if mp == 11 && is_leap(civil_year_feb) {
-            1
-        } else {
-            0
-        }
+    MONTH_LEN[mp as usize] + u32::from(mp == 11 && is_leap(civil_year_feb))
 }
 
 #[inline]
 fn month_start_micros(ts: Timestamp) -> Timestamp {
     let (som_z, _, _) = month_start_parts(ts);
 
-    (som_z as u64) * DAY_IN_MICROS
+    u64::from(som_z) * DAY_IN_MICROS
 }
 
 #[inline]
@@ -355,7 +377,7 @@ fn month_close_micros(ts: Timestamp) -> Timestamp {
     let (som_z, mp, civil_year_feb) = month_start_parts(ts);
     let len = month_length(mp, civil_year_feb);
 
-    (som_z as u64 + len as u64) * DAY_IN_MICROS - 1
+    (u64::from(som_z) + u64::from(len)) * DAY_IN_MICROS - 1
 }
 
 /// Combined `(open, close)` for the calendar month containing `ts`.
@@ -364,8 +386,8 @@ fn month_close_micros(ts: Timestamp) -> Timestamp {
 fn month_bounds_micros(ts: Timestamp) -> (Timestamp, Timestamp) {
     let (som_z, mp, civil_year_feb) = month_start_parts(ts);
     let len = month_length(mp, civil_year_feb);
-    let open = (som_z as u64) * DAY_IN_MICROS;
-    let close = (som_z as u64 + len as u64) * DAY_IN_MICROS - 1;
+    let open = u64::from(som_z) * DAY_IN_MICROS;
+    let close = (u64::from(som_z) + u64::from(len)) * DAY_IN_MICROS - 1;
 
     (open, close)
 }
@@ -375,7 +397,7 @@ fn month_bounds_micros(ts: Timestamp) -> (Timestamp, Timestamp) {
 fn civil_year_month(ts: Timestamp) -> (u32, u32) {
     let (era, yoe, mp) = civil_from_days_core(ts);
     let m = if mp < 10 { mp + 3 } else { mp - 9 };
-    let y = yoe + era * 400 + if m <= 2 { 1 } else { 0 };
+    let y = yoe + era * 400 + u32::from(m <= 2);
 
     (y, m)
 }
@@ -385,7 +407,7 @@ fn civil_year_month(ts: Timestamp) -> (u32, u32) {
 /// `year >= 1970`.
 #[inline]
 fn days_from_civil_month_start(y: u32, m: u32) -> u32 {
-    let ay = y - if m <= 2 { 1 } else { 0 };
+    let ay = y - u32::from(m <= 2);
     let era = ay / 400;
     let yoe = ay - era * 400;
     let mp = if m > 2 { m - 3 } else { m + 9 };
@@ -417,14 +439,14 @@ fn n_month_period(ts: Timestamp, n: u32) -> (u32, u32, u32, u32) {
 fn n_month_start_micros(ts: Timestamp, n: u32) -> Timestamp {
     let (sy, sm, _, _) = n_month_period(ts, n);
 
-    days_from_civil_month_start(sy, sm) as u64 * DAY_IN_MICROS
+    u64::from(days_from_civil_month_start(sy, sm)) * DAY_IN_MICROS
 }
 
 #[inline]
 fn n_month_close_micros(ts: Timestamp, n: u32) -> Timestamp {
     let (_, _, ny, nm) = n_month_period(ts, n);
 
-    days_from_civil_month_start(ny, nm) as u64 * DAY_IN_MICROS - 1
+    u64::from(days_from_civil_month_start(ny, nm)) * DAY_IN_MICROS - 1
 }
 
 /// Combined `(open, close)` for the N-month period containing `ts`. Shares
@@ -433,8 +455,8 @@ fn n_month_close_micros(ts: Timestamp, n: u32) -> Timestamp {
 #[inline]
 fn n_month_bounds_micros(ts: Timestamp, n: u32) -> (Timestamp, Timestamp) {
     let (sy, sm, ny, nm) = n_month_period(ts, n);
-    let open = days_from_civil_month_start(sy, sm) as u64 * DAY_IN_MICROS;
-    let close = days_from_civil_month_start(ny, nm) as u64 * DAY_IN_MICROS - 1;
+    let open = u64::from(days_from_civil_month_start(sy, sm)) * DAY_IN_MICROS;
+    let close = u64::from(days_from_civil_month_start(ny, nm)) * DAY_IN_MICROS - 1;
 
     (open, close)
 }
@@ -577,6 +599,9 @@ mod tests {
     }
 
     fn parse(s: &str) -> u64 {
-        DateTime::parse_from_rfc3339(s).unwrap().timestamp_micros() as u64
+        DateTime::parse_from_rfc3339(s)
+            .unwrap()
+            .timestamp_micros()
+            .cast_unsigned()
     }
 }

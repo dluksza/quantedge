@@ -53,7 +53,7 @@ fn bench_open_time(c: &mut Criterion) {
                 for &t in &ts {
                     black_box(tf.open_time(black_box(t)));
                 }
-            })
+            });
         });
     }
     g.finish();
@@ -70,7 +70,7 @@ fn bench_close_time(c: &mut Criterion) {
                 for &t in &ts {
                     black_box(tf.close_time(black_box(t)));
                 }
-            })
+            });
         });
     }
     g.finish();
@@ -92,7 +92,7 @@ fn bench_fanout(c: &mut Criterion) {
                     black_box(tf.close_time(black_box(t)));
                 }
             }
-        })
+        });
     });
     g.bench_function("bounds", |b| {
         b.iter(|| {
@@ -101,7 +101,7 @@ fn bench_fanout(c: &mut Criterion) {
                     black_box(tf.bounds(black_box(t)));
                 }
             }
-        })
+        });
     });
     g.finish();
 }
