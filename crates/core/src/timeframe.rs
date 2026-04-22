@@ -64,8 +64,8 @@ const HOUR_IN_MICROS: u64 = 60 * MIN_IN_MICROS;
 const DAY_IN_MICROS: u64 = 24 * HOUR_IN_MICROS;
 const WEEK_IN_MICROS: u64 = 7 * DAY_IN_MICROS;
 
-/// Unix epoch (1970-01-01) starts on Thursday, for proper open and close time calulations
-/// for Day and Week based timeframes we need to remove 4 day from the timestamp value.
+/// Unix epoch (1970-01-01) starts on Thursday, for proper open and close time calculations
+/// for Day and Week based timeframes we need to remove 4 days from the timestamp value.
 const EPOCH_TO_MONDAY_OFFSET: u64 = 4 * DAY_IN_MICROS;
 
 impl Timeframe {
