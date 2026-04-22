@@ -5,5 +5,7 @@
 //! it into downstream crates without per-tick conversion.
 
 mod ohlcv;
+mod timeframe;
 
 pub use crate::ohlcv::{Ohlcv, Price, Timestamp};
+pub use crate::timeframe::{TimeUnit, Timeframe};

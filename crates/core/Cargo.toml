@@ -11,5 +11,8 @@ keywords = ["trading", "finance", "ohlcv"]
 categories = ["finance"]
 readme = "README.md"
 
+[dev-dependencies]
+chrono = "^0.4.0"
+
 [lints]
 workspace = true
