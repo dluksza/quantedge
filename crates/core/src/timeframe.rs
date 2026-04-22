@@ -45,7 +45,7 @@ pub enum TimeUnit {
 /// assert_eq!(Timeframe::HOUR_1.open_time(ts),  1_745_798_400_000_000); // 00:00:00
 /// assert_eq!(Timeframe::HOUR_1.close_time(ts), 1_745_801_999_999_999); // 00:59:59.999999
 /// ```
-#[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Timeframe {
     unit: TimeUnit,
     count: NonZero<u64>,
