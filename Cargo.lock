@@ -341,6 +341,7 @@ name = "quantedge-core"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "criterion",
 ]
 
 [[package]]

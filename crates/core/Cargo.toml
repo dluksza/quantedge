@@ -13,6 +13,16 @@ readme = "README.md"
 
 [dev-dependencies]
 chrono = "^0.4.0"
+criterion = { version = "0.8", default-features = false, features = [
+  "html_reports",
+] }
+
+[[bench]]
+name = "timeframe"
+harness = false
+
+[lib]
+bench = false
 
 [lints]
 workspace = true
