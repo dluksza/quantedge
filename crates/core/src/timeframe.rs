@@ -68,88 +68,79 @@ const WEEK_IN_MICROS: u64 = 7 * DAY_IN_MICROS;
 /// for Day and Week based timeframes we need to remove 4 days from the timestamp value.
 const EPOCH_TO_MONDAY_OFFSET: u64 = 4 * DAY_IN_MICROS;
 
+/// Shorthand for constructing a [`NonZero<u64>`] in `const` contexts.
+/// Panics at compile time if `n == 0`.
+const fn nz(n: u64) -> NonZero<u64> {
+    NonZero::new(n).expect("nz requires a non-zero value")
+}
+
 impl Timeframe {
     /// 1-second bars.
-    pub const SEC_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Second);
+    pub const SEC_1: Self = Self::new(nz(1), TimeUnit::Second);
     /// 5-second bars.
-    pub const SEC_5: Self = Self::new(NonZero::new(5).unwrap(), TimeUnit::Second);
+    pub const SEC_5: Self = Self::new(nz(5), TimeUnit::Second);
     /// 10-second bars.
-    pub const SEC_10: Self = Self::new(NonZero::new(10).unwrap(), TimeUnit::Second);
+    pub const SEC_10: Self = Self::new(nz(10), TimeUnit::Second);
     /// 15-second bars.
-    pub const SEC_15: Self = Self::new(NonZero::new(15).unwrap(), TimeUnit::Second);
+    pub const SEC_15: Self = Self::new(nz(15), TimeUnit::Second);
     /// 1-minute bars.
-    pub const MIN_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Minute);
+    pub const MIN_1: Self = Self::new(nz(1), TimeUnit::Minute);
     /// 3-minute bars.
-    pub const MIN_3: Self = Self::new(NonZero::new(3).unwrap(), TimeUnit::Minute);
+    pub const MIN_3: Self = Self::new(nz(3), TimeUnit::Minute);
     /// 5-minute bars.
-    pub const MIN_5: Self = Self::new(NonZero::new(5).unwrap(), TimeUnit::Minute);
+    pub const MIN_5: Self = Self::new(nz(5), TimeUnit::Minute);
     /// 15-minute bars.
-    pub const MIN_15: Self = Self::new(NonZero::new(15).unwrap(), TimeUnit::Minute);
+    pub const MIN_15: Self = Self::new(nz(15), TimeUnit::Minute);
     /// 30-minute bars.
-    pub const MIN_30: Self = Self::new(NonZero::new(30).unwrap(), TimeUnit::Minute);
+    pub const MIN_30: Self = Self::new(nz(30), TimeUnit::Minute);
     /// 1-hour bars.
-    pub const HOUR_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Hour);
+    pub const HOUR_1: Self = Self::new(nz(1), TimeUnit::Hour);
     /// 2-hour bars.
-    pub const HOUR_2: Self = Self::new(NonZero::new(2).unwrap(), TimeUnit::Hour);
+    pub const HOUR_2: Self = Self::new(nz(2), TimeUnit::Hour);
     /// 4-hour bars.
-    pub const HOUR_4: Self = Self::new(NonZero::new(4).unwrap(), TimeUnit::Hour);
+    pub const HOUR_4: Self = Self::new(nz(4), TimeUnit::Hour);
     /// 6-hour bars.
-    pub const HOUR_6: Self = Self::new(NonZero::new(6).unwrap(), TimeUnit::Hour);
+    pub const HOUR_6: Self = Self::new(nz(6), TimeUnit::Hour);
     /// 8-hour bars.
-    pub const HOUR_8: Self = Self::new(NonZero::new(8).unwrap(), TimeUnit::Hour);
+    pub const HOUR_8: Self = Self::new(nz(8), TimeUnit::Hour);
     /// 12-hour bars.
-    pub const HOUR_12: Self = Self::new(NonZero::new(12).unwrap(), TimeUnit::Hour);
+    pub const HOUR_12: Self = Self::new(nz(12), TimeUnit::Hour);
     /// Daily bars (Monday-aligned).
-    pub const DAY_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Day);
+    pub const DAY_1: Self = Self::new(nz(1), TimeUnit::Day);
     /// 3-day bars (Monday-aligned).
-    pub const DAY_3: Self = Self::new(NonZero::new(3).unwrap(), TimeUnit::Day);
+    pub const DAY_3: Self = Self::new(nz(3), TimeUnit::Day);
     /// 5-day bars (Monday-aligned).
-    pub const DAY_5: Self = Self::new(NonZero::new(5).unwrap(), TimeUnit::Day);
+    pub const DAY_5: Self = Self::new(nz(5), TimeUnit::Day);
     /// Weekly bars (Monday-aligned).
-    pub const WEEK_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Week);
+    pub const WEEK_1: Self = Self::new(nz(1), TimeUnit::Week);
     /// Monthly bars.
-    pub const MONTH_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Month);
+    pub const MONTH_1: Self = Self::new(nz(1), TimeUnit::Month);
     /// Bi-monthly bars (Jan-Feb, Mar-Apr, ...).
-    pub const MONTH_2: Self = Self::new(NonZero::new(2).unwrap(), TimeUnit::Month);
+    pub const MONTH_2: Self = Self::new(nz(2), TimeUnit::Month);
     /// Quarterly bars (Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec).
-    pub const MONTH_3: Self = Self::new(NonZero::new(3).unwrap(), TimeUnit::Month);
+    pub const MONTH_3: Self = Self::new(nz(3), TimeUnit::Month);
     /// Semi-annual bars (H1=Jan-Jun, H2=Jul-Dec).
-    pub const MONTH_6: Self = Self::new(NonZero::new(6).unwrap(), TimeUnit::Month);
+    pub const MONTH_6: Self = Self::new(nz(6), TimeUnit::Month);
     /// Yearly bars (calendar year).
-    pub const YEAR_1: Self = Self::new(NonZero::new(1).unwrap(), TimeUnit::Year);
+    pub const YEAR_1: Self = Self::new(nz(1), TimeUnit::Year);
 
     /// Constructs a [`Timeframe`] from a `count` and `unit`, canonicalizing
     /// where possible: `60s -> 1 minute`, `60min -> 1 hour`, `24h -> 1 day`,
     /// `7d -> 1 week`, `12M -> 1 year`. Rules apply recursively.
-    // Each `NonZero::new(n / k).expect("always positive")` is guarded by the
-    // preceding `n.is_multiple_of(k)` arm, which for `n >= 1` and `k >= 2`
-    // guarantees `n / k >= 1`, the `.expect` is unreachable.
+    // Each `nz(n / k)` is guarded by the preceding `n.is_multiple_of(k)` arm,
+    // which for `n >= 1` and `k >= 2` guarantees `n / k >= 1`, so the panic
+    // inside `nz` is unreachable.
     #[allow(clippy::missing_panics_doc)]
     #[must_use]
     pub const fn new(count: NonZero<u64>, unit: TimeUnit) -> Self {
         let n = count.get();
 
         match unit {
-            TimeUnit::Second if n.is_multiple_of(60) => Self::new(
-                NonZero::new(n / 60).expect("always positive"),
-                TimeUnit::Minute,
-            ),
-            TimeUnit::Minute if n.is_multiple_of(60) => Self::new(
-                NonZero::new(n / 60).expect("always positive"),
-                TimeUnit::Hour,
-            ),
-            TimeUnit::Hour if n.is_multiple_of(24) => Self::new(
-                NonZero::new(n / 24).expect("always positive"),
-                TimeUnit::Day,
-            ),
-            TimeUnit::Day if n.is_multiple_of(7) => Self::new(
-                NonZero::new(n / 7).expect("always positive"),
-                TimeUnit::Week,
-            ),
-            TimeUnit::Month if n.is_multiple_of(12) => Self::new(
-                NonZero::new(n / 12).expect("always positive"),
-                TimeUnit::Year,
-            ),
+            TimeUnit::Second if n.is_multiple_of(60) => Self::new(nz(n / 60), TimeUnit::Minute),
+            TimeUnit::Minute if n.is_multiple_of(60) => Self::new(nz(n / 60), TimeUnit::Hour),
+            TimeUnit::Hour if n.is_multiple_of(24) => Self::new(nz(n / 24), TimeUnit::Day),
+            TimeUnit::Day if n.is_multiple_of(7) => Self::new(nz(n / 7), TimeUnit::Week),
+            TimeUnit::Month if n.is_multiple_of(12) => Self::new(nz(n / 12), TimeUnit::Year),
             TimeUnit::Second => Self {
                 count,
                 unit,
@@ -610,16 +601,16 @@ mod tests {
     #[test]
     fn display_reflects_canonicalization() {
         // 120 seconds canonicalizes to 2 minutes.
-        let tf = Timeframe::new(NonZero::new(120).unwrap(), TimeUnit::Second);
+        let tf = Timeframe::new(nz(120), TimeUnit::Second);
         assert_eq!(tf.to_string(), "2m");
         // 168 hours canonicalizes to 1 week.
-        let tf = Timeframe::new(NonZero::new(168).unwrap(), TimeUnit::Hour);
+        let tf = Timeframe::new(nz(168), TimeUnit::Hour);
         assert_eq!(tf.to_string(), "1w");
         // 12 months canonicalizes to 1 year.
-        let tf = Timeframe::new(NonZero::new(12).unwrap(), TimeUnit::Month);
+        let tf = Timeframe::new(nz(12), TimeUnit::Month);
         assert_eq!(tf.to_string(), "1Y");
         // 24 months canonicalizes to 2 years.
-        let tf = Timeframe::new(NonZero::new(24).unwrap(), TimeUnit::Month);
+        let tf = Timeframe::new(nz(24), TimeUnit::Month);
         assert_eq!(tf.to_string(), "2Y");
     }
 
