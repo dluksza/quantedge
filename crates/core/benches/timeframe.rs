@@ -88,6 +88,7 @@ fn bench_fanout(c: &mut Criterion) {
         b.iter(|| {
             for &t in &ts {
                 for &(_, tf) in TIMEFRAMES {
+                    let tf = black_box(tf);
                     black_box(tf.open_time(black_box(t)));
                     black_box(tf.close_time(black_box(t)));
                 }
@@ -98,6 +99,7 @@ fn bench_fanout(c: &mut Criterion) {
         b.iter(|| {
             for &t in &ts {
                 for &(_, tf) in TIMEFRAMES {
+                    let tf = black_box(tf);
                     black_box(tf.bounds(black_box(t)));
                 }
             }
