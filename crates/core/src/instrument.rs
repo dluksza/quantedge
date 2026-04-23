@@ -274,7 +274,7 @@ impl FromStr for Ticker {
 /// and debugging. There is intentionally no `FromStr`; construct
 /// instruments from their typed parts rather than parsing compound
 /// strings.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Instrument {
     venue: Venue,
     ticker: Ticker,
