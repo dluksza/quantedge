@@ -8,8 +8,9 @@
 //!
 //! All string-valued types share the same construction rules: leading
 //! and trailing whitespace is trimmed; the remainder must be ASCII
-//! alphanumeric or `_`. Case is normalized per type (lowercase for
-//! [`Venue`] and [`MarketKind`], uppercase for [`Asset`]).
+//! alphanumeric or `_`, and no longer than 32 bytes. Case is
+//! normalized per type (lowercase for [`Venue`] and [`MarketKind`],
+//! uppercase for [`Asset`]).
 
 use std::{error::Error, fmt::Display, str::FromStr};
 
@@ -29,6 +30,8 @@ macro_rules! ascii_ident {
         pub enum $err {
             /// Input was empty or entirely whitespace.
             Empty,
+            /// Input exceeded the maximum permitted length.
+            TooLong,
             /// Input contained characters outside the permitted charset.
             Invalid,
         }
@@ -37,6 +40,7 @@ macro_rules! ascii_ident {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
                     Self::Empty => f.write_str(concat!($label, " is empty")),
+                    Self::TooLong => f.write_str(concat!($label, " is too long")),
                     Self::Invalid => f.write_str(concat!($label, " is invalid")),
                 }
             }
@@ -49,19 +53,30 @@ macro_rules! ascii_ident {
         pub struct $ty(std::sync::Arc<str>);
 
         impl $ty {
+            /// Maximum permitted length, in bytes, of an input after
+            /// trimming. Set to 32, which comfortably covers every real
+            /// venue, asset, and market label while blocking
+            /// pathological input before the charset scan.
+            const MAX_LEN: usize = 32;
+
             /// Constructs a new value, trimming whitespace, validating
-            /// the charset, and normalizing case.
+            /// the length and charset, and normalizing case.
             ///
             /// # Errors
             ///
-            /// Returns the `Empty` variant for empty or whitespace-only
-            /// input, and `Invalid` when any character falls outside
-            /// the permitted charset.
+            /// Returns `Empty` for empty or whitespace-only input,
+            /// `TooLong` when the trimmed input exceeds 32 bytes, and
+            /// `Invalid` when any character falls outside the permitted
+            /// charset.
             pub fn new(name: impl AsRef<str>) -> Result<Self, $err> {
                 let name = name.as_ref().trim();
 
                 if name.is_empty() {
                     return Err($err::Empty);
+                }
+
+                if name.len() > Self::MAX_LEN {
+                    return Err($err::TooLong);
                 }
 
                 if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
@@ -364,6 +379,27 @@ mod tests {
     }
 
     #[test]
+    fn venue_allows_input_at_max_len() {
+        let at_limit = "a".repeat(Venue::MAX_LEN);
+        assert!(Venue::new(&at_limit).is_ok());
+    }
+
+    #[test]
+    fn venue_rejects_input_exceeding_max_len() {
+        let over_limit = "a".repeat(Venue::MAX_LEN + 1);
+        assert_eq!(Venue::new(&over_limit), Err(VenueError::TooLong));
+    }
+
+    #[test]
+    fn venue_length_check_precedes_charset_scan() {
+        // A 10 MB non-ASCII input would be a DoS vector if the charset
+        // scan ran before the length gate; we verify the order here by
+        // asserting TooLong (not Invalid) wins.
+        let huge = "é".repeat(10_000);
+        assert_eq!(Venue::new(&huge), Err(VenueError::TooLong));
+    }
+
+    #[test]
     fn venue_from_str_and_try_from_agree() {
         let a: Venue = "binance".parse().unwrap();
         let b = Venue::try_from(String::from("binance")).unwrap();
@@ -385,6 +421,7 @@ mod tests {
     #[test]
     fn venue_error_display() {
         assert_eq!(VenueError::Empty.to_string(), "venue is empty");
+        assert_eq!(VenueError::TooLong.to_string(), "venue is too long");
         assert_eq!(VenueError::Invalid.to_string(), "venue is invalid");
     }
 
