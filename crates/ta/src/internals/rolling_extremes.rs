@@ -112,7 +112,7 @@ impl RollingExtremes {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use crate::test_util::Bar;
+    use quantedge_core::test_util::Bar;
 
     fn ohlc(high: f64, low: f64, close: f64) -> Bar {
         Bar::new(0.0, high, low, close)

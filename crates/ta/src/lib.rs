@@ -9,17 +9,13 @@
 //! import needed. Import [`Indicator`], [`IndicatorConfig`], or
 //! [`IndicatorConfigBuilder`] only for generic code.
 
-pub use quantedge_core::{Ohlcv, Price, Timestamp};
+pub use quantedge_core::{
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Timestamp,
+};
 
 mod indicators;
 mod internals;
 mod types;
-
-mod indicator;
-mod price_source;
-
-pub use crate::indicator::{Indicator, IndicatorConfig, IndicatorConfigBuilder};
-pub use crate::price_source::PriceSource;
 
 pub use crate::indicators::*;
 pub use crate::types::*;
@@ -113,11 +109,8 @@ impl_inherent_methods!(Vwap, VwapConfig, VwapConfigBuilder);
 impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 
 #[cfg(test)]
-mod test_util;
-
-#[cfg(test)]
 mod inherent_methods {
-    use super::test_util::nz;
+    use quantedge_core::test_util::nz;
     use super::{Bb, BbConfig, BbValue, Ema, EmaConfig, Ohlcv, Price, Sma, SmaConfig, Timestamp};
 
     struct Bar(f64, u64);

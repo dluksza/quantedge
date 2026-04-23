@@ -1,15 +1,16 @@
-// src/test_util.rs
-
 use std::num::NonZero;
 
 use crate::{Ohlcv, Price, Timestamp};
 
+/// # Panics
+/// Panics if `n` is zero.
 pub fn nz(n: usize) -> NonZero<usize> {
     NonZero::new(n).unwrap()
 }
 
 /// Asserts that two `f64` values are approximately equal using a
 /// relative epsilon of `4 * f64::EPSILON`.
+#[macro_export]
 macro_rules! assert_approx {
     ($actual:expr, $expected:expr) => {{
         let (a, e) = ($actual, $expected);
@@ -21,7 +22,7 @@ macro_rules! assert_approx {
     }};
 }
 
-pub(crate) use assert_approx;
+pub use crate::assert_approx;
 
 pub struct Bar {
     pub open: f64,
@@ -61,11 +62,13 @@ impl Bar {
         }
     }
 
+    #[must_use]
     pub fn at(mut self, open_time: u64) -> Self {
         self.open_time = open_time;
         self
     }
 
+    #[must_use]
     pub fn vol(mut self, volume: f64) -> Self {
         self.volume = volume;
         self

@@ -260,7 +260,7 @@ impl Display for Ema {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{Bar, assert_approx, bar, nz};
+    use quantedge_core::test_util::{Bar, assert_approx, bar, nz};
 
     fn ema(length: usize) -> Ema {
         Ema::new(EmaConfig::builder().length(nz(length)).build())
@@ -562,7 +562,7 @@ mod tests {
 
     mod true_range {
         use super::*;
-        use crate::test_util::ohlc;
+        use quantedge_core::test_util::ohlc;
 
         fn tr_ema(length: usize) -> Ema {
             Ema::new(

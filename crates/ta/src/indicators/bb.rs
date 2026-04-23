@@ -328,7 +328,7 @@ impl Display for Bb {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{Bar, nz};
+    use quantedge_core::test_util::{Bar, nz};
 
     fn bb(length: usize) -> Bb {
         Bb::new(BbConfig::builder().length(nz(length)).build())

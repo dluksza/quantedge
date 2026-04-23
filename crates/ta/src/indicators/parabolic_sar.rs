@@ -441,7 +441,7 @@ impl Display for ParabolicSar {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::ohlc;
+    use quantedge_core::test_util::ohlc;
 
     fn default_sar() -> ParabolicSar {
         ParabolicSar::new(ParabolicSarConfig::default())
@@ -512,7 +512,7 @@ mod tests {
 
     mod computation {
         use super::*;
-        use crate::test_util::assert_approx;
+        use quantedge_core::test_util::assert_approx;
 
         #[test]
         fn sar_advances_toward_ep_in_uptrend() {

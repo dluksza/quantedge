@@ -349,7 +349,7 @@ impl Display for Kc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     /// KC(2, 2, 1.5) — small windows for tractable hand calculations.
     fn kc_2_2() -> Kc {
@@ -419,7 +419,7 @@ mod tests {
 
     mod computation {
         use super::*;
-        use crate::test_util::assert_approx;
+        use quantedge_core::test_util::assert_approx;
 
         #[test]
         fn middle_equals_ema() {
@@ -739,7 +739,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use crate::test_util::assert_approx;
+        use quantedge_core::test_util::assert_approx;
 
         #[test]
         fn uses_configured_source() {

@@ -386,7 +386,7 @@ impl Display for Rsi {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{bar, nz};
+    use quantedge_core::test_util::{bar, nz};
 
     /// Returns a seeded RSI(3) after bars: 10, 12, 11, 13 at times 1–4.
     fn seeded_rsi3() -> Rsi {
@@ -663,7 +663,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use crate::test_util::Bar;
+        use quantedge_core::test_util::Bar;
 
         #[test]
         fn uses_configured_source() {

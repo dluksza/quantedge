@@ -231,7 +231,7 @@ impl Display for Cci {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{Bar, assert_approx, bar, nz};
+    use quantedge_core::test_util::{Bar, assert_approx, bar, nz};
 
     fn make_cci(length: usize) -> Cci {
         Cci::new(CciConfig::close(nz(length)))

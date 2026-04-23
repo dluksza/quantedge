@@ -525,9 +525,9 @@ impl Display for Vwap {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use crate::test_util::{assert_approx, bar};
+    use quantedge_core::test_util::{assert_approx, bar};
 
-    fn vbar(close: f64, volume: f64, time: u64) -> crate::test_util::Bar {
+    fn vbar(close: f64, volume: f64, time: u64) -> quantedge_core::test_util::Bar {
         bar(close, time).vol(volume)
     }
 

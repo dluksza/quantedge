@@ -39,7 +39,7 @@ impl Display for PriceSource {
 }
 
 impl PriceSource {
-    pub(crate) fn extract(self, ohlcv: &impl Ohlcv, prev_close: Option<Price>) -> Price {
+    pub fn extract(self, ohlcv: &impl Ohlcv, prev_close: Option<Price>) -> Price {
         match self {
             Self::Open => ohlcv.open(),
             Self::High => ohlcv.high(),

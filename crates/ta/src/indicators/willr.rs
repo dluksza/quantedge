@@ -221,7 +221,7 @@ impl Display for WillR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{Bar, bar, nz, ohlc};
+    use quantedge_core::test_util::{Bar, bar, nz, ohlc};
 
     fn willr(length: usize) -> WillR {
         WillR::new(WillRConfig::close(nz(length)))

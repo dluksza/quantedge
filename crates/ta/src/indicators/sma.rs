@@ -213,7 +213,7 @@ impl Display for Sma {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{assert_approx, bar, nz};
+    use quantedge_core::test_util::{assert_approx, bar, nz};
 
     fn sma(length: usize) -> Sma {
         Sma::new(SmaConfig::close(nz(length)))
@@ -331,7 +331,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use crate::test_util::Bar;
+        use quantedge_core::test_util::Bar;
 
         #[test]
         fn hl2_source() {
@@ -441,7 +441,7 @@ mod tests {
 
     mod true_range {
         use super::*;
-        use crate::test_util::ohlc;
+        use quantedge_core::test_util::ohlc;
 
         fn tr_sma(length: usize) -> Sma {
             Sma::new(

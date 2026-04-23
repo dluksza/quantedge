@@ -244,7 +244,7 @@ impl Display for Dc {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     fn dc(length: usize) -> Dc {
         Dc::new(DcConfig::builder().length(nz(length)).build())

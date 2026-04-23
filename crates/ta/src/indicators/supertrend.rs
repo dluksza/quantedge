@@ -382,7 +382,7 @@ impl Display for Supertrend {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     /// Supertrend(3, 1.0) — small window for tractable hand calculations.
     fn st_3() -> Supertrend {

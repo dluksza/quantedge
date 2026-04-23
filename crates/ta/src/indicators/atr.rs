@@ -206,7 +206,7 @@ impl Display for Atr {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     fn atr(length: usize) -> Atr {
         Atr::new(AtrConfig::builder().length(nz(length)).build())

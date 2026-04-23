@@ -396,7 +396,7 @@ impl Display for StochRsi {
 #[allow(clippy::float_cmp, clippy::cast_precision_loss)]
 mod tests {
     use super::*;
-    use crate::test_util::{bar, nz};
+    use quantedge_core::test_util::{bar, nz};
 
     /// StochRsi(rsi=3, stoch=3, k=1, d=1) — simplest config.
     fn stoch_rsi_3_3_1_1() -> StochRsi {

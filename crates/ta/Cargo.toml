@@ -16,6 +16,7 @@ exclude = ["tests/"]
 quantedge-core = { workspace = true }
 
 [dev-dependencies]
+quantedge-core = { workspace = true, features = ["test-util"] }
 csv = "1"
 serde = { version = "1", features = ["derive"] }
 criterion = { version = "0.8", default-features = false, features = [

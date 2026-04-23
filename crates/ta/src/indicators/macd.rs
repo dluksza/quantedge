@@ -391,7 +391,7 @@ impl Display for Macd {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{Bar, bar, nz};
+    use quantedge_core::test_util::{Bar, bar, nz};
 
     /// Standard MACD(3, 6, 4) on close for tractable hand calculations.
     /// Fast α = 2/4 = 0.5, Slow α = 2/7 ≈ 0.2857, Signal α = 2/5 = 0.4

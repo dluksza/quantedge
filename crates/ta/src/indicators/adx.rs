@@ -384,7 +384,7 @@ impl Display for Adx {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     fn adx(length: usize) -> Adx {
         Adx::new(AdxConfig::builder().length(nz(length)).build())

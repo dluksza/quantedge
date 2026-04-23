@@ -95,7 +95,7 @@ mod tests {
 
     mod price_window {
         use super::*;
-        use crate::test_util::{Bar, bar};
+        use quantedge_core::test_util::{Bar, bar};
 
         fn close_window(size: usize) -> PriceWindow {
             PriceWindow::new(size, PriceSource::Close)

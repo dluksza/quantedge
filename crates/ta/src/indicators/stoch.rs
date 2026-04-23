@@ -400,7 +400,7 @@ impl Display for Stoch {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     /// Stoch(3,1,1) — simplest config: no smoothing, raw %K output.
     fn stoch_3_1_1() -> Stoch {

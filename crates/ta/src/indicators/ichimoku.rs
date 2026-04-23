@@ -420,7 +420,7 @@ impl Display for Ichimoku {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{nz, ohlc};
+    use quantedge_core::test_util::{nz, ohlc};
 
     fn default_config() -> IchimokuConfig {
         IchimokuConfig::builder().default().build()

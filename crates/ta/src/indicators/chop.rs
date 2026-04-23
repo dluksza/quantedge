@@ -218,7 +218,7 @@ impl Display for Chop {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::{assert_approx, nz, ohlc};
+    use quantedge_core::test_util::{assert_approx, nz, ohlc};
 
     fn chop(length: usize) -> Chop {
         Chop::new(ChopConfig::builder().length(nz(length)).build())

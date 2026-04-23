@@ -46,29 +46,6 @@ where
 /// Indicators maintain internal state and update incrementally on each call to
 /// [`compute`](Indicator::compute). Output is `None` until enough data has been
 /// received for convergence.
-///
-/// # Example
-///
-/// ```
-/// use quantedge_ta::{Sma, SmaConfig};
-/// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
-///
-/// let mut sma = Sma::new(SmaConfig::close(NonZero::new(3).unwrap()));
-///
-/// assert_eq!(sma.compute(&Bar(10.0, 1)), None);
-/// assert_eq!(sma.compute(&Bar(20.0, 2)), None);
-/// assert_eq!(sma.compute(&Bar(30.0, 3)), Some(20.0));
-/// ```
 pub trait Indicator: Sized + Clone + Display + Debug {
     /// Configuration type for this indicator.
     type Config: IndicatorConfig;

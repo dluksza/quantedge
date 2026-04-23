@@ -213,9 +213,9 @@ impl Display for Obv {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::bar;
+    use quantedge_core::test_util::bar;
 
-    fn vbar(close: f64, volume: f64, time: u64) -> crate::test_util::Bar {
+    fn vbar(close: f64, volume: f64, time: u64) -> quantedge_core::test_util::Bar {
         bar(close, time).vol(volume)
     }
 
