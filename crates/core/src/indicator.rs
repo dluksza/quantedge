@@ -52,7 +52,7 @@ where
 /// received for convergence.
 pub trait Indicator: Sized + Clone + Display + Debug {
     /// Configuration type for this indicator.
-    type Config: IndicatorConfig;
+    type Config: IndicatorConfig<Output = Self::Output>;
 
     /// Computed output type. `f64` for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
