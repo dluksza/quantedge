@@ -40,6 +40,7 @@ pub struct ObvConfig {
 
 impl IndicatorConfig for ObvConfig {
     type Builder = ObvConfigBuilder;
+    type Output = f64;
 
     fn builder() -> Self::Builder {
         ObvConfigBuilder::new()

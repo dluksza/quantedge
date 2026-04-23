@@ -36,6 +36,7 @@ pub struct ParabolicSarConfig {
 
 impl IndicatorConfig for ParabolicSarConfig {
     type Builder = ParabolicSarConfigBuilder;
+    type Output = ParabolicSarValue;
 
     fn builder() -> Self::Builder {
         ParabolicSarConfigBuilder::new()

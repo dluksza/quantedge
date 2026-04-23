@@ -27,6 +27,7 @@ pub struct DcConfig {
 
 impl IndicatorConfig for DcConfig {
     type Builder = DcConfigBuilder;
+    type Output = DcValue;
 
     fn builder() -> Self::Builder {
         DcConfigBuilder::new()

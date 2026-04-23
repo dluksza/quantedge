@@ -14,6 +14,10 @@ pub trait IndicatorConfig: Default + Sized + PartialEq + Eq + Hash + Display + D
     /// Builder type for constructing this config.
     type Builder: IndicatorConfigBuilder<Self>;
 
+    /// Computed output type. `f64` for simple indicators,
+    /// a struct for composite ones (e.g. Bollinger Bands).
+    type Output: 'static + Copy + Send + Sync + Display + Debug;
+
     /// Returns a new builder with default values.
     fn builder() -> Self::Builder;
 
@@ -52,7 +56,7 @@ pub trait Indicator: Sized + Clone + Display + Debug {
 
     /// Computed output type. `f64` for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: Send + Sync + Display + Debug;
+    type Output: 'static + Copy + Send + Sync + Display + Debug;
 
     /// Creates a new indicator from the given config.
     fn new(config: Self::Config) -> Self;

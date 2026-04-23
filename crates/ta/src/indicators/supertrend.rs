@@ -54,6 +54,7 @@ impl SupertrendConfig {
 
 impl IndicatorConfig for SupertrendConfig {
     type Builder = SupertrendConfigBuilder;
+    type Output = SupertrendValue;
 
     fn builder() -> Self::Builder {
         SupertrendConfigBuilder::new()

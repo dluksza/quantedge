@@ -29,6 +29,7 @@ pub struct AtrConfig {
 
 impl IndicatorConfig for AtrConfig {
     type Builder = AtrConfigBuilder;
+    type Output = Price;
 
     fn builder() -> Self::Builder {
         AtrConfigBuilder::new()

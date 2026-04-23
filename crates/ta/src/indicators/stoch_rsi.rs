@@ -73,6 +73,7 @@ impl StochRsiConfig {
 
 impl IndicatorConfig for StochRsiConfig {
     type Builder = StochRsiConfigBuilder;
+    type Output = StochRsiValue;
 
     fn builder() -> Self::Builder {
         StochRsiConfigBuilder::new()

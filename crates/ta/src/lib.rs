@@ -110,8 +110,8 @@ impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 
 #[cfg(test)]
 mod inherent_methods {
-    use quantedge_core::test_util::nz;
     use super::{Bb, BbConfig, BbValue, Ema, EmaConfig, Ohlcv, Price, Sma, SmaConfig, Timestamp};
+    use quantedge_core::test_util::nz;
 
     struct Bar(f64, u64);
     impl Ohlcv for Bar {

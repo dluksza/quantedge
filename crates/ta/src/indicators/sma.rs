@@ -27,6 +27,7 @@ pub struct SmaConfig {
 
 impl IndicatorConfig for SmaConfig {
     type Builder = SmaConfigBuilder;
+    type Output = Price;
 
     fn builder() -> Self::Builder {
         SmaConfigBuilder::new()
