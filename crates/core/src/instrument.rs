@@ -2,9 +2,9 @@
 //!
 //! [`Instrument`] combines a [`Venue`], a [`Ticker`] (base/quote asset
 //! pair), and a [`MarketKind`]. The leaf newtypes wrap `Arc<str>`, so
-//! each leaf clone is a single atomic increment; an [`Instrument`]
-//! clone is four. No heap allocation on the clone path — instruments
-//! flow cheaply through strategies, order paths, and log lines.
+//! each leaf clone is a single atomic increment and an [`Instrument`]
+//! clone is four — cheap enough to pass through strategies, order
+//! paths, and log lines without heap pressure.
 //!
 //! All string-valued types share the same construction rules: leading
 //! and trailing whitespace is trimmed; the remainder must be ASCII
