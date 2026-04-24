@@ -8,6 +8,7 @@ mod indicator;
 mod instrument;
 mod ohlcv;
 mod price_source;
+mod snapshots;
 mod timeframe;
 
 #[cfg(any(test, feature = "test-util"))]
@@ -20,4 +21,5 @@ pub use crate::instrument::{
 };
 pub use crate::ohlcv::{Ohlcv, Price, Timestamp};
 pub use crate::price_source::PriceSource;
+pub use crate::snapshots::{Bar, MarketSnapshot, TimeframeSnapshot};
 pub use crate::timeframe::{TimeUnit, Timeframe};
