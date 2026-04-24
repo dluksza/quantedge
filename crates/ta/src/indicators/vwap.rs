@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Ohlcv, Price, PriceSource,
-    Timestamp,
+    Timestamp, internals::extract_price,
 };
 
 /// Anchor period for VWAP session resets.
@@ -393,7 +393,7 @@ impl Indicator for Vwap {
         }
 
         self.cur_close = ohlcv.close;
-        let price = self.config.source.extract(ohlcv, self.prev_close);
+        let price = extract_price(self.config.source, ohlcv, self.prev_close);
 
         self.pending_price = price;
         self.pending_volume = volume;

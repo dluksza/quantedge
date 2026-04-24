@@ -1,4 +1,4 @@
-use crate::{Ohlcv, Price, PriceSource, Timestamp};
+use crate::{Ohlcv, Price, PriceSource, Timestamp, internals::extract_price};
 
 pub(crate) enum BarAction {
     Advance(Price),
@@ -40,7 +40,7 @@ impl BarState {
 
         self.curr_close = Some(ohlcv.close);
 
-        let price = self.price_source.extract(ohlcv, self.prev_close);
+        let price = extract_price(self.price_source, ohlcv, self.prev_close);
 
         if is_next_bar {
             BarAction::Advance(price)

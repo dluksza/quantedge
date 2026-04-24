@@ -2,6 +2,7 @@ use std::{fmt::Display, num::NonZero};
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Timestamp,
+    internals::extract_price,
 };
 
 /// Configuration for the Relative Strength Index ([`Rsi`])
@@ -237,7 +238,7 @@ impl Indicator for Rsi {
             self.last_open_time = Some(ohlcv.open_time);
         }
 
-        let price = self.config.source().extract(ohlcv, self.prev_close);
+        let price = extract_price(self.config.source(), ohlcv, self.prev_close);
         self.cur_price = price;
         self.cur_close = Some(ohlcv.close);
 

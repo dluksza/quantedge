@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use crate::{Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource, Timestamp};
+use crate::{
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource, Timestamp,
+    internals::extract_price,
+};
 
 /// Configuration for the On-Balance Volume ([`Obv`]) indicator.
 ///
@@ -166,7 +169,7 @@ impl Indicator for Obv {
             self.previous = self.current.unwrap_or(0.0);
         }
 
-        let price = self.config.source().extract(ohlcv, self.prev_price);
+        let price = extract_price(self.config.source, ohlcv, self.prev_price);
         self.current_price = Some(price);
 
         self.current = match self.prev_price {
