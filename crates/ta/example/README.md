@@ -6,15 +6,16 @@ an SMA(20) value that updates on every tick — including intra-bar repaints.
 
 ## What it demonstrates
 
-- **Bring-your-own OHLCV** — `BinanceOhlcv` implements the `Ohlcv` trait
-  directly (`src/main.rs:21`). No conversion to a library-specific struct.
+- **Plain-struct bar input** — Binance klines are parsed into `Ohlcv` values
+  (`src/binance_client.rs`: `kline_to_ohlcv` / `summary_to_ohlcv`). The
+  iterator yields `Ohlcv` directly; no trait impl required.
 - **Warm-up via `convergence()`** — the historical fetch size is driven by
   `config.convergence()` so the indicator is already producing values when the
-  live stream takes over (`src/main.rs:61`).
+  live stream takes over.
 - **Live repainting** — Binance emits ~150 kline snapshots per 5m bar, all
   sharing the same `open_time`. `Sma::compute()` replaces the current bar's
   contribution on each repaint and advances the window only when `open_time`
-  changes (`src/main.rs:71`).
+  changes.
 - **O(1) per tick** — `compute()` is called once per websocket event, no
   re-scanning.
 
@@ -57,5 +58,5 @@ The example is hardcoded to `BTCUSDT` on the `5m` interval with
 | File                    | Purpose                                              |
 |-------------------------|------------------------------------------------------|
 | `src/main.rs`           | Wires the stream through `Sma::compute()`            |
-| `src/binance_client.rs` | Historical REST fetch + live websocket, as one iterator |
+| `src/binance_client.rs` | Historical REST fetch + live websocket, emitting `Ohlcv` |
 | `src/utils.rs`          | SIGINT handler and formatted output                  |

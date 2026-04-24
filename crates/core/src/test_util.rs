@@ -24,17 +24,17 @@ macro_rules! assert_approx {
 
 pub use crate::assert_approx;
 
-pub struct Bar {
-    pub open: f64,
-    pub high: f64,
-    pub low: f64,
-    pub close: f64,
-    pub volume: f64,
-    pub open_time: u64,
-}
+pub type Bar = Ohlcv;
 
-impl Bar {
-    pub fn new(open: f64, high: f64, low: f64, close: f64) -> Self {
+/// Test-only builder-style constructors on [`Ohlcv`]. Gated behind the
+/// `test-util` feature so they do not leak into the public API — production
+/// callers should build [`Ohlcv`] with a struct literal or a `From`
+/// conversion from their own kline type.
+impl Ohlcv {
+    /// Construct a bar from OHLC values. `open_time` and `volume` default
+    /// to `0`; override via [`at`](Self::at) and [`vol`](Self::vol).
+    #[must_use]
+    pub const fn new(open: Price, high: Price, low: Price, close: Price) -> Self {
         Self {
             open,
             high,
@@ -45,63 +45,37 @@ impl Bar {
         }
     }
 
-    pub fn new_with_open_time(
-        open: f64,
-        high: f64,
-        low: f64,
-        close: f64,
-        open_time: Timestamp,
-    ) -> Self {
-        Self {
-            open,
-            high,
-            low,
-            close,
-            volume: 0.0,
-            open_time,
-        }
-    }
-
+    /// Sets `open_time`, consuming `self`.
     #[must_use]
-    pub fn at(mut self, open_time: u64) -> Self {
+    pub const fn at(mut self, open_time: Timestamp) -> Self {
         self.open_time = open_time;
         self
     }
 
+    /// Sets `volume`, consuming `self`.
     #[must_use]
-    pub fn vol(mut self, volume: f64) -> Self {
+    pub const fn vol(mut self, volume: f64) -> Self {
         self.volume = volume;
         self
     }
 }
 
-/// Convenience: bar with just a close price and timestamp (OHLC all equal to close).
-pub fn bar(close: f64, time: u64) -> Bar {
-    Bar::new(close, close, close, close).at(time)
+/// Convenience: build a [`Bar`] with OHLC collapsed to `close` at `open_time`.
+///
+/// Used in ta unit tests where only the close price matters.
+#[must_use]
+pub fn bar(close: f64, open_time: Timestamp) -> Bar {
+    Ohlcv::new(close, close, close, close).at(open_time)
 }
 
-/// Convenience: bar with explicit OHLC and timestamp.
-pub fn ohlc(open: f64, high: f64, low: f64, close: f64, time: u64) -> Bar {
-    Bar::new(open, high, low, close).at(time)
+/// Convenience: build a [`Bar`] with explicit OHLC at `open_time`.
+#[must_use]
+pub fn ohlc(open: f64, high: f64, low: f64, close: f64, open_time: Timestamp) -> Bar {
+    Ohlcv::new(open, high, low, close).at(open_time)
 }
 
-impl Ohlcv for Bar {
-    fn open(&self) -> Price {
-        self.open
-    }
-    fn high(&self) -> Price {
-        self.high
-    }
-    fn low(&self) -> Price {
-        self.low
-    }
-    fn close(&self) -> Price {
-        self.close
-    }
-    fn volume(&self) -> f64 {
-        self.volume
-    }
-    fn open_time(&self) -> Timestamp {
-        self.open_time
-    }
+/// Convenience shim for tests still using the previous 5-arg constructor.
+#[must_use]
+pub fn bar_at(open: f64, high: f64, low: f64, close: f64, open_time: Timestamp) -> Bar {
+    Ohlcv::new(open, high, low, close).at(open_time)
 }

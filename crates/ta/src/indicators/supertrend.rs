@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Price, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Ohlcv, Price, PriceSource,
     internals::{BarAction, BarState, EmaCore},
 };
 
@@ -165,24 +165,10 @@ impl IndicatorConfigBuilder<SupertrendConfig> for SupertrendConfigBuilder {
 /// against the trend.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SupertrendValue {
-    value: Price,
-    is_bullish: bool,
-}
-
-impl SupertrendValue {
     /// The current trend line price level.
-    #[inline]
-    #[must_use]
-    pub fn value(&self) -> Price {
-        self.value
-    }
-
+    pub value: Price,
     /// `true` when the trend is bullish (price above lower band).
-    #[inline]
-    #[must_use]
-    pub fn is_bullish(&self) -> bool {
-        self.is_bullish
-    }
+    pub is_bullish: bool,
 }
 
 impl Display for SupertrendValue {
@@ -221,18 +207,12 @@ impl Display for SupertrendValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Supertrend, SupertrendConfig, Multiplier};
+/// use quantedge_ta::{Multiplier, Ohlcv, Supertrend, SupertrendConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let config = SupertrendConfig::builder()
 ///     .length(NonZero::new(3).unwrap())
@@ -241,12 +221,12 @@ impl Display for SupertrendValue {
 /// let mut st = Supertrend::new(config);
 ///
 /// // Seeding: need length + 1 = 4 bars
-/// assert!(st.compute(&Bar { o: 10.0, h: 15.0, l: 5.0, c: 12.0, t: 1 }).is_none());
-/// assert!(st.compute(&Bar { o: 12.0, h: 18.0, l: 8.0, c: 14.0, t: 2 }).is_none());
-/// assert!(st.compute(&Bar { o: 14.0, h: 20.0, l: 10.0, c: 16.0, t: 3 }).is_none());
+/// assert!(st.compute(&ohlc(10.0, 15.0, 5.0, 12.0, 1)).is_none());
+/// assert!(st.compute(&ohlc(12.0, 18.0, 8.0, 14.0, 2)).is_none());
+/// assert!(st.compute(&ohlc(14.0, 20.0, 10.0, 16.0, 3)).is_none());
 ///
-/// let val = st.compute(&Bar { o: 16.0, h: 22.0, l: 12.0, c: 20.0, t: 4 }).unwrap();
-/// assert!(val.value() > 0.0);
+/// let val = st.compute(&ohlc(16.0, 22.0, 12.0, 20.0, 4)).unwrap();
+/// assert!(val.value > 0.0);
 /// ```
 #[derive(Clone, Debug)]
 pub struct Supertrend {
@@ -284,7 +264,7 @@ impl Indicator for Supertrend {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         let atr = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 self.previous = self.current;
@@ -299,7 +279,7 @@ impl Indicator for Supertrend {
 
         self.current = match (atr, self.prev_close) {
             (Some(atr), Some(prev_close)) => {
-                let midpoint = ohlcv.high().midpoint(ohlcv.low());
+                let midpoint = ohlcv.high.midpoint(ohlcv.low);
                 let atr_mult = self.config.multiplier.value() * atr;
                 let next_upper = midpoint + atr_mult;
                 let next_lower = midpoint - atr_mult;
@@ -325,12 +305,12 @@ impl Indicator for Supertrend {
                     self.current_lower = Some(lower);
 
                     if previous.is_bullish {
-                        if ohlcv.close() >= lower {
+                        if ohlcv.close >= lower {
                             Self::bullish(lower)
                         } else {
                             bearish
                         }
-                    } else if ohlcv.close() <= upper {
+                    } else if ohlcv.close <= upper {
                         bearish
                     } else {
                         Self::bullish(lower)
@@ -342,7 +322,7 @@ impl Indicator for Supertrend {
             _ => None,
         };
 
-        self.current_close = Some(ohlcv.close());
+        self.current_close = Some(ohlcv.close);
 
         self.value()
     }
@@ -452,18 +432,18 @@ mod tests {
             st.compute(&ohlc(12.0, 18.0, 8.0, 14.0, 2));
             st.compute(&ohlc(14.0, 20.0, 10.0, 16.0, 3));
             let val = st.compute(&ohlc(16.0, 22.0, 12.0, 20.0, 4)).unwrap();
-            assert!(!val.is_bullish());
+            assert!(!val.is_bullish);
         }
 
         #[test]
         fn bearish_to_bullish_transition() {
             let mut st = seeded_st();
             let prev = st.value().unwrap();
-            assert!(!prev.is_bullish());
+            assert!(!prev.is_bullish);
 
             // Push price well above the upper band to trigger bullish flip
             let val = st.compute(&ohlc(30.0, 40.0, 25.0, 38.0, 5)).unwrap();
-            assert!(val.is_bullish());
+            assert!(val.is_bullish);
         }
 
         #[test]
@@ -471,11 +451,11 @@ mod tests {
             let mut st = seeded_st();
             // First force bullish
             st.compute(&ohlc(30.0, 40.0, 25.0, 38.0, 5));
-            assert!(st.value().unwrap().is_bullish());
+            assert!(st.value().unwrap().is_bullish);
 
             // Now push price well below the lower band
             let val = st.compute(&ohlc(5.0, 8.0, 2.0, 3.0, 6)).unwrap();
-            assert!(!val.is_bullish());
+            assert!(!val.is_bullish);
         }
 
         #[test]
@@ -488,7 +468,7 @@ mod tests {
             // Feed a bar that keeps price below upper band
             let second = st.compute(&ohlc(14.0, 16.0, 10.0, 12.0, 5)).unwrap();
             // Upper band should be clamped (not widening)
-            assert!(second.value() <= first.value());
+            assert!(second.value <= first.value);
         }
 
         #[test]
@@ -497,12 +477,12 @@ mod tests {
             // Force bullish
             st.compute(&ohlc(30.0, 40.0, 25.0, 38.0, 5));
             let bullish_val = st.value().unwrap();
-            assert!(bullish_val.is_bullish());
+            assert!(bullish_val.is_bullish);
 
             // Feed bar that keeps price above lower band
             let next = st.compute(&ohlc(35.0, 42.0, 30.0, 40.0, 6)).unwrap();
             // Lower band should be clamped upward (not decreasing)
-            assert!(next.value() >= bullish_val.value());
+            assert!(next.value >= bullish_val.value);
         }
 
         #[test]

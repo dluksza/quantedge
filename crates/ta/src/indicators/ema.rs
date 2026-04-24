@@ -186,18 +186,12 @@ impl IndicatorConfigBuilder<EmaConfig> for EmaConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ema, EmaConfig};
+/// use quantedge_ta::{Ema, EmaConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let config = EmaConfig::builder()
 ///     .length(NonZero::new(3).unwrap())
@@ -205,14 +199,14 @@ impl IndicatorConfigBuilder<EmaConfig> for EmaConfigBuilder {
 /// let mut ema = Ema::new(config);
 ///
 /// // Seeding phase: collecting SMA
-/// assert_eq!(ema.compute(&Bar(2.0, 1)), None);
-/// assert_eq!(ema.compute(&Bar(4.0, 2)), None);
+/// assert_eq!(ema.compute(&bar(2.0, 1)), None);
+/// assert_eq!(ema.compute(&bar(4.0, 2)), None);
 ///
 /// // SMA seed = (2 + 4 + 6) / 3 = 4.0
-/// assert_eq!(ema.compute(&Bar(6.0, 3)), Some(4.0));
+/// assert_eq!(ema.compute(&bar(6.0, 3)), Some(4.0));
 ///
 /// // EMA(3) α = 0.5: 8 × 0.5 + 4 × 0.5 = 6.0
-/// assert_eq!(ema.compute(&Bar(8.0, 4)), Some(6.0));
+/// assert_eq!(ema.compute(&bar(8.0, 4)), Some(6.0));
 /// ```
 #[derive(Clone, Debug)]
 pub struct Ema {
@@ -233,7 +227,7 @@ impl Indicator for Ema {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl Ohlcv) -> Option<Price> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Price> {
         match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 self.core.push(price);

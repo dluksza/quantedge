@@ -36,7 +36,7 @@ impl PriceWindow<true> {
 }
 
 impl<const SUM_OF_SQUARES: bool> PriceWindow<SUM_OF_SQUARES> {
-    pub fn add(&mut self, ohlcv: &impl Ohlcv) -> Price {
+    pub fn add(&mut self, ohlcv: &Ohlcv) -> Price {
         let price = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 if let Some(old_price) = self.window.push(price) {

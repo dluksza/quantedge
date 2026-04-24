@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource, Rsi, RsiConfig, Stoch,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource, Rsi, RsiConfig, Stoch,
     Timestamp,
     internals::{RollingMaxMin, RollingSum},
 };
@@ -206,24 +206,10 @@ impl IndicatorConfigBuilder<StochRsiConfig> for StochRsiConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct StochRsiValue {
-    k: f64,
-    d: Option<f64>,
-}
-
-impl StochRsiValue {
     /// Smoothed %K value (0–100).
-    #[inline]
-    #[must_use]
-    pub fn k(&self) -> f64 {
-        self.k
-    }
-
+    pub k: f64,
     /// %D signal line, or `None` if not yet converged.
-    #[inline]
-    #[must_use]
-    pub fn d(&self) -> Option<f64> {
-        self.d
-    }
+    pub d: Option<f64>,
 }
 
 impl Display for StochRsiValue {
@@ -261,18 +247,12 @@ impl Display for StochRsiValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{StochRsi, StochRsiConfig};
+/// use quantedge_ta::{Ohlcv, StochRsi, StochRsiConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let config = StochRsiConfig::builder()
 ///     .rsi_length(NonZero::new(3).unwrap())
@@ -284,7 +264,7 @@ impl Display for StochRsiValue {
 ///
 /// // Feed bars until convergence
 /// for (i, price) in [10.0, 12.0, 11.0, 13.0, 14.0, 12.0, 15.0].iter().enumerate() {
-///     let result = stoch_rsi.compute(&Bar(*price, i as u64 + 1));
+///     let result = stoch_rsi.compute(&bar(*price, i as u64 + 1));
 ///     if i < 6 {
 ///         assert!(result.is_none());
 ///     } else {
@@ -330,12 +310,12 @@ impl Indicator for StochRsi {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         if let Some(rsi) = self.rsi.compute(ohlcv) {
-            let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+            let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
             self.current = if is_next_bar {
-                self.last_open_time = Some(ohlcv.open_time());
+                self.last_open_time = Some(ohlcv.open_time);
 
                 let k_sum = self
                     .max_min
@@ -497,17 +477,17 @@ mod tests {
                 s.compute(&bar(10.0 + t as f64, t));
             }
             let v7 = s.value().unwrap();
-            assert!(v7.d().is_none());
+            assert!(v7.d.is_none());
 
             let v8 = s.compute(&bar(20.0, 8)).unwrap();
-            assert!(v8.d().is_none());
+            assert!(v8.d.is_none());
 
             let v9 = s.compute(&bar(18.0, 9)).unwrap();
-            assert!(v9.d().is_none());
+            assert!(v9.d.is_none());
 
             // Bar 10: 4th d_sum push → first %D
             let v10 = s.compute(&bar(22.0, 10)).unwrap();
-            assert!(v10.d().is_some());
+            assert!(v10.d.is_some());
         }
     }
 
@@ -522,9 +502,9 @@ mod tests {
                 let val = s.compute(&bar(100.0, t));
                 if let Some(v) = val {
                     assert!(
-                        (v.k() - 50.0).abs() < 1e-10,
+                        (v.k - 50.0).abs() < 1e-10,
                         "flat price should give %K=50, got {}",
-                        v.k()
+                        v.k
                     );
                 }
             }
@@ -541,9 +521,9 @@ mod tests {
             }
             let v = last_val.unwrap();
             assert!(
-                (v.k() - 50.0).abs() < 1e-10,
+                (v.k - 50.0).abs() < 1e-10,
                 "constant RSI should give %K=50, got {}",
-                v.k()
+                v.k
             );
         }
 
@@ -559,9 +539,9 @@ mod tests {
             }
             let v = last_val.unwrap();
             assert!(
-                v.k() > 0.0 && v.k() < 100.0,
+                v.k > 0.0 && v.k < 100.0,
                 "expected intermediate %K, got {}",
-                v.k()
+                v.k
             );
         }
     }
@@ -576,10 +556,10 @@ mod tests {
             let original = s.compute(&bar(11.0, 8)).unwrap();
             let repainted = s.compute(&bar(20.0, 8)).unwrap();
             assert!(
-                (original.k() - repainted.k()).abs() > 1e-10,
+                (original.k - repainted.k).abs() > 1e-10,
                 "repaint should change %K: original={}, repainted={}",
-                original.k(),
-                repainted.k()
+                original.k,
+                repainted.k
             );
         }
 
@@ -595,10 +575,10 @@ mod tests {
             let expected = clean.compute(&bar(21.0, 8)).unwrap();
 
             assert!(
-                (final_val.k() - expected.k()).abs() < 1e-10,
+                (final_val.k - expected.k).abs() < 1e-10,
                 "multiple repaints should match single: got {} vs {}",
-                final_val.k(),
-                expected.k()
+                final_val.k,
+                expected.k
             );
         }
 
@@ -614,7 +594,7 @@ mod tests {
             let expected = clean.compute(&bar(19.0, 9)).unwrap();
 
             assert!(
-                (after.k() - expected.k()).abs() < 1e-10,
+                (after.k - expected.k).abs() < 1e-10,
                 "advance after repaint should match clean"
             );
         }
@@ -646,12 +626,8 @@ mod tests {
             ];
             for (i, &p) in prices.iter().enumerate() {
                 if let Some(v) = s.compute(&bar(p, i as u64 + 1)) {
-                    assert!(
-                        (0.0..=100.0).contains(&v.k()),
-                        "%K out of bounds: {}",
-                        v.k()
-                    );
-                    if let Some(d) = v.d() {
+                    assert!((0.0..=100.0).contains(&v.k), "%K out of bounds: {}", v.k);
+                    if let Some(d) = v.d {
                         assert!((0.0..=100.0).contains(&d), "%D out of bounds: {d}");
                     }
                 }
@@ -671,7 +647,7 @@ mod tests {
             let clone_val = cloned.compute(&bar(5.0, 8)).unwrap();
 
             assert!(
-                (orig.k() - clone_val.k()).abs() > 1e-10,
+                (orig.k - clone_val.k).abs() > 1e-10,
                 "divergent inputs should give different %K"
             );
         }
@@ -825,13 +801,13 @@ mod tests {
             // d_smooth=1 needs 2 %K values before %D appears
             let mut s = seeded_stoch_rsi();
             let val = s.value().unwrap();
-            assert!(val.k().is_finite());
+            assert!(val.k.is_finite());
 
             // Feed one more bar to get %D
             let v = s.compute(&bar(20.0, 8)).unwrap();
-            assert!(v.k().is_finite());
-            assert!(v.d().is_some());
-            assert!(v.d().unwrap().is_finite());
+            assert!(v.k.is_finite());
+            assert!(v.d.is_some());
+            assert!(v.d.unwrap().is_finite());
         }
     }
 }

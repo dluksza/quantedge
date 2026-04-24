@@ -45,13 +45,13 @@ fn stoch_rsi_14_14_3_3_matches_reference() {
             let ctx = format!("StochRsi(14,14,3,3) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.k(),
+                value.k,
                 reference[ref_idx].k,
                 TOLERANCE,
                 &format!("{ctx} %K"),
             );
 
-            if let Some(d) = value.d() {
+            if let Some(d) = value.d {
                 assert_near(d, reference[ref_idx].d, TOLERANCE, &format!("{ctx} %D"));
                 d_checked += 1;
             }

@@ -1,43 +1,19 @@
 use std::sync::{Arc, atomic::AtomicBool};
 
-use quantedge_ta::{Ohlcv, Price, Sma, SmaConfig, Timestamp};
+use quantedge_ta::{Sma, SmaConfig};
 
 use crate::{
-    binance_client::{BinanceOhlcv, stream_binance_klines},
+    binance_client::stream_binance_klines,
     utils::{print_data, register_sigint},
 };
 
 mod binance_client;
 mod utils;
 
-// Implement the `Ohlcv` trait on the caller's own candle type. quantedge-ta
-// never forces a conversion to a library-specific struct — any type that
-// exposes the five required fields (`open`, `high`, `low`, `close`,
-// `open_time`) works. `volume` is optional and defaults to 0.0.
-//
-// `open_time` is the bar-boundary key: two klines with the same `open_time`
-// are treated as the *same* bar (a repaint); a new `open_time` advances the
-// window.
-impl Ohlcv for BinanceOhlcv {
-    fn open(&self) -> Price {
-        self.open
-    }
-    fn high(&self) -> Price {
-        self.high
-    }
-    fn low(&self) -> Price {
-        self.low
-    }
-    fn close(&self) -> Price {
-        self.close
-    }
-    fn open_time(&self) -> Timestamp {
-        self.open_time
-    }
-    fn volume(&self) -> f64 {
-        self.volume
-    }
-}
+// Each kline coming from Binance is converted into an `Ohlcv` struct by
+// the binance_client module. `open_time` is the bar-boundary key: two
+// klines with the same `open_time` are treated as the *same* bar (a
+// repaint); a new `open_time` advances the window.
 
 fn main() {
     // `SmaConfig::default()` yields SMA(20) over Close. Every indicator config

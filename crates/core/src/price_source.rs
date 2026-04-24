@@ -39,23 +39,23 @@ impl Display for PriceSource {
 }
 
 impl PriceSource {
-    pub fn extract(self, ohlcv: &impl Ohlcv, prev_close: Option<Price>) -> Price {
+    pub fn extract(self, ohlcv: &Ohlcv, prev_close: Option<Price>) -> Price {
         match self {
-            Self::Open => ohlcv.open(),
-            Self::High => ohlcv.high(),
-            Self::Close => ohlcv.close(),
-            Self::Low => ohlcv.low(),
-            Self::HL2 => f64::midpoint(ohlcv.high(), ohlcv.low()),
-            Self::HLC3 => (ohlcv.high() + ohlcv.low() + ohlcv.close()) / 3.0,
-            Self::OHLC4 => (ohlcv.open() + ohlcv.high() + ohlcv.low() + ohlcv.close()) / 4.0,
-            Self::HLCC4 => (ohlcv.high() + ohlcv.low() + ohlcv.close() + ohlcv.close()) / 4.0,
+            Self::Open => ohlcv.open,
+            Self::High => ohlcv.high,
+            Self::Close => ohlcv.close,
+            Self::Low => ohlcv.low,
+            Self::HL2 => f64::midpoint(ohlcv.high, ohlcv.low),
+            Self::HLC3 => (ohlcv.high + ohlcv.low + ohlcv.close) / 3.0,
+            Self::OHLC4 => (ohlcv.open + ohlcv.high + ohlcv.low + ohlcv.close) / 4.0,
+            Self::HLCC4 => (ohlcv.high + ohlcv.low + ohlcv.close + ohlcv.close) / 4.0,
             Self::TrueRange => {
-                let hl = ohlcv.high() - ohlcv.low();
+                let hl = ohlcv.high - ohlcv.low;
 
                 match prev_close {
                     Some(prev_close) => {
-                        let hc = (ohlcv.high() - prev_close).abs();
-                        let lc = (ohlcv.low() - prev_close).abs();
+                        let hc = (ohlcv.high - prev_close).abs();
+                        let lc = (ohlcv.low - prev_close).abs();
                         hl.max(hc).max(lc)
                     }
                     None => hl,

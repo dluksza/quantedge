@@ -39,25 +39,25 @@ fn ichimoku_9_26_52_26_matches_reference() {
             let ctx = format!("Ichimoku at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.tenkan(),
+                value.tenkan,
                 reference[ref_idx].tenkan,
                 TOLERANCE,
                 &format!("{ctx} tenkan"),
             );
             assert_near(
-                value.kijun(),
+                value.kijun,
                 reference[ref_idx].kijun,
                 TOLERANCE,
                 &format!("{ctx} kijun"),
             );
             assert_near(
-                value.senkou_a(),
+                value.senkou_a,
                 reference[ref_idx].senkou_a,
                 TOLERANCE,
                 &format!("{ctx} senkou_a"),
             );
             assert_near(
-                value.senkou_b(),
+                value.senkou_b,
                 reference[ref_idx].senkou_b,
                 TOLERANCE,
                 &format!("{ctx} senkou_b"),

@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Price, PriceSource, Timestamp,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Ohlcv, Price, PriceSource,
+    Timestamp,
 };
 
 /// Anchor period for VWAP session resets.
@@ -64,22 +65,16 @@ impl Display for VwapAnchor {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Vwap, VwapConfig, VwapAnchor, Ohlcv, Price, Timestamp};
-///
-/// struct Bar(f64, f64, u64);
-/// impl Ohlcv for Bar {
-///     fn open(&self) -> Price { self.0 }
-///     fn high(&self) -> Price { self.0 }
-///     fn low(&self) -> Price { self.0 }
-///     fn close(&self) -> Price { self.0 }
-///     fn volume(&self) -> f64 { self.1 }
-///     fn open_time(&self) -> Timestamp { self.2 }
-/// }
+/// use quantedge_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
 ///
 /// let mut vwap = Vwap::new(VwapConfig::builder().anchor(VwapAnchor::User).build());
 ///
-/// let v = vwap.compute(&Bar(10.0, 100.0, 1)).unwrap();
-/// assert_eq!(v.vwap(), 10.0);
+/// let bar = Ohlcv {
+///     open: 10.0, high: 10.0, low: 10.0, close: 10.0,
+///     volume: 100.0, open_time: 1,
+/// };
+/// let v = vwap.compute(&bar).unwrap();
+/// assert_eq!(v.vwap, 10.0);
 /// ```
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct VwapConfig {
@@ -274,40 +269,14 @@ impl Display for VwapBand {
 /// Output of [`Vwap::compute`]: the VWAP line and optional bands.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct VwapValue {
-    vwap: Price,
-    band_1: Option<VwapBand>,
-    band_2: Option<VwapBand>,
-    band_3: Option<VwapBand>,
-}
-
-impl VwapValue {
     /// The volume-weighted average price.
-    #[inline]
-    #[must_use]
-    pub fn vwap(&self) -> Price {
-        self.vwap
-    }
-
+    pub vwap: Price,
     /// First standard-deviation band, if configured.
-    #[inline]
-    #[must_use]
-    pub fn band_1(&self) -> Option<VwapBand> {
-        self.band_1
-    }
-
+    pub band_1: Option<VwapBand>,
     /// Second standard-deviation band, if configured.
-    #[inline]
-    #[must_use]
-    pub fn band_2(&self) -> Option<VwapBand> {
-        self.band_2
-    }
-
+    pub band_2: Option<VwapBand>,
     /// Third standard-deviation band, if configured.
-    #[inline]
-    #[must_use]
-    pub fn band_3(&self) -> Option<VwapBand> {
-        self.band_3
-    }
+    pub band_3: Option<VwapBand>,
 }
 
 impl Display for VwapValue {
@@ -346,16 +315,10 @@ impl VwapValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Vwap, VwapConfig, VwapAnchor, Ohlcv, Price, Timestamp};
+/// use quantedge_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
 ///
-/// struct Bar(f64, f64, u64);
-/// impl Ohlcv for Bar {
-///     fn open(&self) -> Price { self.0 }
-///     fn high(&self) -> Price { self.0 }
-///     fn low(&self) -> Price { self.0 }
-///     fn close(&self) -> Price { self.0 }
-///     fn volume(&self) -> f64 { self.1 }
-///     fn open_time(&self) -> Timestamp { self.2 }
+/// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
 /// }
 ///
 /// let config = VwapConfig::builder()
@@ -363,12 +326,12 @@ impl VwapValue {
 ///     .build();
 /// let mut vwap = Vwap::new(config);
 ///
-/// let v1 = vwap.compute(&Bar(10.0, 100.0, 1)).unwrap();
-/// assert_eq!(v1.vwap(), 10.0);
+/// let v1 = vwap.compute(&bar(10.0, 100.0, 1)).unwrap();
+/// assert_eq!(v1.vwap, 10.0);
 ///
 /// // (10×100 + 20×200) / (100+200) = 5000/300 ≈ 16.667
-/// let v2 = vwap.compute(&Bar(20.0, 200.0, 2)).unwrap();
-/// assert!((v2.vwap() - 16.666_666_666_666_668).abs() < 1e-10);
+/// let v2 = vwap.compute(&bar(20.0, 200.0, 2)).unwrap();
+/// assert!((v2.vwap - 16.666_666_666_666_668).abs() < 1e-10);
 /// ```
 #[derive(Clone, Debug)]
 pub struct Vwap {
@@ -409,17 +372,17 @@ impl Indicator for Vwap {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
-        let volume = ohlcv.volume();
-        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
+        let volume = ohlcv.volume;
+        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
         if is_next_bar {
             self.prev_close = Some(self.cur_close);
-            self.last_open_time = Some(ohlcv.open_time());
+            self.last_open_time = Some(ohlcv.open_time);
 
             if self
                 .anchor
-                .is_some_and(|v| ohlcv.open_time().is_multiple_of(v))
+                .is_some_and(|v| ohlcv.open_time.is_multiple_of(v))
             {
                 self.do_reset();
             } else {
@@ -429,7 +392,7 @@ impl Indicator for Vwap {
             }
         }
 
-        self.cur_close = ohlcv.close();
+        self.cur_close = ohlcv.close;
         let price = self.config.source.extract(ohlcv, self.prev_close);
 
         self.pending_price = price;
@@ -574,7 +537,7 @@ mod tests {
         fn single_bar_equals_price() {
             let mut vwap = user_vwap();
             let v = vwap.compute(&vbar(10.0, 100.0, 1)).unwrap();
-            assert_eq!(v.vwap(), 10.0);
+            assert_eq!(v.vwap, 10.0);
         }
 
         #[test]
@@ -583,7 +546,7 @@ mod tests {
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 200.0, 2)).unwrap();
             // (10*100 + 20*200) / (100+200) = 5000/300
-            assert_approx!(v.vwap(), 5000.0 / 300.0);
+            assert_approx!(v.vwap, 5000.0 / 300.0);
         }
 
         #[test]
@@ -593,7 +556,7 @@ mod tests {
             vwap.compute(&vbar(20.0, 200.0, 2));
             let v = vwap.compute(&vbar(30.0, 300.0, 3)).unwrap();
             // (10*100 + 20*200 + 30*300) / (100+200+300) = 14000/600
-            assert_approx!(v.vwap(), 14000.0 / 600.0);
+            assert_approx!(v.vwap, 14000.0 / 600.0);
         }
 
         #[test]
@@ -601,16 +564,16 @@ mod tests {
             let mut vwap = user_vwap();
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 100.0, 2)).unwrap();
-            assert_approx!(v.vwap(), 15.0);
+            assert_approx!(v.vwap, 15.0);
         }
 
         #[test]
         fn no_bands_when_not_configured() {
             let mut vwap = user_vwap();
             let v = vwap.compute(&vbar(10.0, 100.0, 1)).unwrap();
-            assert!(v.band_1().is_none());
-            assert!(v.band_2().is_none());
-            assert!(v.band_3().is_none());
+            assert!(v.band_1.is_none());
+            assert!(v.band_2.is_none());
+            assert!(v.band_3.is_none());
         }
     }
 
@@ -622,9 +585,9 @@ mod tests {
             let mut vwap = user_vwap_with_bands();
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 200.0, 2)).unwrap();
-            assert!(v.band_1().is_some());
-            assert!(v.band_2().is_some());
-            assert!(v.band_3().is_none());
+            assert!(v.band_1.is_some());
+            assert!(v.band_2.is_some());
+            assert!(v.band_3.is_none());
         }
 
         #[test]
@@ -632,9 +595,9 @@ mod tests {
             let mut vwap = user_vwap_with_bands();
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 200.0, 2)).unwrap();
-            let b1 = v.band_1().unwrap();
-            let midpoint = b1.upper().midpoint(b1.lower());
-            assert_approx!(midpoint, v.vwap());
+            let b1 = v.band_1.unwrap();
+            let midpoint = b1.upper.midpoint(b1.lower);
+            assert_approx!(midpoint, v.vwap);
         }
 
         #[test]
@@ -642,20 +605,20 @@ mod tests {
             let mut vwap = user_vwap_with_bands();
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 200.0, 2)).unwrap();
-            let b1 = v.band_1().unwrap();
-            let b2 = v.band_2().unwrap();
-            assert!(b2.upper() > b1.upper());
-            assert!(b2.lower() < b1.lower());
+            let b1 = v.band_1.unwrap();
+            let b2 = v.band_2.unwrap();
+            assert!(b2.upper > b1.upper);
+            assert!(b2.lower < b1.lower);
         }
 
         #[test]
         fn single_price_zero_std_dev() {
             let mut vwap = user_vwap_with_bands();
             let v = vwap.compute(&vbar(10.0, 100.0, 1)).unwrap();
-            let b1 = v.band_1().unwrap();
+            let b1 = v.band_1.unwrap();
             // All same price → std_dev = 0 → bands collapse to vwap
-            assert_eq!(b1.upper(), v.vwap());
-            assert_eq!(b1.lower(), v.vwap());
+            assert_eq!(b1.upper, v.vwap);
+            assert_eq!(b1.lower, v.vwap);
         }
     }
 
@@ -669,7 +632,7 @@ mod tests {
             vwap.compute(&vbar(20.0, 200.0, 2));
             vwap.reset();
             let v = vwap.compute(&vbar(30.0, 300.0, 3)).unwrap();
-            assert_eq!(v.vwap(), 30.0);
+            assert_eq!(v.vwap, 30.0);
         }
 
         #[test]
@@ -690,7 +653,7 @@ mod tests {
 
             // Bar at next day boundary → reset
             let v = vwap.compute(&vbar(50.0, 500.0, day_us * 2)).unwrap();
-            assert_eq!(v.vwap(), 50.0);
+            assert_eq!(v.vwap, 50.0);
         }
     }
 
@@ -705,7 +668,7 @@ mod tests {
             // Repaint bar 2 with different price
             let v = vwap.compute(&vbar(30.0, 200.0, 2)).unwrap();
             // (10*100 + 30*200) / 300 = 7000/300
-            assert_approx!(v.vwap(), 7000.0 / 300.0);
+            assert_approx!(v.vwap, 7000.0 / 300.0);
         }
 
         #[test]
@@ -715,7 +678,7 @@ mod tests {
             vwap.compute(&vbar(20.0, 200.0, 2));
             vwap.compute(&vbar(25.0, 200.0, 2)); // repaint
             let v = vwap.compute(&vbar(30.0, 200.0, 2)).unwrap();
-            assert_approx!(v.vwap(), 7000.0 / 300.0);
+            assert_approx!(v.vwap, 7000.0 / 300.0);
         }
 
         #[test]
@@ -727,7 +690,7 @@ mod tests {
             // Advance: cumulative includes repainted bar 2
             let v = vwap.compute(&vbar(40.0, 100.0, 3)).unwrap();
             // (10*100 + 30*200 + 40*100) / (100+200+100) = 11000/400
-            assert_approx!(v.vwap(), 11000.0 / 400.0);
+            assert_approx!(v.vwap, 11000.0 / 400.0);
         }
 
         #[test]
@@ -735,7 +698,7 @@ mod tests {
             let mut vwap = user_vwap();
             vwap.compute(&vbar(10.0, 100.0, 1));
             let v = vwap.compute(&vbar(20.0, 200.0, 1)).unwrap();
-            assert_eq!(v.vwap(), 20.0);
+            assert_eq!(v.vwap, 20.0);
         }
     }
 
@@ -748,25 +711,25 @@ mod tests {
 
             // Bar 1: open
             let v = vwap.compute(&vbar(10.0, 100.0, 1)).unwrap();
-            assert_eq!(v.vwap(), 10.0);
+            assert_eq!(v.vwap, 10.0);
             // Bar 1: close (repaint)
             let v = vwap.compute(&vbar(12.0, 150.0, 1)).unwrap();
-            assert_eq!(v.vwap(), 12.0);
+            assert_eq!(v.vwap, 12.0);
 
             // Bar 2: open
             let v = vwap.compute(&vbar(15.0, 200.0, 2)).unwrap();
             // (12*150 + 15*200) / (150+200) = 4800/350
-            assert_approx!(v.vwap(), 4800.0 / 350.0);
+            assert_approx!(v.vwap, 4800.0 / 350.0);
 
             // Bar 2: close (repaint)
             let v = vwap.compute(&vbar(14.0, 200.0, 2)).unwrap();
             // (12*150 + 14*200) / (150+200) = 4600/350
-            assert_approx!(v.vwap(), 4600.0 / 350.0);
+            assert_approx!(v.vwap, 4600.0 / 350.0);
 
             // Bar 3
             let v = vwap.compute(&vbar(20.0, 300.0, 3)).unwrap();
             // (12*150 + 14*200 + 20*300) / (150+200+300) = 10600/650
-            assert_approx!(v.vwap(), 10600.0 / 650.0);
+            assert_approx!(v.vwap, 10600.0 / 650.0);
         }
     }
 
@@ -784,7 +747,7 @@ mod tests {
             let v_orig = vwap.compute(&vbar(30.0, 300.0, 3)).unwrap();
             let v_clone = cloned.compute(&vbar(50.0, 500.0, 3)).unwrap();
 
-            assert!((v_orig.vwap() - v_clone.vwap()).abs() > 1e-10);
+            assert!((v_orig.vwap - v_clone.vwap).abs() > 1e-10);
         }
     }
 
@@ -797,9 +760,9 @@ mod tests {
             let config = VwapConfig::default();
             assert_eq!(config.source(), PriceSource::HLC3);
             assert_eq!(config.anchor(), VwapAnchor::Day);
-            assert!(config.band_1().is_none());
-            assert!(config.band_2().is_none());
-            assert!(config.band_3().is_none());
+            assert!(config.band_1.is_none());
+            assert!(config.band_2.is_none());
+            assert!(config.band_3.is_none());
         }
 
         #[test]

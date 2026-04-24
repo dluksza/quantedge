@@ -23,22 +23,22 @@ impl BarState {
         }
     }
 
-    pub(crate) fn handle(&mut self, ohlcv: &impl Ohlcv) -> BarAction {
+    pub(crate) fn handle(&mut self, ohlcv: &Ohlcv) -> BarAction {
         debug_assert!(
-            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time()),
+            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time),
             "open_time must be non-decreasing: last={}, got={}",
             self.last_open_time.unwrap_or(0),
-            ohlcv.open_time(),
+            ohlcv.open_time,
         );
 
-        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
         if is_next_bar {
             self.prev_close = self.curr_close;
-            self.last_open_time = Some(ohlcv.open_time());
+            self.last_open_time = Some(ohlcv.open_time);
         }
 
-        self.curr_close = Some(ohlcv.close());
+        self.curr_close = Some(ohlcv.close);
 
         let price = self.price_source.extract(ohlcv, self.prev_close);
 

@@ -124,29 +124,9 @@ impl IndicatorConfigBuilder<AdxConfig> for AdxConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AdxValue {
-    adx: Price,
-    plus_di: Price,
-    minus_di: Price,
-}
-
-impl AdxValue {
-    #[must_use]
-    #[inline]
-    pub fn adx(&self) -> Price {
-        self.adx
-    }
-
-    #[must_use]
-    #[inline]
-    pub fn plus_di(&self) -> Price {
-        self.plus_di
-    }
-
-    #[must_use]
-    #[inline]
-    pub fn minus_di(&self) -> Price {
-        self.minus_di
-    }
+    pub adx: Price,
+    pub plus_di: Price,
+    pub minus_di: Price,
 }
 
 impl Display for AdxValue {
@@ -181,18 +161,12 @@ impl Display for AdxValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Adx, AdxConfig};
+/// use quantedge_ta::{Adx, AdxConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let config = AdxConfig::builder()
 ///     .length(NonZero::new(3).unwrap())
@@ -200,14 +174,14 @@ impl Display for AdxValue {
 /// let mut adx = Adx::new(config);
 ///
 /// // Seeding phase (convergence = length × 2 = 6 bars)
-/// assert!(adx.compute(&Bar { o: 10.0, h: 15.0, l: 8.0, c: 12.0, t: 1 }).is_none());
-/// assert!(adx.compute(&Bar { o: 12.0, h: 18.0, l: 10.0, c: 16.0, t: 2 }).is_none());
-/// assert!(adx.compute(&Bar { o: 16.0, h: 20.0, l: 14.0, c: 18.0, t: 3 }).is_none());
-/// assert!(adx.compute(&Bar { o: 18.0, h: 22.0, l: 15.0, c: 20.0, t: 4 }).is_none());
-/// assert!(adx.compute(&Bar { o: 20.0, h: 25.0, l: 17.0, c: 23.0, t: 5 }).is_none());
+/// assert!(adx.compute(&ohlc(10.0, 15.0, 8.0, 12.0, 1)).is_none());
+/// assert!(adx.compute(&ohlc(12.0, 18.0, 10.0, 16.0, 2)).is_none());
+/// assert!(adx.compute(&ohlc(16.0, 20.0, 14.0, 18.0, 3)).is_none());
+/// assert!(adx.compute(&ohlc(18.0, 22.0, 15.0, 20.0, 4)).is_none());
+/// assert!(adx.compute(&ohlc(20.0, 25.0, 17.0, 23.0, 5)).is_none());
 ///
 /// // ADX output begins
-/// let value = adx.compute(&Bar { o: 23.0, h: 28.0, l: 19.0, c: 26.0, t: 6 });
+/// let value = adx.compute(&ohlc(23.0, 28.0, 19.0, 26.0, 6));
 /// assert!(value.is_some());
 /// ```
 #[derive(Clone, Debug)]
@@ -252,7 +226,7 @@ impl Indicator for Adx {
     }
 
     #[allow(clippy::similar_names)]
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(true_range) => {
                 let smooth_tr = self.smoothed_tr.push(true_range);
@@ -325,8 +299,8 @@ impl Indicator for Adx {
             }
         };
 
-        self.current_high = ohlcv.high();
-        self.current_low = ohlcv.low();
+        self.current_high = ohlcv.high;
+        self.current_low = ohlcv.low;
 
         self.current
     }
@@ -342,9 +316,9 @@ impl Adx {
         if a > b && a > 0.0 { a } else { 0.0 }
     }
 
-    fn dm(ohlcv: &impl Ohlcv, prev_high: Price, prev_low: Price) -> (Price, Price) {
-        let move_up = ohlcv.high() - prev_high;
-        let move_down = prev_low - ohlcv.low();
+    fn dm(ohlcv: &Ohlcv, prev_high: Price, prev_low: Price) -> (Price, Price) {
+        let move_up = ohlcv.high - prev_high;
+        let move_down = prev_low - ohlcv.low;
 
         let plus_dm = Adx::d_move(move_up, move_down);
         let minus_dm = Adx::d_move(move_down, move_up);
@@ -446,10 +420,10 @@ mod tests {
             let a = seeded_adx3();
             let val = a.value().unwrap();
             assert!(
-                val.plus_di() > val.minus_di(),
+                val.plus_di > val.minus_di,
                 "+DI should exceed -DI in uptrend: +DI={}, -DI={}",
-                val.plus_di(),
-                val.minus_di()
+                val.plus_di,
+                val.minus_di
             );
         }
 
@@ -465,10 +439,10 @@ mod tests {
             a.compute(&ohlc(12.0, 13.0, 6.0, 8.0, 6));
             let val = a.compute(&ohlc(8.0, 9.0, 3.0, 5.0, 7)).unwrap();
             assert!(
-                val.minus_di() > val.plus_di(),
+                val.minus_di > val.plus_di,
                 "-DI should exceed +DI in downtrend: -DI={}, +DI={}",
-                val.minus_di(),
-                val.plus_di()
+                val.minus_di,
+                val.plus_di
             );
         }
 
@@ -476,7 +450,7 @@ mod tests {
         fn adx_positive_in_trend() {
             let a = seeded_adx3();
             let val = a.value().unwrap();
-            assert!(val.adx() > 0.0, "ADX should be positive in a trend");
+            assert!(val.adx > 0.0, "ADX should be positive in a trend");
         }
     }
 
@@ -500,12 +474,12 @@ mod tests {
             for b in &bars {
                 if let Some(v) = a.compute(b) {
                     assert!(
-                        (0.0..=100.0).contains(&v.adx()),
+                        (0.0..=100.0).contains(&v.adx),
                         "ADX out of bounds: {}",
-                        v.adx()
+                        v.adx
                     );
-                    assert!(v.plus_di() >= 0.0, "+DI negative: {}", v.plus_di());
-                    assert!(v.minus_di() >= 0.0, "-DI negative: {}", v.minus_di());
+                    assert!(v.plus_di >= 0.0, "+DI negative: {}", v.plus_di);
+                    assert!(v.minus_di >= 0.0, "-DI negative: {}", v.minus_di);
                 }
             }
         }
@@ -522,14 +496,14 @@ mod tests {
             }
             let val = a.value().unwrap();
             assert!(
-                val.plus_di().abs() < 1e-10,
+                val.plus_di.abs() < 1e-10,
                 "flat market +DI should be 0, got {}",
-                val.plus_di()
+                val.plus_di
             );
             assert!(
-                val.minus_di().abs() < 1e-10,
+                val.minus_di.abs() < 1e-10,
                 "flat market -DI should be 0, got {}",
-                val.minus_di()
+                val.minus_di
             );
         }
     }
@@ -544,10 +518,10 @@ mod tests {
             // Repaint with much higher high — +DI should increase
             let repainted = a.compute(&ohlc(29.0, 46.0, 25.0, 44.0, 8)).unwrap();
             assert!(
-                repainted.plus_di() > original.plus_di(),
+                repainted.plus_di > original.plus_di,
                 "higher high should increase +DI: {} vs {}",
-                repainted.plus_di(),
-                original.plus_di()
+                repainted.plus_di,
+                original.plus_di
             );
         }
 
@@ -562,9 +536,9 @@ mod tests {
             let mut clean = seeded_adx3();
             let expected = clean.compute(&ohlc(29.0, 33.0, 26.0, 30.0, 8)).unwrap();
 
-            assert!((final_val.adx() - expected.adx()).abs() < 1e-10);
-            assert!((final_val.plus_di() - expected.plus_di()).abs() < 1e-10);
-            assert!((final_val.minus_di() - expected.minus_di()).abs() < 1e-10);
+            assert!((final_val.adx - expected.adx).abs() < 1e-10);
+            assert!((final_val.plus_di - expected.plus_di).abs() < 1e-10);
+            assert!((final_val.minus_di - expected.minus_di).abs() < 1e-10);
         }
 
         #[test]
@@ -578,9 +552,9 @@ mod tests {
             clean.compute(&ohlc(29.0, 36.0, 24.0, 34.0, 8));
             let expected = clean.compute(&ohlc(34.0, 39.0, 30.0, 37.0, 9)).unwrap();
 
-            assert!((after.adx() - expected.adx()).abs() < 1e-10);
-            assert!((after.plus_di() - expected.plus_di()).abs() < 1e-10);
-            assert!((after.minus_di() - expected.minus_di()).abs() < 1e-10);
+            assert!((after.adx - expected.adx).abs() < 1e-10);
+            assert!((after.plus_di - expected.plus_di).abs() < 1e-10);
+            assert!((after.minus_di - expected.minus_di).abs() < 1e-10);
         }
 
         #[test]
@@ -605,7 +579,7 @@ mod tests {
             let clone_val = cloned.compute(&ohlc(29.0, 21.0, 11.0, 14.0, 8)).unwrap();
 
             assert!(
-                (orig.adx() - clone_val.adx()).abs() > 1e-10,
+                (orig.adx - clone_val.adx).abs() > 1e-10,
                 "divergent inputs should give different ADX"
             );
         }
@@ -724,9 +698,9 @@ mod tests {
         fn accessors_return_components() {
             let a = seeded_adx3();
             let val = a.value().unwrap();
-            assert!(val.adx().is_finite());
-            assert!(val.plus_di().is_finite());
-            assert!(val.minus_di().is_finite());
+            assert!(val.adx.is_finite());
+            assert!(val.plus_di.is_finite());
+            assert!(val.minus_di.is_finite());
         }
     }
 }

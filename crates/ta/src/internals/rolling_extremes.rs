@@ -34,9 +34,9 @@ impl RollingExtremes {
         self.low_val
     }
 
-    pub(crate) fn push(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
-        let high = ohlcv.high();
-        let low = ohlcv.low();
+    pub(crate) fn push(&mut self, ohlcv: &Ohlcv) -> Option<(Price, Price)> {
+        let high = ohlcv.high;
+        let low = ohlcv.low;
 
         self.highs.push(high);
 
@@ -71,9 +71,9 @@ impl RollingExtremes {
     ///
     /// Assumes OHLCV monotonicity: on repaint, the high can only go higher
     /// and the low can only go lower (as new ticks arrive within a bar).
-    pub(crate) fn replace(&mut self, ohlcv: &impl Ohlcv) -> Option<(Price, Price)> {
-        let high = ohlcv.high();
-        let low = ohlcv.low();
+    pub(crate) fn replace(&mut self, ohlcv: &Ohlcv) -> Option<(Price, Price)> {
+        let high = ohlcv.high;
+        let low = ohlcv.low;
 
         let prev_high = self.highs.replace(high);
         let prev_low = self.lows.replace(low);

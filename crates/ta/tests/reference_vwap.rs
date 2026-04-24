@@ -25,7 +25,7 @@ fn matches_reference() {
                 .value()
                 .unwrap_or_else(|| panic!("vwap returned None at t={}", bar.open_time));
             assert_near(
-                value.vwap(),
+                value.vwap,
                 reference[ref_idx].expected,
                 TOLERANCE,
                 &format!("vwap at bar {ref_idx} (t={})", bar.open_time),
@@ -53,8 +53,8 @@ fn repaint_matches_closed() {
         for tick in repaint_sequence(bar) {
             repainted.compute(&tick);
         }
-        let c = closed.value().map(|v| v.vwap());
-        let r = repainted.value().map(|v| v.vwap());
+        let c = closed.value().map(|v| v.vwap);
+        let r = repainted.value().map(|v| v.vwap);
         assert_values_match(i, c, r, TOLERANCE);
     }
 }

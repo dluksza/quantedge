@@ -170,33 +170,15 @@ impl IndicatorConfigBuilder<BbConfig> for BbConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BbValue {
-    upper: Price,
-    middle: Price,
-    lower: Price,
+    /// Upper band: `SMA + k × σ`.
+    pub upper: Price,
+    /// Middle band: SMA of the window.
+    pub middle: Price,
+    /// Lower band: `SMA − k × σ`.
+    pub lower: Price,
 }
 
 impl BbValue {
-    /// Upper band: `SMA + k × σ`.
-    #[inline]
-    #[must_use]
-    pub fn upper(&self) -> Price {
-        self.upper
-    }
-
-    /// Middle band: SMA of the window.
-    #[inline]
-    #[must_use]
-    pub fn middle(&self) -> Price {
-        self.middle
-    }
-
-    /// Lower band: `SMA − k × σ`.
-    #[inline]
-    #[must_use]
-    pub fn lower(&self) -> Price {
-        self.lower
-    }
-
     /// Band width: `upper − lower`.
     ///
     /// Useful for measuring volatility. Narrow width indicates
@@ -235,18 +217,12 @@ impl Display for BbValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Bb, BbConfig};
+/// use quantedge_ta::{Bb, BbConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let config = BbConfig::builder()
 ///     .length(NonZero::new(20).unwrap())
@@ -254,11 +230,11 @@ impl Display for BbValue {
 /// let mut bb = Bb::new(config);
 ///
 /// // Feed bars...
-/// # for i in 1..=19 { bb.compute(&Bar(100.0, i)); }
+/// # for i in 1..=19 { bb.compute(&bar(100.0, i)); }
 ///
-/// if let Some(value) = bb.compute(&Bar(100.0, 20)) {
+/// if let Some(value) = bb.compute(&bar(100.0, 20)) {
 ///     println!("upper: {}, middle: {}, lower: {}",
-///         value.upper(), value.middle(), value.lower());
+///         value.upper, value.middle, value.lower);
 /// }
 /// ```
 #[derive(Clone, Debug)]
@@ -287,7 +263,7 @@ impl Indicator for Bb {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.window.add(ohlcv);
 
         self.current = match (self.window.sum(), self.window.sum_of_squares()) {
@@ -351,19 +327,19 @@ mod tests {
     fn assert_bb(value: Option<BbValue>, upper: f64, middle: f64, lower: f64) {
         let v = value.expect("expected Some(BbValue)");
         assert!(
-            (v.upper() - upper).abs() < 1e-10,
+            (v.upper - upper).abs() < 1e-10,
             "upper: expected {upper}, got {}",
-            v.upper()
+            v.upper
         );
         assert!(
-            (v.middle() - middle).abs() < 1e-10,
+            (v.middle - middle).abs() < 1e-10,
             "middle: expected {middle}, got {}",
-            v.middle()
+            v.middle
         );
         assert!(
-            (v.lower() - lower).abs() < 1e-10,
+            (v.lower - lower).abs() < 1e-10,
             "lower: expected {lower}, got {}",
-            v.lower()
+            v.lower
         );
     }
 
@@ -412,8 +388,8 @@ mod tests {
             let mut bb = bb(2);
             bb.compute(&bar(3.0, 1));
             let v = bb.compute(&bar(5.0, 2)).unwrap();
-            let upper_dist = v.upper() - v.middle();
-            let lower_dist = v.middle() - v.lower();
+            let upper_dist = v.upper - v.middle;
+            let lower_dist = v.middle - v.lower;
             assert!((upper_dist - lower_dist).abs() < 1e-10);
         }
     }
@@ -503,7 +479,7 @@ mod tests {
             let mut bb = bb(2);
             bb.compute(&bar(3.0, 1));
             let v = bb.compute(&bar(5.0, 2)).unwrap();
-            assert!((v.width() - (v.upper() - v.lower())).abs() < 1e-10);
+            assert!((v.width() - (v.upper - v.lower)).abs() < 1e-10);
         }
 
         #[test]
@@ -612,9 +588,7 @@ mod tests {
 
             // Clone converges independently with different data
             assert!(cloned.compute(&bar(90.0, 3)).is_some());
-            assert!(
-                (bb.value().unwrap().middle() - cloned.value().unwrap().middle()).abs() > 1e-10
-            );
+            assert!((bb.value().unwrap().middle - cloned.value().unwrap().middle).abs() > 1e-10);
         }
     }
 
@@ -633,7 +607,7 @@ mod tests {
             bb.compute(&Bar::new(0.0, 20.0, 10.0, 0.0).at(1)); // HL2 = 15
             let v = bb.compute(&Bar::new(0.0, 30.0, 20.0, 0.0).at(2)).unwrap(); // HL2 = 25
             // [15, 25], mean=20
-            assert!((v.middle() - 20.0).abs() < 1e-10);
+            assert!((v.middle - 20.0).abs() < 1e-10);
         }
     }
 

@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Price, Timestamp,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, Timestamp,
     internals::RollingExtremes,
 };
 
@@ -108,32 +108,12 @@ impl IndicatorConfigBuilder<DcConfig> for DcConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DcValue {
-    upper: Price,
-    middle: Price,
-    lower: Price,
-}
-
-impl DcValue {
     /// Upper band (highest high).
-    #[inline]
-    #[must_use]
-    pub fn upper(&self) -> Price {
-        self.upper
-    }
-
+    pub upper: Price,
     /// Middle band: `(upper + lower) / 2`.
-    #[inline]
-    #[must_use]
-    pub fn middle(&self) -> Price {
-        self.middle
-    }
-
+    pub middle: Price,
     /// Lower band (lowest low).
-    #[inline]
-    #[must_use]
-    pub fn lower(&self) -> Price {
-        self.lower
-    }
+    pub lower: Price,
 }
 
 impl Display for DcValue {
@@ -166,21 +146,16 @@ impl Display for DcValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Dc, DcConfig};
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+/// use quantedge_ta::{Dc, DcConfig, Ohlcv};
+///
+/// let bar = Ohlcv {
+///     open: 10.0, high: 12.0, low: 8.0, close: 11.0,
+///     volume: 0.0, open_time: 1,
+/// };
 ///
 /// let mut dc = Dc::new(DcConfig::builder().build());
 /// // Returns None until the lookback window (default 20) is full.
-/// assert!(dc.compute(&Bar { o: 10.0, h: 12.0, l: 8.0, c: 11.0, t: 1 }).is_none());
+/// assert!(dc.compute(&bar).is_none());
 /// ```
 #[derive(Clone, Debug)]
 pub struct Dc {
@@ -203,18 +178,18 @@ impl Indicator for Dc {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         debug_assert!(
-            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time()),
+            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time),
             "open_time must be non-decreasing: last={}, got={}",
             self.last_open_time.unwrap_or(0),
-            ohlcv.open_time(),
+            ohlcv.open_time,
         );
 
-        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
         let extremes = if is_next_bar {
-            self.last_open_time = Some(ohlcv.open_time());
+            self.last_open_time = Some(ohlcv.open_time);
             self.extremes.push(ohlcv)
         } else {
             self.extremes.replace(ohlcv)
@@ -297,9 +272,9 @@ mod tests {
             // Window bars 1–3: highest_high=14, lowest_low=8
             let d = seeded_dc();
             let val = d.value().unwrap();
-            assert_eq!(val.upper(), 14.0);
-            assert_eq!(val.lower(), 8.0);
-            assert_eq!(val.middle(), 11.0);
+            assert_eq!(val.upper, 14.0);
+            assert_eq!(val.lower, 8.0);
+            assert_eq!(val.middle, 11.0);
         }
 
         #[test]
@@ -309,9 +284,9 @@ mod tests {
             // highest_high = max(14, 13, 15) = 15
             // lowest_low = min(9, 10, 11) = 9
             let val = d.compute(&ohlc(12.0, 15.0, 11.0, 12.0, 4)).unwrap();
-            assert_eq!(val.upper(), 15.0);
-            assert_eq!(val.lower(), 9.0);
-            assert_eq!(val.middle(), 12.0);
+            assert_eq!(val.upper, 15.0);
+            assert_eq!(val.lower, 9.0);
+            assert_eq!(val.middle, 12.0);
         }
 
         #[test]
@@ -322,9 +297,9 @@ mod tests {
             d.compute(&ohlc(10.0, 16.0, 10.0, 14.0, 3));
             // Window bars 3–4: h=16,12 → 16, l=10,7 → 7
             let val = d.compute(&ohlc(10.0, 12.0, 7.0, 10.0, 4)).unwrap();
-            assert_eq!(val.upper(), 16.0);
-            assert_eq!(val.lower(), 7.0);
-            assert_eq!(val.middle(), 11.5);
+            assert_eq!(val.upper, 16.0);
+            assert_eq!(val.lower, 7.0);
+            assert_eq!(val.middle, 11.5);
         }
 
         #[test]
@@ -333,9 +308,9 @@ mod tests {
             for t in 1..=5 {
                 let val = d.compute(&ohlc(10.0, 10.0, 10.0, 10.0, t));
                 if let Some(v) = val {
-                    assert_eq!(v.upper(), 10.0);
-                    assert_eq!(v.lower(), 10.0);
-                    assert_eq!(v.middle(), 10.0);
+                    assert_eq!(v.upper, 10.0);
+                    assert_eq!(v.lower, 10.0);
+                    assert_eq!(v.middle, 10.0);
                 }
             }
         }
@@ -350,7 +325,7 @@ mod tests {
             let original = d.compute(&ohlc(12.0, 16.0, 11.0, 13.0, 4)).unwrap();
             // Repaint bar 4 with higher high
             let repainted = d.compute(&ohlc(12.0, 20.0, 11.0, 13.0, 4)).unwrap();
-            assert!(repainted.upper() > original.upper());
+            assert!(repainted.upper > original.upper);
         }
 
         #[test]
@@ -364,9 +339,9 @@ mod tests {
             let mut clean = seeded_dc();
             let expected = clean.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 4)).unwrap();
 
-            assert_eq!(final_val.upper(), expected.upper());
-            assert_eq!(final_val.lower(), expected.lower());
-            assert_eq!(final_val.middle(), expected.middle());
+            assert_eq!(final_val.upper, expected.upper);
+            assert_eq!(final_val.lower, expected.lower);
+            assert_eq!(final_val.middle, expected.middle);
         }
 
         #[test]
@@ -380,9 +355,9 @@ mod tests {
             clean.compute(&ohlc(12.0, 16.0, 7.0, 13.0, 4));
             let expected = clean.compute(&ohlc(14.0, 17.0, 12.0, 14.0, 5)).unwrap();
 
-            assert_eq!(after.upper(), expected.upper());
-            assert_eq!(after.lower(), expected.lower());
-            assert_eq!(after.middle(), expected.middle());
+            assert_eq!(after.upper, expected.upper);
+            assert_eq!(after.lower, expected.lower);
+            assert_eq!(after.middle, expected.middle);
         }
 
         #[test]
@@ -409,7 +384,7 @@ mod tests {
             let clone_val = cloned.compute(&ohlc(12.0, 13.0, 7.0, 9.0, 4)).unwrap();
 
             assert!(
-                (orig.upper() - clone_val.upper()).abs() > 1e-10,
+                (orig.upper - clone_val.upper).abs() > 1e-10,
                 "divergent inputs should give different upper"
             );
         }
@@ -513,12 +488,12 @@ mod tests {
         fn accessors_return_correct_values() {
             let d = seeded_dc();
             let val = d.value().unwrap();
-            assert!(val.upper().is_finite());
-            assert!(val.lower().is_finite());
-            assert!(val.middle().is_finite());
-            assert!(val.upper() >= val.lower());
-            assert!(val.middle() >= val.lower());
-            assert!(val.middle() <= val.upper());
+            assert!(val.upper.is_finite());
+            assert!(val.lower.is_finite());
+            assert!(val.middle.is_finite());
+            assert!(val.upper >= val.lower);
+            assert!(val.middle >= val.lower);
+            assert!(val.middle <= val.upper);
         }
     }
 

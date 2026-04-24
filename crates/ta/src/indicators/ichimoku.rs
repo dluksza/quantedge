@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Price,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price,
     internals::{BarAction, BarState, RingBuffer, RollingExtremes},
 };
 
@@ -204,53 +204,21 @@ impl IndicatorConfigBuilder<IchimokuConfig> for IchimokuBuilder {
 /// (leading span B), and the Chikou close price (lagging span input).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct IchimokuValue {
-    tenkan: Price,
-    kijun: Price,
-    senkou_a: Price,
-    senkou_b: Price,
-    chikou_close: Price,
-}
-
-impl IchimokuValue {
     /// Tenkan-sen (conversion line): midpoint of highest high and
     /// lowest low over the tenkan lookback window.
-    #[inline]
-    #[must_use]
-    pub fn tenkan(&self) -> Price {
-        self.tenkan
-    }
-
+    pub tenkan: Price,
     /// Kijun-sen (base line): midpoint of highest high and lowest
     /// low over the kijun lookback window.
-    #[inline]
-    #[must_use]
-    pub fn kijun(&self) -> Price {
-        self.kijun
-    }
-
+    pub kijun: Price,
     /// Senkou Span A (leading span A): midpoint of Tenkan-sen and
     /// Kijun-sen, displaced forward.
-    #[inline]
-    #[must_use]
-    pub fn senkou_a(&self) -> Price {
-        self.senkou_a
-    }
-
+    pub senkou_a: Price,
     /// Senkou Span B (leading span B): midpoint of highest high and
     /// lowest low over the `senkou_b` lookback window, displaced forward.
-    #[inline]
-    #[must_use]
-    pub fn senkou_b(&self) -> Price {
-        self.senkou_b
-    }
-
+    pub senkou_b: Price,
     /// Chikou close price (lagging span input): the current bar's
     /// close price, plotted displaced bars back.
-    #[inline]
-    #[must_use]
-    pub fn chikou_close(&self) -> Price {
-        self.chikou_close
-    }
+    pub chikou_close: Price,
 }
 
 impl Display for IchimokuValue {
@@ -287,18 +255,8 @@ impl Display for IchimokuValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ichimoku, IchimokuConfig};
+/// use quantedge_ta::{Ichimoku, IchimokuConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
 ///
 /// let config = IchimokuConfig::builder()
 ///     .tenkan_length(NonZero::new(2).unwrap())
@@ -308,8 +266,12 @@ impl Display for IchimokuValue {
 ///     .build();
 /// let mut ich = Ichimoku::new(config);
 ///
+/// let bar = Ohlcv {
+///     open: 10.0, high: 12.0, low: 8.0, close: 11.0,
+///     volume: 0.0, open_time: 1,
+/// };
 /// // Returns None during convergence
-/// assert!(ich.compute(&Bar { o: 10.0, h: 12.0, l: 8.0, c: 11.0, t: 1 }).is_none());
+/// assert!(ich.compute(&bar).is_none());
 /// ```
 #[derive(Clone, Debug)]
 pub struct Ichimoku {
@@ -340,7 +302,7 @@ impl Indicator for Ichimoku {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 let tenkan_sen = Self::price_midpoint(self.tenkan_extremes.push(ohlcv));
@@ -486,7 +448,7 @@ mod tests {
 
             // tenkan window = bars 6,7: HH=max(23,25)=25, LL=min(6,8)=6
             // tenkan = (25 + 6) / 2 = 15.5
-            assert!((val.tenkan() - 15.5).abs() < 1e-10);
+            assert!((val.tenkan - 15.5).abs() < 1e-10);
         }
 
         #[test]
@@ -502,7 +464,7 @@ mod tests {
 
             // kijun window = bars 5,6,7: HH=max(21,23,25)=25, LL=min(3,6,8)=3
             // kijun = (25 + 3) / 2 = 14.0
-            assert!((val.kijun() - 14.0).abs() < 1e-10);
+            assert!((val.kijun - 14.0).abs() < 1e-10);
         }
 
         #[test]
@@ -512,7 +474,7 @@ mod tests {
                 ich.compute(&ohlc(10.0, 20.0, 5.0, 15.0, t));
             }
             let val = ich.compute(&ohlc(10.0, 20.0, 5.0, 42.0, 7)).unwrap();
-            assert!((val.chikou_close() - 42.0).abs() < 1e-10);
+            assert!((val.chikou_close - 42.0).abs() < 1e-10);
         }
 
         #[test]
@@ -538,9 +500,9 @@ mod tests {
             // Bar 5: convergence reached
             let v5 = ich.compute(&ohlc(10.0, 26.0, 4.0, 15.0, 5)).unwrap();
             // senkou_a displaced by 2: from bar 3's senkou_a_raw = (16+16)/2 = 16.0
-            assert!((v5.senkou_a() - 16.0).abs() < 1e-10);
+            assert!((v5.senkou_a - 16.0).abs() < 1e-10);
             // senkou_b displaced by 3: from bar 2's senkou_b_raw = (20+5)/2 = 12.5
-            assert!((v5.senkou_b() - 12.5).abs() < 1e-10);
+            assert!((v5.senkou_b - 12.5).abs() < 1e-10);
         }
     }
 
@@ -560,7 +522,7 @@ mod tests {
 
             // tenkan should change (new extremes)
             assert!(
-                (v1.tenkan() - v2.tenkan()).abs() > 1e-10,
+                (v1.tenkan - v2.tenkan).abs() > 1e-10,
                 "tenkan should change as window slides"
             );
         }
@@ -579,7 +541,7 @@ mod tests {
             let v2 = ich.compute(&ohlc(10.0, 40.0, 1.0, 15.0, 7)).unwrap();
 
             assert!(
-                (v1.tenkan() - v2.tenkan()).abs() > 1e-10,
+                (v1.tenkan - v2.tenkan).abs() > 1e-10,
                 "repaint with different extremes should change tenkan"
             );
         }
@@ -602,9 +564,9 @@ mod tests {
             }
             let expected = clean.compute(&ohlc(10.0, 21.0, 4.0, 13.0, 7)).unwrap();
 
-            assert!((final_val.tenkan() - expected.tenkan()).abs() < 1e-10);
-            assert!((final_val.kijun() - expected.kijun()).abs() < 1e-10);
-            assert!((final_val.chikou_close() - expected.chikou_close()).abs() < 1e-10);
+            assert!((final_val.tenkan - expected.tenkan).abs() < 1e-10);
+            assert!((final_val.kijun - expected.kijun).abs() < 1e-10);
+            assert!((final_val.chikou_close - expected.chikou_close).abs() < 1e-10);
         }
 
         #[test]
@@ -651,7 +613,7 @@ mod tests {
             let v2 = ich.compute(&ohlc(10.0, 25.0, 2.0, 17.0, 7)).unwrap();
 
             assert!(
-                (v1.tenkan() - v2.tenkan()).abs() > 1e-10,
+                (v1.tenkan - v2.tenkan).abs() > 1e-10,
                 "repaint should change tenkan"
             );
 
@@ -680,7 +642,7 @@ mod tests {
             let clone_val = cloned.compute(&ohlc(14.0, 16.0, 14.0, 15.0, 8)).unwrap();
 
             assert!(
-                (orig.tenkan() - clone_val.tenkan()).abs() > 1e-10,
+                (orig.tenkan - clone_val.tenkan).abs() > 1e-10,
                 "divergent inputs should give different tenkan"
             );
         }

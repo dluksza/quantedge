@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource,
     internals::{BarAction, BarState, RollingExtremes, RollingSum},
 };
 
@@ -131,24 +131,18 @@ impl IndicatorConfigBuilder<ChopConfig> for ChopConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Chop, ChopConfig};
+/// use quantedge_ta::{Chop, ChopConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.c }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let mut chop = Chop::new(ChopConfig::builder().length(NonZero::new(2).unwrap()).build());
 ///
-/// assert_eq!(chop.compute(&Bar { h: 20.0, l: 10.0, c: 15.0, t: 1 }), None);
+/// assert_eq!(chop.compute(&ohlc(15.0, 20.0, 10.0, 15.0, 1)), None);
 /// // Window full — returns a value between 0 and 100
-/// let val = chop.compute(&Bar { h: 22.0, l: 12.0, c: 18.0, t: 2 }).unwrap();
+/// let val = chop.compute(&ohlc(18.0, 22.0, 12.0, 18.0, 2)).unwrap();
 /// assert!((0.0..=100.0).contains(&val));
 /// ```
 #[derive(Clone, Debug)]
@@ -177,7 +171,7 @@ impl Indicator for Chop {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         let extremes = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 self.tr_sum.push(price);

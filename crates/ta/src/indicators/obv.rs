@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource, Timestamp};
+use crate::{Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource, Timestamp};
 
 /// Configuration for the On-Balance Volume ([`Obv`]) indicator.
 ///
@@ -15,23 +15,17 @@ use crate::{Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource, Tim
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Obv, ObvConfig, Ohlcv, Price, Timestamp};
+/// use quantedge_ta::{Obv, ObvConfig, Ohlcv};
 ///
-/// struct Bar(f64, f64, u64);
-/// impl Ohlcv for Bar {
-///     fn open(&self) -> Price { self.0 }
-///     fn high(&self) -> Price { self.0 }
-///     fn low(&self) -> Price { self.0 }
-///     fn close(&self) -> Price { self.0 }
-///     fn volume(&self) -> f64 { self.1 }
-///     fn open_time(&self) -> Timestamp { self.2 }
+/// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
 /// }
 ///
 /// let mut obv = Obv::new(ObvConfig::default());
 ///
-/// assert_eq!(obv.compute(&Bar(10.0, 100.0, 1)), Some(100.0));
-/// assert_eq!(obv.compute(&Bar(12.0, 150.0, 2)), Some(250.0));
-/// assert_eq!(obv.compute(&Bar(11.0, 200.0, 3)), Some(50.0));
+/// assert_eq!(obv.compute(&bar(10.0, 100.0, 1)), Some(100.0));
+/// assert_eq!(obv.compute(&bar(12.0, 150.0, 2)), Some(250.0));
+/// assert_eq!(obv.compute(&bar(11.0, 200.0, 3)), Some(50.0));
 /// ```
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct ObvConfig {
@@ -121,28 +115,22 @@ impl IndicatorConfigBuilder<ObvConfig> for ObvConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Obv, ObvConfig, Ohlcv, Price, Timestamp};
+/// use quantedge_ta::{Obv, ObvConfig, Ohlcv};
 ///
-/// struct Bar(f64, f64, u64);
-/// impl Ohlcv for Bar {
-///     fn open(&self) -> Price { self.0 }
-///     fn high(&self) -> Price { self.0 }
-///     fn low(&self) -> Price { self.0 }
-///     fn close(&self) -> Price { self.0 }
-///     fn volume(&self) -> f64 { self.1 }
-///     fn open_time(&self) -> Timestamp { self.2 }
+/// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
 /// }
 ///
 /// let mut obv = Obv::new(ObvConfig::default());
 ///
 /// // First bar: OBV = volume
-/// assert_eq!(obv.compute(&Bar(10.0, 100.0, 1)), Some(100.0));
+/// assert_eq!(obv.compute(&bar(10.0, 100.0, 1)), Some(100.0));
 ///
 /// // Price up: OBV = 100 + 150 = 250
-/// assert_eq!(obv.compute(&Bar(12.0, 150.0, 2)), Some(250.0));
+/// assert_eq!(obv.compute(&bar(12.0, 150.0, 2)), Some(250.0));
 ///
 /// // Price down: OBV = 250 − 200 = 50
-/// assert_eq!(obv.compute(&Bar(11.0, 200.0, 3)), Some(50.0));
+/// assert_eq!(obv.compute(&bar(11.0, 200.0, 3)), Some(50.0));
 /// ```
 #[derive(Clone, Debug)]
 pub struct Obv {
@@ -169,11 +157,11 @@ impl Indicator for Obv {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
-        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
+        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
         if is_next_bar {
-            self.last_open_time = Some(ohlcv.open_time());
+            self.last_open_time = Some(ohlcv.open_time);
             self.prev_price = self.current_price;
             self.previous = self.current.unwrap_or(0.0);
         }
@@ -184,16 +172,16 @@ impl Indicator for Obv {
         self.current = match self.prev_price {
             Some(prev_price) => {
                 let value = if price > prev_price {
-                    self.previous + ohlcv.volume()
+                    self.previous + ohlcv.volume
                 } else if price < prev_price {
-                    self.previous - ohlcv.volume()
+                    self.previous - ohlcv.volume
                 } else {
                     self.previous
                 };
 
                 Some(value)
             }
-            None => Some(ohlcv.volume()),
+            None => Some(ohlcv.volume),
         };
 
         self.current

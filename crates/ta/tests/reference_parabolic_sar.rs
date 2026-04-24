@@ -34,17 +34,16 @@ fn psar_matches_reference() {
             let ctx = format!("PSAR(0.02,0.2) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.sar(),
+                value.sar,
                 reference[ref_idx].sar,
                 TOLERANCE,
                 &format!("{ctx} sar"),
             );
             let expected_long = reference[ref_idx].is_long == 1;
             assert_eq!(
-                value.is_long(),
-                expected_long,
+                value.is_long, expected_long,
                 "{ctx} direction: expected is_long={expected_long}, got is_long={}",
-                value.is_long()
+                value.is_long
             );
             ref_idx += 1;
         }

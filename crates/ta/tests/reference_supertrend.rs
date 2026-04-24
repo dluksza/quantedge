@@ -37,17 +37,16 @@ fn supertrend_10_3_matches_reference() {
             let ctx = format!("Supertrend(10,3) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.value(),
+                value.value,
                 reference[ref_idx].value,
                 TOLERANCE,
                 &format!("{ctx} value"),
             );
             let expected_bullish = reference[ref_idx].is_bullish == 1;
             assert_eq!(
-                value.is_bullish(),
-                expected_bullish,
+                value.is_bullish, expected_bullish,
                 "{ctx} direction: expected bullish={expected_bullish}, got bullish={}",
-                value.is_bullish()
+                value.is_bullish
             );
             ref_idx += 1;
         }

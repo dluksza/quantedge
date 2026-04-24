@@ -276,7 +276,7 @@ fn repaint_benchmarks(c: &mut Criterion) {
     let (warmup, _) = split_at_warmup(reference_bars());
     // Repaint the last warmed bar (same open_time, perturbed close).
     let repaint_bar = {
-        let mut b = warmup.last().unwrap().clone();
+        let mut b = *warmup.last().unwrap();
         b.close *= 1.001;
         b
     };

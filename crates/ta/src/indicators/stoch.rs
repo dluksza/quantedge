@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource,
     internals::{BarAction, BarState, RollingExtremes, RollingSum},
 };
 
@@ -198,24 +198,10 @@ impl IndicatorConfigBuilder<StochConfig> for StochConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct StochValue {
-    k: f64,
-    d: Option<f64>,
-}
-
-impl StochValue {
     /// Smoothed %K value (0–100).
-    #[inline]
-    #[must_use]
-    pub fn k(&self) -> f64 {
-        self.k
-    }
-
+    pub k: f64,
     /// %D signal line, or `None` if not yet converged.
-    #[inline]
-    #[must_use]
-    pub fn d(&self) -> Option<f64> {
-        self.d
-    }
+    pub d: Option<f64>,
 }
 
 impl Display for StochValue {
@@ -261,18 +247,12 @@ impl Display for StochValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Stoch, StochConfig};
+/// use quantedge_ta::{Ohlcv, Stoch, StochConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let config = StochConfig::builder()
 ///     .length(NonZero::new(3).unwrap())
@@ -282,12 +262,12 @@ impl Display for StochValue {
 /// let mut stoch = Stoch::new(config);
 ///
 /// // Filling: need length + k_smooth = 4 bars
-/// assert!(stoch.compute(&Bar { o: 10.0, h: 12.0, l: 8.0, c: 11.0, t: 1 }).is_none());
-/// assert!(stoch.compute(&Bar { o: 11.0, h: 14.0, l: 9.0, c: 13.0, t: 2 }).is_none());
-/// assert!(stoch.compute(&Bar { o: 13.0, h: 13.0, l: 10.0, c: 10.0, t: 3 }).is_none());
+/// assert!(stoch.compute(&ohlc(10.0, 12.0, 8.0, 11.0, 1)).is_none());
+/// assert!(stoch.compute(&ohlc(11.0, 14.0, 9.0, 13.0, 2)).is_none());
+/// assert!(stoch.compute(&ohlc(13.0, 13.0, 10.0, 10.0, 3)).is_none());
 ///
 /// // Bar 4: lookback window and %K smoothing both full
-/// let value = stoch.compute(&Bar { o: 12.0, h: 15.0, l: 11.0, c: 12.0, t: 4 });
+/// let value = stoch.compute(&ohlc(12.0, 15.0, 11.0, 12.0, 4));
 /// assert!(value.is_some());
 /// ```
 #[derive(Clone, Debug)]
@@ -321,7 +301,7 @@ impl Indicator for Stoch {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 let k_sum = self
@@ -477,17 +457,17 @@ mod tests {
 
             // Bars 3–5: %K available, %D still None
             let v3 = s.compute(&ohlc(13.0, 13.0, 10.0, 10.0, 3)).unwrap();
-            assert!(v3.d().is_none());
+            assert!(v3.d.is_none());
 
             let v4 = s.compute(&ohlc(12.0, 15.0, 11.0, 12.0, 4)).unwrap();
-            assert!(v4.d().is_none());
+            assert!(v4.d.is_none());
 
             let v5 = s.compute(&ohlc(11.0, 13.0, 9.0, 11.0, 5)).unwrap();
-            assert!(v5.d().is_none());
+            assert!(v5.d.is_none());
 
             // Bar 6: 4th d_sum push → first %D
             let v6 = s.compute(&ohlc(10.0, 14.0, 8.0, 12.0, 6)).unwrap();
-            assert!(v6.d().is_some());
+            assert!(v6.d.is_some());
         }
     }
 
@@ -501,7 +481,7 @@ mod tests {
             // close=12, raw %K = (12-9)/(15-9)*100 = 50
             let s = seeded_stoch();
             let val = s.value().unwrap();
-            assert!((val.k() - 50.0).abs() < 1e-10);
+            assert!((val.k - 50.0).abs() < 1e-10);
         }
 
         #[test]
@@ -511,9 +491,9 @@ mod tests {
                 let val = s.compute(&ohlc(10.0, 10.0, 10.0, 10.0, t));
                 if let Some(v) = val {
                     assert!(
-                        (v.k() - 50.0).abs() < 1e-10,
+                        (v.k - 50.0).abs() < 1e-10,
                         "flat market should give %K=50, got {}",
-                        v.k()
+                        v.k
                     );
                 }
             }
@@ -527,7 +507,7 @@ mod tests {
             s.compute(&ohlc(13.0, 13.0, 10.0, 10.0, 3));
             // close=15 = highest_high in window
             let val = s.compute(&ohlc(12.0, 15.0, 11.0, 15.0, 4)).unwrap();
-            assert!((val.k() - 100.0).abs() < 1e-10);
+            assert!((val.k - 100.0).abs() < 1e-10);
         }
 
         #[test]
@@ -538,7 +518,7 @@ mod tests {
             s.compute(&ohlc(13.0, 13.0, 10.0, 10.0, 3));
             // close=9 = lowest_low in window
             let val = s.compute(&ohlc(12.0, 15.0, 9.0, 9.0, 4)).unwrap();
-            assert!((val.k() - 0.0).abs() < 1e-10);
+            assert!((val.k - 0.0).abs() < 1e-10);
         }
 
         #[test]
@@ -561,7 +541,7 @@ mod tests {
             // Bar 4: raw_k = (20-10)/(20-10)*100 = 100, push 3 → Some
             // %K = SMA of last 2 raw_k: (50+100)/2 = 75
             let val = s.compute(&ohlc(15.0, 20.0, 10.0, 20.0, 4)).unwrap();
-            assert!((val.k() - 75.0).abs() < 1e-10);
+            assert!((val.k - 75.0).abs() < 1e-10);
         }
 
         #[test]
@@ -580,17 +560,17 @@ mod tests {
 
             // Bar 3: first %K, %D=None
             let v3 = s.compute(&ohlc(15.0, 20.0, 10.0, 15.0, 3)).unwrap();
-            assert!(v3.d().is_none());
+            assert!(v3.d.is_none());
 
             // Bar 4: second %K, %D=None (need 3 d_sum pushes for d_smooth=2)
             let v4 = s.compute(&ohlc(15.0, 20.0, 10.0, 20.0, 4)).unwrap();
-            assert!(v4.d().is_none());
-            let k4 = v4.k();
+            assert!(v4.d.is_none());
+            let k4 = v4.k;
 
             // Bar 5: third %K, %D = SMA of last 2 %K values
             let v5 = s.compute(&ohlc(15.0, 20.0, 10.0, 17.5, 5)).unwrap();
-            let expected_d = f64::midpoint(k4, v5.k());
-            assert!((v5.d().unwrap() - expected_d).abs() < 1e-10);
+            let expected_d = f64::midpoint(k4, v5.k);
+            assert!((v5.d.unwrap() - expected_d).abs() < 1e-10);
         }
     }
 
@@ -603,7 +583,7 @@ mod tests {
             let original = s.compute(&ohlc(12.0, 16.0, 11.0, 13.0, 5)).unwrap();
             let repainted = s.compute(&ohlc(12.0, 16.0, 11.0, 16.0, 5)).unwrap();
             assert!(
-                repainted.k() > original.k(),
+                repainted.k > original.k,
                 "higher close should give higher %K"
             );
         }
@@ -619,9 +599,9 @@ mod tests {
             let mut clean = seeded_stoch();
             let expected = clean.compute(&ohlc(12.0, 20.0, 8.0, 12.0, 5)).unwrap();
 
-            assert!((final_val.k() - expected.k()).abs() < 1e-10);
-            assert_eq!(final_val.d().is_some(), expected.d().is_some());
-            if let (Some(fd), Some(ed)) = (final_val.d(), expected.d()) {
+            assert!((final_val.k - expected.k).abs() < 1e-10);
+            assert_eq!(final_val.d.is_some(), expected.d.is_some());
+            if let (Some(fd), Some(ed)) = (final_val.d, expected.d) {
                 assert!((fd - ed).abs() < 1e-10);
             }
         }
@@ -637,7 +617,7 @@ mod tests {
             clean.compute(&ohlc(12.0, 16.0, 11.0, 15.0, 5));
             let expected = clean.compute(&ohlc(14.0, 17.0, 12.0, 14.0, 6)).unwrap();
 
-            assert!((after.k() - expected.k()).abs() < 1e-10);
+            assert!((after.k - expected.k).abs() < 1e-10);
         }
 
         #[test]
@@ -695,10 +675,10 @@ mod tests {
             let actual = repainted.value().unwrap();
 
             assert!(
-                (actual.k() - expected.k()).abs() < 1e-10,
+                (actual.k - expected.k).abs() < 1e-10,
                 "repaint during k_sum filling corrupted %K: got {}, expected {}",
-                actual.k(),
-                expected.k()
+                actual.k,
+                expected.k
             );
         }
     }
@@ -721,12 +701,8 @@ mod tests {
             ];
             for b in &bars {
                 if let Some(v) = s.compute(b) {
-                    assert!(
-                        (0.0..=100.0).contains(&v.k()),
-                        "%K out of bounds: {}",
-                        v.k()
-                    );
-                    if let Some(d) = v.d() {
+                    assert!((0.0..=100.0).contains(&v.k), "%K out of bounds: {}", v.k);
+                    if let Some(d) = v.d {
                         assert!((0.0..=100.0).contains(&d), "%D out of bounds: {d}");
                     }
                 }
@@ -746,7 +722,7 @@ mod tests {
             let clone_val = cloned.compute(&ohlc(12.0, 16.0, 11.0, 9.0, 5)).unwrap();
 
             assert!(
-                (orig.k() - clone_val.k()).abs() > 1e-10,
+                (orig.k - clone_val.k).abs() > 1e-10,
                 "divergent inputs should give different %K"
             );
         }
@@ -900,7 +876,7 @@ mod tests {
             // Bar 3: h=20, l=10 → HL2=15; hh=20, ll=10
             // raw_k = (15-10)/(20-10)*100 = 50
             let val = s.compute(&ohlc(15.0, 20.0, 10.0, 5.0, 3)).unwrap();
-            assert!((val.k() - 50.0).abs() < 1e-10);
+            assert!((val.k - 50.0).abs() < 1e-10);
         }
     }
 
@@ -926,14 +902,14 @@ mod tests {
             // So after 4 bars, %K is present but %D is None.
             let mut s = seeded_stoch();
             let val = s.value().unwrap();
-            assert!(val.k().is_finite());
-            assert!(val.d().is_none());
+            assert!(val.k.is_finite());
+            assert!(val.d.is_none());
 
             // Bar 5: %D now available
             let v5 = s.compute(&ohlc(13.0, 16.0, 10.0, 14.0, 5)).unwrap();
-            assert!(v5.k().is_finite());
-            assert!(v5.d().is_some());
-            assert!(v5.d().unwrap().is_finite());
+            assert!(v5.k.is_finite());
+            assert!(v5.d.is_some());
+            assert!(v5.d.unwrap().is_finite());
         }
     }
 }

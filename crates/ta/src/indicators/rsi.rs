@@ -163,28 +163,22 @@ enum RsiPhase {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Rsi, RsiConfig};
+/// use quantedge_ta::{Ohlcv, Rsi, RsiConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let mut rsi = Rsi::new(RsiConfig::close(NonZero::new(3).unwrap()));
 ///
 /// // Seeding: need 3 price changes (4 bars)
-/// assert_eq!(rsi.compute(&Bar(10.0, 1)), None);
-/// assert_eq!(rsi.compute(&Bar(12.0, 2)), None);
-/// assert_eq!(rsi.compute(&Bar(11.0, 3)), None);
+/// assert_eq!(rsi.compute(&bar(10.0, 1)), None);
+/// assert_eq!(rsi.compute(&bar(12.0, 2)), None);
+/// assert_eq!(rsi.compute(&bar(11.0, 3)), None);
 ///
 /// // Bar 4: changes = +2, −1, +2 → avg_gain=4/3, avg_loss=1/3 → RSI=80
-/// assert_eq!(rsi.compute(&Bar(13.0, 4)), Some(80.0));
+/// assert_eq!(rsi.compute(&bar(13.0, 4)), Some(80.0));
 /// ```
 #[derive(Clone, Debug)]
 pub struct Rsi {
@@ -227,25 +221,25 @@ impl Indicator for Rsi {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         debug_assert!(
-            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time()),
+            self.last_open_time.is_none_or(|t| t <= ohlcv.open_time),
             "open_time must be non-decreasing: last={}, got={}",
             self.last_open_time.unwrap_or(0),
-            ohlcv.open_time(),
+            ohlcv.open_time,
         );
 
-        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time());
+        let is_next_bar = self.last_open_time.is_none_or(|t| t < ohlcv.open_time);
 
         if is_next_bar {
             self.prev_close = self.cur_close;
             self.prev_price = self.cur_price;
-            self.last_open_time = Some(ohlcv.open_time());
+            self.last_open_time = Some(ohlcv.open_time);
         }
 
         let price = self.config.source().extract(ohlcv, self.prev_close);
         self.cur_price = price;
-        self.cur_close = Some(ohlcv.close());
+        self.cur_close = Some(ohlcv.close);
 
         self.current = match &mut self.phase {
             RsiPhase::Seeding {
@@ -675,11 +669,9 @@ mod tests {
                 .source(PriceSource::HL2)
                 .build();
             let mut rsi = Rsi::new(config);
-            rsi.compute(&Bar::new_with_open_time(10.0, 20.0, 10.0, 5.0, 1)); // HL2=15
-            rsi.compute(&Bar::new_with_open_time(10.0, 24.0, 12.0, 5.0, 2)); // HL2=18, change=+3
-            let val = rsi
-                .compute(&Bar::new_with_open_time(10.0, 22.0, 8.0, 5.0, 3))
-                .unwrap(); // HL2=15, change=-3
+            rsi.compute(&Bar::new(10.0, 20.0, 10.0, 5.0).at(1)); // HL2=15
+            rsi.compute(&Bar::new(10.0, 24.0, 12.0, 5.0).at(2)); // HL2=18, change=+3
+            let val = rsi.compute(&Bar::new(10.0, 22.0, 8.0, 5.0).at(3)).unwrap(); // HL2=15, change=-3
 
             // equal gain and loss → RSI=50
             assert!((val - 50.0).abs() < 1e-10);

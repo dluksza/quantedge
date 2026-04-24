@@ -16,8 +16,8 @@ pub type Timestamp = u64;
 
 /// OHLCV bar data used as input to all indicators.
 ///
-/// Implement this on your own kline/candle type to avoid per-tick
-/// conversion.
+/// Construct one per bar and pass it by reference to each indicator's
+/// `compute` call.
 ///
 /// # Bar boundaries
 ///
@@ -28,33 +28,31 @@ pub type Timestamp = u64;
 /// # Example
 ///
 /// ```
-/// use quantedge_core::{Ohlcv, Price, Timestamp};
+/// use quantedge_core::Ohlcv;
 ///
-/// struct MyKline {
-///     o: f64, h: f64, l: f64, c: f64,
-///     ts: u64,
-/// }
-///
-/// impl Ohlcv for MyKline {
-///     fn open(&self) -> Price { self.o }
-///     fn high(&self) -> Price { self.h }
-///     fn low(&self) -> Price { self.l }
-///     fn close(&self) -> Price { self.c }
-///     fn open_time(&self) -> Timestamp { self.ts }
-/// }
+/// let bar = Ohlcv {
+///     open: 10.0,
+///     high: 12.0,
+///     low: 9.0,
+///     close: 11.0,
+///     volume: 100.0,
+///     open_time: 1,
+/// };
+/// assert_eq!(bar.close, 11.0);
 /// ```
-pub trait Ohlcv {
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Ohlcv {
     /// Opening price of the bar.
-    fn open(&self) -> Price;
+    pub open: Price,
 
     /// Highest price during the bar.
-    fn high(&self) -> Price;
+    pub high: Price,
 
     /// Lowest price during the bar.
-    fn low(&self) -> Price;
+    pub low: Price,
 
     /// Closing (or latest) price of the bar.
-    fn close(&self) -> Price;
+    pub close: Price,
 
     /// Bar open timestamp or sequence number.
     ///
@@ -63,15 +61,11 @@ pub trait Ohlcv {
     ///
     /// Values must be non-decreasing between calls. Behaviour is undefined if
     /// `open_time` decreases.
-    fn open_time(&self) -> Timestamp;
+    pub open_time: Timestamp,
 
-    /// Trade volume during the bar. Defaults to `0.0`.
+    /// Trade volume during the bar.
     ///
-    /// **Required** for volume-dependent indicators (OBV, VWAP).
-    /// You must override this method when using these indicators;
-    /// the default `0.0` will produce meaningless results.
-    /// Indicators that don't use volume ignore this value.
-    fn volume(&self) -> f64 {
-        0.0
-    }
+    /// Required by volume-dependent indicators (OBV, VWAP). Set to `0.0`
+    /// when feeding indicators that ignore volume.
+    pub volume: f64,
 }

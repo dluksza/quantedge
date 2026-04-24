@@ -37,19 +37,19 @@ fn kc_20_10_1_5_matches_reference() {
             let ctx = format!("KC(20,10,1.5) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.upper(),
+                value.upper,
                 reference[ref_idx].upper,
                 TOLERANCE,
                 &format!("{ctx} upper"),
             );
             assert_near(
-                value.middle(),
+                value.middle,
                 reference[ref_idx].middle,
                 TOLERANCE,
                 &format!("{ctx} middle"),
             );
             assert_near(
-                value.lower(),
+                value.lower,
                 reference[ref_idx].lower,
                 TOLERANCE,
                 &format!("{ctx} lower"),

@@ -148,24 +148,18 @@ impl IndicatorConfigBuilder<SmaConfig> for SmaConfigBuilder {
 /// # Example
 ///
 /// ```rust
-/// use quantedge_ta::{Sma, SmaConfig};
+/// use quantedge_ta::{Ohlcv, Sma, SmaConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let mut sma = Sma::new(SmaConfig::close(NonZero::new(3).unwrap()));
 ///
-/// assert_eq!(sma.compute(&Bar(10.0, 1)), None);
-/// assert_eq!(sma.compute(&Bar(20.0, 2)), None);
-/// assert_eq!(sma.compute(&Bar(30.0, 3)), Some(20.0));
+/// assert_eq!(sma.compute(&bar(10.0, 1)), None);
+/// assert_eq!(sma.compute(&bar(20.0, 2)), None);
+/// assert_eq!(sma.compute(&bar(30.0, 3)), Some(20.0));
 /// ```
 #[derive(Clone, Debug)]
 pub struct Sma {
@@ -191,7 +185,7 @@ impl Indicator for Sma {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.window.add(ohlcv);
 
         self.current = self.window.sum().map(|sum| sum * self.length_reciprocal);

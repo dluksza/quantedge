@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource,
     internals::{BarAction, BarState, RollingExtremes},
 };
 
@@ -146,27 +146,21 @@ impl IndicatorConfigBuilder<WillRConfig> for WillRConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{WillR, WillRConfig};
+/// use quantedge_ta::{Ohlcv, WillR, WillRConfig};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.c }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let mut wr = WillR::new(WillRConfig::close(NonZero::new(3).unwrap()));
 ///
-/// assert_eq!(wr.compute(&Bar { h: 10.0, l: 5.0, c: 8.0, t: 1 }), None);
-/// assert_eq!(wr.compute(&Bar { h: 12.0, l: 6.0, c: 10.0, t: 2 }), None);
+/// assert_eq!(wr.compute(&ohlc(8.0, 10.0, 5.0, 8.0, 1)), None);
+/// assert_eq!(wr.compute(&ohlc(10.0, 12.0, 6.0, 10.0, 2)), None);
 ///
 /// // Window full: highest_high=15, lowest_low=5
 /// // %R = (15 − 11) / (15 − 5) × −100 = −40
-/// assert_eq!(wr.compute(&Bar { h: 15.0, l: 7.0, c: 11.0, t: 3 }), Some(-40.0));
+/// assert_eq!(wr.compute(&ohlc(11.0, 15.0, 7.0, 11.0, 3)), Some(-40.0));
 /// ```
 #[derive(Clone, Debug)]
 pub struct WillR {
@@ -189,7 +183,7 @@ impl Indicator for WillR {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         let (price, extremes) = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => (price, self.extremes.push(ohlcv)),
             BarAction::Repaint(price) => (price, self.extremes.replace(ohlcv)),

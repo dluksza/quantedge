@@ -8,13 +8,13 @@
 
 Core types shared across the [quantedge](https://github.com/dluksza/quantedge) crates.
 
-Defines the `Ohlcv` bar trait, its `Price` and `Timestamp` aliases, and the `Timeframe` type for bar boundary alignment, so downstream crates can share a single bar abstraction without depending on the full indicator library.
+Defines the `Ohlcv` bar struct, its `Price` and `Timestamp` aliases, and the `Timeframe` type for bar boundary alignment, so downstream crates can share a single bar abstraction without depending on the full indicator library.
 
 ## Features
 
-### Bring your own data
+### Plain-struct bar
 
-Implement `Ohlcv` on your existing kline/candle type to feed it into any consumer crate without per-tick conversion. `volume()` has a default implementation for data sources that don't provide it.
+`Ohlcv` is a `Copy` struct with six public fields (`open`, `high`, `low`, `close`, `open_time`, `volume`). Build one per kline, pass it by reference to consumer crates — no trait to implement, no generic parameters to thread through signatures. Volume-dependent indicators (OBV, VWAP) require a real `volume`; pass `0.0` when feeding indicators that ignore it.
 
 ### Bar timeframes
 
@@ -35,23 +35,36 @@ Compiles for `wasm32-unknown-unknown` and `wasm32-wasip1`. No filesystem or OS c
 ### Ohlcv
 
 ```rust
-use quantedge_core::{Ohlcv, Price, Timestamp};
+use quantedge_core::Ohlcv;
 
-struct MyKline {
-    open: f64,
-    high: f64,
-    low: f64,
-    close: f64,
-    open_time: u64,
-}
+let bar = Ohlcv {
+    open: 10.0,
+    high: 12.0,
+    low: 9.0,
+    close: 11.0,
+    volume: 100.0,
+    open_time: 1_745_798_400_000_000,
+};
+```
 
-impl Ohlcv for MyKline {
-    fn open(&self) -> Price { self.open }
-    fn high(&self) -> Price { self.high }
-    fn low(&self) -> Price { self.low }
-    fn close(&self) -> Price { self.close }
-    fn open_time(&self) -> Timestamp { self.open_time }
-    // fn volume(&self) -> f64 { 0.0 }  -- default, override when volume is required
+Converting from your own kline type is a field-wise copy:
+
+```rust
+use quantedge_core::Ohlcv;
+
+struct MyKline { o: f64, h: f64, l: f64, c: f64, v: f64, t: u64 }
+
+impl From<&MyKline> for Ohlcv {
+    fn from(k: &MyKline) -> Self {
+        Ohlcv {
+            open: k.o,
+            high: k.h,
+            low: k.l,
+            close: k.c,
+            volume: k.v,
+            open_time: k.t,
+        }
+    }
 }
 ```
 

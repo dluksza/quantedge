@@ -17,12 +17,12 @@ No silent NaN, no garbage early values. The type system enforces correctness.
 For indicators with infinite memory (EMA), `full_convergence()` reports how
 many bars are needed for the seed's influence to decay below 1%.
 
-### Bring your own data
+### Plain-struct bar input
 
-Indicators accept any type implementing the `Ohlcv` trait. No forced conversion
-to a library-specific struct. Implement five required methods on your existing
-type and you're done. Volume has a default implementation for data sources that
-don't provide it.
+Indicators take `&Ohlcv`, a `Copy` struct with six public fields (`open`,
+`high`, `low`, `close`, `open_time`, `volume`). Build one per kline with a
+struct literal or a `From` conversion from your own kline type — no trait
+impl required, no generic parameters on `compute`.
 
 ### O(1) incremental updates
 
@@ -77,7 +77,7 @@ for kline in stream {
 }
 ```
 
-Bollinger Bands returns a struct:
+Bollinger Bands returns a struct with public fields:
 
 ```rust
 use quantedge_ta::{Bb, BbConfig};
@@ -91,7 +91,7 @@ let mut bb = Bb::new(config);
 for kline in stream {
     if let Some(value) = bb.compute(&kline) {
         println!("BB upper: {}, middle: {}, lower: {}",
-            value.upper(), value.middle(), value.lower());
+            value.upper, value.middle, value.lower);
     }
 }
 ```
@@ -145,7 +145,7 @@ trait Indicator: Sized + Clone + Display + Debug {
     type Output: Send + Sync + Display + Debug;
 
     fn new(config: Self::Config) -> Self;
-    fn compute(&mut self, kline: &impl Ohlcv) -> Option<Self::Output>;
+    fn compute(&mut self, kline: &Ohlcv) -> Option<Self::Output>;
     fn value(&self) -> Option<Self::Output>;
 }
 
@@ -170,34 +170,37 @@ trait Indicator: Sized + Clone + Display + Debug {
 // ParabolicSar:  Output = ParabolicSarValue { sar: f64, is_long: bool }
 ```
 
-### Ohlcv Trait
+### Ohlcv Struct
 
-Implement the `Ohlcv` trait on your own data type:
+`Ohlcv` is a plain `Copy` struct — build one per bar and pass it by reference
+to `compute()`. Convert from your own kline type with a field-wise copy:
 
 ```rust
-use quantedge_ta::{Ohlcv, Price, Timestamp};
+use quantedge_ta::Ohlcv;
 
-struct MyKline {
-    open: f64,
-    high: f64,
-    low: f64,
-    close: f64,
-    open_time: u64,
+struct MyKline { o: f64, h: f64, l: f64, c: f64, v: f64, t: u64 }
+
+impl From<&MyKline> for Ohlcv {
+    fn from(k: &MyKline) -> Self {
+        Ohlcv {
+            open: k.o,
+            high: k.h,
+            low: k.l,
+            close: k.c,
+            volume: k.v,
+            open_time: k.t,
+        }
+    }
 }
 
-impl Ohlcv for MyKline {
-    fn open(&self) -> Price { self.open }
-    fn high(&self) -> Price { self.high }
-    fn low(&self) -> Price { self.low }
-    fn close(&self) -> Price { self.close }
-    fn open_time(&self) -> Timestamp { self.open_time }
-    // fn volume(&self) -> f64 { 0.0 }  -- default, must override for OBV/VWAP
-}
+// let bar: Ohlcv = (&my_kline).into();
+// indicator.compute(&bar);
 ```
 
 `Timestamp` is recommended to be microseconds since Unix epoch, monotonically
 increasing. This is **required** for the VWAP indicator, which uses timestamps
-to detect session boundaries.
+to detect session boundaries. `volume` has no implicit default: set it to a
+real figure for OBV and VWAP, or `0.0` when feeding indicators that ignore it.
 
 ### Convergence
 

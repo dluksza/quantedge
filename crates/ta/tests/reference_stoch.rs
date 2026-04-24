@@ -43,7 +43,7 @@ fn stoch_14_1_3_matches_reference() {
             let ctx = format!("Stoch(14,1,3) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.k(),
+                value.k,
                 reference[ref_idx].k,
                 TOLERANCE,
                 &format!("{ctx} %K"),
@@ -51,7 +51,7 @@ fn stoch_14_1_3_matches_reference() {
 
             // %D may converge later than %K due to k_smooth + d_smooth delay.
             // Only assert %D once the Rust indicator has it.
-            if let Some(d) = value.d() {
+            if let Some(d) = value.d {
                 assert_near(d, reference[ref_idx].d, TOLERANCE, &format!("{ctx} %D"));
                 d_checked += 1;
             }

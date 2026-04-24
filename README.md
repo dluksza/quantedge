@@ -40,7 +40,7 @@ Design notes and per-indicator writeups at [luksza.org/category/quantedge](https
 
 ```
 crates/
-  core/         # shared types (Ohlcv, Price, Timestamp)
+  core/         # shared types (Ohlcv struct, Price, Timestamp, Timeframe)
   ta/           # technical analysis indicators
     example/    # runnable WebSocket demo
 ```

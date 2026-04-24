@@ -15,7 +15,7 @@ use binance::{
     websockets::{WebSockets, WebsocketEvent},
 };
 
-use quantedge_ta::{Price, Timestamp};
+use quantedge_ta::{Ohlcv, Price, Timestamp};
 
 /// NOTE: panics on malformed price data, intentional for demo purposes.
 /// Production callers must validate input before this point
@@ -26,36 +26,25 @@ fn to_price(value: &str) -> Price {
     }
 }
 
-pub(crate) struct BinanceOhlcv {
-    pub(crate) open: Price,
-    pub(crate) high: Price,
-    pub(crate) low: Price,
-    pub(crate) close: Price,
-    pub(crate) volume: f64,
-    pub(crate) open_time: Timestamp,
+fn kline_to_ohlcv(kline: &Kline) -> Ohlcv {
+    Ohlcv {
+        open: to_price(&kline.open),
+        high: to_price(&kline.high),
+        low: to_price(&kline.low),
+        close: to_price(&kline.close),
+        volume: to_price(&kline.volume),
+        open_time: kline.open_time as Timestamp,
+    }
 }
 
-impl BinanceOhlcv {
-    pub(crate) fn from_kline(kline: Kline) -> Self {
-        Self {
-            open: to_price(&kline.open),
-            high: to_price(&kline.high),
-            low: to_price(&kline.low),
-            close: to_price(&kline.close),
-            volume: to_price(&kline.volume),
-            open_time: kline.open_time as Timestamp,
-        }
-    }
-
-    pub(crate) fn from_kline_summary(kline: KlineSummary) -> Self {
-        Self {
-            open: to_price(&kline.open),
-            high: to_price(&kline.high),
-            low: to_price(&kline.low),
-            close: to_price(&kline.close),
-            volume: to_price(&kline.volume),
-            open_time: kline.open_time as Timestamp,
-        }
+fn summary_to_ohlcv(kline: &KlineSummary) -> Ohlcv {
+    Ohlcv {
+        open: to_price(&kline.open),
+        high: to_price(&kline.high),
+        low: to_price(&kline.low),
+        close: to_price(&kline.close),
+        volume: to_price(&kline.volume),
+        open_time: kline.open_time as Timestamp,
     }
 }
 
@@ -64,7 +53,7 @@ pub(crate) fn stream_binance_klines(
     interval: &str,
     history: u16,
     running: Arc<AtomicBool>,
-) -> Result<impl Iterator<Item = BinanceOhlcv>, Box<Error>> {
+) -> Result<impl Iterator<Item = Ohlcv>, Box<Error>> {
     let (tx, rx) = channel::<KlineEvent>();
     let subscription = subscription_cmd(symbol, interval);
 
@@ -94,7 +83,7 @@ pub(crate) fn stream_binance_klines(
     let live = rx
         .into_iter()
         .filter(move |k| k.symbol == symbol)
-        .map(|k| BinanceOhlcv::from_kline(k.kline));
+        .map(|k| kline_to_ohlcv(&k.kline));
 
     Ok(klines.chain(live))
 }
@@ -103,12 +92,12 @@ fn history_data(
     symbol: &str,
     interval: &str,
     history: u16,
-) -> Result<impl Iterator<Item = BinanceOhlcv>, Box<Error>> {
+) -> Result<impl Iterator<Item = Ohlcv>, Box<Error>> {
     let market: Market = Binance::new(None, None);
     let KlineSummaries::AllKlineSummaries(klines) =
         market.get_klines(symbol, interval, history, None, None)?;
 
-    Ok(klines.into_iter().map(BinanceOhlcv::from_kline_summary))
+    Ok(klines.into_iter().map(|k| summary_to_ohlcv(&k)))
 }
 
 fn subscription_cmd(symbol: &str, interval: &str) -> String {

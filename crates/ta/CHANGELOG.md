@@ -2,7 +2,10 @@
 
 ## [Unreleased]
 
-## [0.19.0] - 2026-04-21
+### Changed
+
+- **Breaking:** `Ohlcv` changed from a trait to a concrete struct with public fields re-exported from `quantedge-core`. `Indicator::compute` (and every indicator's inherent `compute`) now takes `&Ohlcv` instead of `&impl Ohlcv`. Callers that previously implemented the trait on their own kline type now produce an `Ohlcv` value per bar (fields: `open`, `high`, `low`, `close`, `open_time`, `volume`) and pass it by reference. Simplifies every indicator signature, removes the generic parameter, and turns hot paths into direct field loads.
+- **Breaking:** Value types (`AdxValue`, `BbValue`, `DcValue`, `IchimokuValue`, `KcValue`, `MacdValue`, `ParabolicSarValue`, `StochValue`, `StochRsiValue`, `SupertrendValue`, `VwapValue`) expose their components as public fields instead of getter methods. Migration: replace `value.upper()` with `value.upper`, `value.adx()` with `value.adx`, etc. Field names match the previous method names exactly.
 
 ### Changed
 

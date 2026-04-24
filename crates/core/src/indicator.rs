@@ -66,7 +66,7 @@ pub trait Indicator: Sized + Clone + Display + Debug {
     ///
     /// Prefer using the return value directly over calling
     /// [`value()`](Self::value) separately.
-    fn compute(&mut self, ohlcv: &impl Ohlcv) -> Option<Self::Output>;
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output>;
 
     /// Returns the last computed indicator value without advancing state,
     /// or `None` if not yet converged.

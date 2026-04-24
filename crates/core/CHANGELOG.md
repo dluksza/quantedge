@@ -9,6 +9,12 @@
 - Predefined constants for common bar sizes: `SEC_{1,5,10,15}`, `MIN_{1,3,5,15,30}`, `HOUR_{1,2,4,6,8,12}`, `DAY_{1,3,5}`, `WEEK_1`, `MONTH_{1,2,3,6}`, `YEAR_1`. Multi-month periods are epoch-anchored from January 1970, matching calendar quarters and halves for any N dividing 12.
 - `Timeframe::new(count, unit)` constructor with automatic canonicalization (`60s -> 1 minute`, `60min -> 1 hour`, `24h -> 1 day`, `7d → -> week`, applied recursively).
 - `Timeframe::count()` and `Timeframe::unit()` accessors.
+- `Debug`, `Clone`, `Copy`, and `PartialEq` derives on `Ohlcv`.
+- Test-only builder helpers (`Ohlcv::new`, `at`, `vol`) available behind the `test-util` feature. Not part of the stable public API — production callers build `Ohlcv` with a struct literal or a `From` conversion.
+
+### Changed
+
+- **Breaking:** `Ohlcv` is now a concrete struct with public fields (`open`, `high`, `low`, `close`, `open_time`, `volume`) instead of a trait. Callers build an `Ohlcv` per bar and pass it by reference — no more `impl Ohlcv for MyKline`. Removes the dynamic-dispatch / generic-parameter surface on every indicator signature and makes hot paths direct field reads. Migration: replace trait impls with a conversion that produces an `Ohlcv`.
 
 ## [0.1.0] - 2026-04-21
 

@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource, internals::PriceWindow,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource, internals::PriceWindow,
 };
 
 /// Configuration for the Commodity Channel Index ([`Cci`]) indicator.
@@ -153,26 +153,20 @@ impl IndicatorConfigBuilder<CciConfig> for CciConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Cci, CciConfig};
+/// use quantedge_ta::{Cci, CciConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let mut cci = Cci::new(CciConfig::close(NonZero::new(3).unwrap()));
 ///
-/// assert_eq!(cci.compute(&Bar(10.0, 1)), None);
-/// assert_eq!(cci.compute(&Bar(20.0, 2)), None);
+/// assert_eq!(cci.compute(&bar(10.0, 1)), None);
+/// assert_eq!(cci.compute(&bar(20.0, 2)), None);
 ///
 /// // SMA = 20, mean_dev = 20/3, CCI = (30 − 20) / (0.015 × 20/3) = 100
-/// let value = cci.compute(&Bar(30.0, 3)).unwrap();
+/// let value = cci.compute(&bar(30.0, 3)).unwrap();
 /// assert!((value - 100.0).abs() < 1e-6);
 /// ```
 #[derive(Clone, Debug)]
@@ -197,7 +191,7 @@ impl Indicator for Cci {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         let price = self.window.add(ohlcv);
 
         self.current = self.window.sum().map(|sum| {

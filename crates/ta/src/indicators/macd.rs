@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, PriceSource,
     internals::{BarAction, BarState, EmaCore},
 };
 
@@ -207,34 +207,14 @@ impl IndicatorConfigBuilder<MacdConfig> for MacdConfigBuilder {
 /// has accumulated enough MACD values to complete its SMA seed.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MacdValue {
-    macd: f64,
-    signal: Option<f64>,
-    histogram: Option<f64>,
-}
-
-impl MacdValue {
     /// MACD line: fast EMA minus slow EMA.
-    #[inline]
-    #[must_use]
-    pub fn macd(&self) -> f64 {
-        self.macd
-    }
-
+    pub macd: f64,
     /// Signal line: EMA of the MACD line.
     /// `None` during the signal seeding phase.
-    #[inline]
-    #[must_use]
-    pub fn signal(&self) -> Option<f64> {
-        self.signal
-    }
-
+    pub signal: Option<f64>,
     /// Histogram: MACD minus signal.
     /// `None` when signal is not yet available.
-    #[inline]
-    #[must_use]
-    pub fn histogram(&self) -> Option<f64> {
-        self.histogram
-    }
+    pub histogram: Option<f64>,
 }
 
 impl Display for MacdValue {
@@ -274,18 +254,12 @@ impl Display for MacdValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Macd, MacdConfig};
+/// use quantedge_ta::{Macd, MacdConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar(f64, u64);
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.0 }
-/// #     fn high(&self) -> Price { self.0 }
-/// #     fn low(&self) -> Price { self.0 }
-/// #     fn close(&self) -> Price { self.0 }
-/// #     fn open_time(&self) -> Timestamp { self.1 }
-/// # }
+///
+/// fn bar(close: f64, time: u64) -> Ohlcv {
+///     Ohlcv { open: close, high: close, low: close, close, volume: 0.0, open_time: time }
+/// }
 ///
 /// let mut macd = Macd::new(MacdConfig::close(
 ///     NonZero::new(3).unwrap(),
@@ -295,11 +269,11 @@ impl Display for MacdValue {
 ///
 /// // Feed bars until the slow EMA converges
 /// for i in 1..=5 {
-///     assert_eq!(macd.compute(&Bar(i as f64 * 10.0, i as u64)), None);
+///     assert_eq!(macd.compute(&bar(i as f64 * 10.0, i as u64)), None);
 /// }
 ///
 /// // MACD line available at bar 6 (slow_length)
-/// let val = macd.compute(&Bar(60.0, 6));
+/// let val = macd.compute(&bar(60.0, 6));
 /// assert!(val.is_some());
 /// ```
 #[derive(Clone, Debug)]
@@ -327,7 +301,7 @@ impl Indicator for Macd {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         let signal_value = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => {
                 let fast_value = self.fast.push(price);
@@ -452,9 +426,9 @@ mod tests {
                 macd.compute(&bar(i as f64 * 10.0, i));
             }
             let val = macd.value().unwrap();
-            assert!(val.signal().is_none(), "signal should be None during seed");
+            assert!(val.signal.is_none(), "signal should be None during seed");
             assert!(
-                val.histogram().is_none(),
+                val.histogram.is_none(),
                 "histogram should be None during seed"
             );
         }
@@ -468,11 +442,8 @@ mod tests {
                 macd.compute(&bar(i as f64 * 10.0, i));
             }
             let val = macd.value().unwrap();
-            assert!(val.signal().is_some(), "signal should be Some at bar 9");
-            assert!(
-                val.histogram().is_some(),
-                "histogram should be Some at bar 9"
-            );
+            assert!(val.signal.is_some(), "signal should be Some at bar 9");
+            assert!(val.histogram.is_some(), "histogram should be Some at bar 9");
         }
 
         #[test]
@@ -510,7 +481,7 @@ mod tests {
 
                 if let (Some(f), Some(s)) = (fast.value(), slow.value()) {
                     let expected_macd = f - s;
-                    let actual = macd.value().unwrap().macd();
+                    let actual = macd.value().unwrap().macd;
                     assert!(
                         (actual - expected_macd).abs() < 1e-10,
                         "MACD line mismatch at bar {}: expected {expected_macd}, got {actual}",
@@ -528,7 +499,7 @@ mod tests {
             }
             let val = macd.value().unwrap();
             assert!(
-                (val.macd()).abs() < 1e-10,
+                (val.macd).abs() < 1e-10,
                 "MACD should be 0 for constant price"
             );
         }
@@ -550,7 +521,7 @@ mod tests {
             for (i, &p) in prices.iter().enumerate() {
                 macd.compute(&bar(p, (i + 1) as u64));
                 if let Some(val) = macd.value() {
-                    macd_values.push(val.macd());
+                    macd_values.push(val.macd);
                 }
             }
 
@@ -568,7 +539,7 @@ mod tests {
                 expected_signal = alpha * mv + (1.0 - alpha) * expected_signal;
             }
             let last_val = macd.value().unwrap();
-            let actual_signal = last_val.signal().unwrap();
+            let actual_signal = last_val.signal.unwrap();
             assert!(
                 (actual_signal - expected_signal).abs() < 1e-10,
                 "signal mismatch: expected {expected_signal}, got {actual_signal}"
@@ -582,7 +553,7 @@ mod tests {
                 macd.compute(&bar(50.0, i));
             }
             let val = macd.value().unwrap();
-            assert!((val.signal().unwrap()).abs() < 1e-10);
+            assert!((val.signal.unwrap()).abs() < 1e-10);
         }
     }
     mod histogram {
@@ -597,8 +568,8 @@ mod tests {
                 macd.compute(&bar(f * 10.0 + f.sin() * 5.0, i));
             }
             let val = macd.value().unwrap();
-            if let (Some(sig), Some(hist)) = (val.signal(), val.histogram()) {
-                let expected = val.macd() - sig;
+            if let (Some(sig), Some(hist)) = (val.signal, val.histogram) {
+                let expected = val.macd - sig;
                 assert!(
                     (hist - expected).abs() < 1e-10,
                     "histogram should equal macd - signal"
@@ -613,7 +584,7 @@ mod tests {
                 macd.compute(&bar(50.0, i));
             }
             let val = macd.value().unwrap();
-            assert!((val.histogram().unwrap()).abs() < 1e-10);
+            assert!((val.histogram.unwrap()).abs() < 1e-10);
         }
     }
 
@@ -674,7 +645,7 @@ mod tests {
             assert_ne!(original, repainted);
 
             // Verify signal still None
-            assert!(macd.value().unwrap().signal().is_none());
+            assert!(macd.value().unwrap().signal.is_none());
         }
 
         #[test]
@@ -703,9 +674,9 @@ mod tests {
                 macd.compute(&bar(100.0, i));
             }
             let val = macd.value().unwrap();
-            assert!((val.macd()).abs() < 1e-10);
-            assert!((val.signal().unwrap()).abs() < 1e-10);
-            assert!((val.histogram().unwrap()).abs() < 1e-10);
+            assert!((val.macd).abs() < 1e-10);
+            assert!((val.signal.unwrap()).abs() < 1e-10);
+            assert!((val.histogram.unwrap()).abs() < 1e-10);
         }
         #[test]
         fn trending_up_positive_macd() {
@@ -715,7 +686,7 @@ mod tests {
                 #[allow(clippy::cast_precision_loss)]
                 macd.compute(&bar(i as f64 * 10.0, i));
             }
-            assert!(macd.value().unwrap().macd() > 0.0);
+            assert!(macd.value().unwrap().macd > 0.0);
         }
 
         #[test]
@@ -726,7 +697,7 @@ mod tests {
                 #[allow(clippy::cast_precision_loss)]
                 macd.compute(&bar(200.0 - i as f64 * 10.0, i));
             }
-            assert!(macd.value().unwrap().macd() < 0.0);
+            assert!(macd.value().unwrap().macd < 0.0);
         }
     }
 
@@ -743,7 +714,7 @@ mod tests {
             let clone = cloned.compute(&bar(50.0, 11)).unwrap();
 
             assert!(
-                (orig.macd() - clone.macd()).abs() > 1e-10,
+                (orig.macd - clone.macd).abs() > 1e-10,
                 "divergent inputs should give different MACD"
             );
         }
@@ -905,7 +876,7 @@ mod tests {
             let val_hl2 = macd.value().unwrap();
             let val_close = macd_close.value().unwrap();
             assert!(
-                (val_hl2.macd() - val_close.macd()).abs() < 1e-10,
+                (val_hl2.macd - val_close.macd).abs() < 1e-10,
                 "HL2 source should match close source fed with HL2 values"
             );
         }

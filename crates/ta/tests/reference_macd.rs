@@ -30,19 +30,19 @@ fn macd_12_26_9_matches_reference() {
             let ctx = format!("MACD(12,26,9) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.macd(),
+                value.macd,
                 reference[ref_idx].macd,
                 TOLERANCE,
                 &format!("{ctx} macd"),
             );
             assert_near(
-                value.signal().unwrap(),
+                value.signal.unwrap(),
                 reference[ref_idx].signal,
                 TOLERANCE,
                 &format!("{ctx} signal"),
             );
             assert_near(
-                value.histogram().unwrap(),
+                value.histogram.unwrap(),
                 reference[ref_idx].histogram,
                 TOLERANCE,
                 &format!("{ctx} histogram"),

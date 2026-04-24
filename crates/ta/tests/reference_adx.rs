@@ -30,19 +30,19 @@ fn adx_14_matches_reference() {
             let ctx = format!("ADX(14) at bar {ref_idx} (t={})", bar.open_time);
 
             assert_near(
-                value.adx(),
+                value.adx,
                 reference[ref_idx].adx,
                 TOLERANCE,
                 &format!("{ctx} adx"),
             );
             assert_near(
-                value.plus_di(),
+                value.plus_di,
                 reference[ref_idx].plus_di,
                 TOLERANCE,
                 &format!("{ctx} +DI"),
             );
             assert_near(
-                value.minus_di(),
+                value.minus_di,
                 reference[ref_idx].minus_di,
                 TOLERANCE,
                 &format!("{ctx} -DI"),

@@ -2,7 +2,7 @@ use std::{fmt::Display, hash::Hash, num::NonZero};
 
 use crate::{
     Atr, AtrConfig, Ema, EmaConfig, Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier,
-    Price, PriceSource, internals::EmaCore,
+    Ohlcv, Price, PriceSource, internals::EmaCore,
 };
 
 /// Configuration for the Keltner Channel ([`Kc`]) indicator.
@@ -195,32 +195,12 @@ impl KcConfigBuilder {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct KcValue {
-    upper: Price,
-    middle: Price,
-    lower: Price,
-}
-
-impl KcValue {
     /// Upper band: `EMA + multiplier × ATR`.
-    #[inline]
-    #[must_use]
-    pub fn upper(&self) -> Price {
-        self.upper
-    }
-
+    pub upper: Price,
     /// Middle line: EMA value.
-    #[inline]
-    #[must_use]
-    pub fn middle(&self) -> Price {
-        self.middle
-    }
-
+    pub middle: Price,
     /// Lower band: `EMA − multiplier × ATR`.
-    #[inline]
-    #[must_use]
-    pub fn lower(&self) -> Price {
-        self.lower
-    }
+    pub lower: Price,
 }
 
 impl Display for KcValue {
@@ -255,18 +235,12 @@ impl Display for KcValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Kc, KcConfig, Multiplier};
+/// use quantedge_ta::{Kc, KcConfig, Multiplier, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let config = KcConfig::builder()
 ///     .length(NonZero::new(2).unwrap())
@@ -275,11 +249,11 @@ impl Display for KcValue {
 ///     .build();
 /// let mut kc = Kc::new(config);
 ///
-/// assert!(kc.compute(&Bar { o: 10.0, h: 20.0, l: 5.0, c: 15.0, t: 1 }).is_none());
+/// assert!(kc.compute(&ohlc(10.0, 20.0, 5.0, 15.0, 1)).is_none());
 ///
-/// let val = kc.compute(&Bar { o: 16.0, h: 22.0, l: 12.0, c: 18.0, t: 2 }).unwrap();
-/// assert!(val.upper() > val.middle());
-/// assert!(val.middle() > val.lower());
+/// let val = kc.compute(&ohlc(16.0, 22.0, 12.0, 18.0, 2)).unwrap();
+/// assert!(val.upper > val.middle);
+/// assert!(val.middle > val.lower);
 /// ```
 #[derive(Clone, Debug)]
 pub struct Kc {
@@ -311,7 +285,7 @@ impl Indicator for Kc {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.current = match (self.ema.compute(ohlcv), self.atr.compute(ohlcv)) {
             (Some(ema), Some(atr)) => {
                 let diff = atr * self.config.multiplier.value();
@@ -438,29 +412,29 @@ mod tests {
             }
             kc.compute(&bars[2]);
 
-            assert_approx!(kc.value().unwrap().middle(), ema.value().unwrap());
+            assert_approx!(kc.value().unwrap().middle, ema.value().unwrap());
         }
 
         #[test]
         fn bands_symmetric_around_middle() {
             let val = seeded_kc().value().unwrap();
-            let upper_dist = val.upper() - val.middle();
-            let lower_dist = val.middle() - val.lower();
+            let upper_dist = val.upper - val.middle;
+            let lower_dist = val.middle - val.lower;
             assert!((upper_dist - lower_dist).abs() < 1e-10);
         }
 
         #[test]
         fn upper_above_middle_above_lower() {
             let val = seeded_kc().value().unwrap();
-            assert!(val.upper() > val.middle());
-            assert!(val.middle() > val.lower());
+            assert!(val.upper > val.middle);
+            assert!(val.middle > val.lower);
         }
 
         #[test]
         fn band_width_equals_2_times_multiplier_times_atr() {
             let val = seeded_kc().value().unwrap();
-            let width = val.upper() - val.lower();
-            let half_width = val.upper() - val.middle();
+            let width = val.upper - val.lower;
+            let half_width = val.upper - val.middle;
             // width should be 2 * half_width
             assert!((width - 2.0 * half_width).abs() < 1e-10);
         }
@@ -471,8 +445,8 @@ mod tests {
             let mut kc = kc_2_2();
             kc.compute(&ohlc(50.0, 50.0, 50.0, 50.0, 1));
             let val = kc.compute(&ohlc(50.0, 50.0, 50.0, 50.0, 2)).unwrap();
-            assert!((val.upper() - val.middle()).abs() < 1e-10);
-            assert!((val.middle() - val.lower()).abs() < 1e-10);
+            assert!((val.upper - val.middle).abs() < 1e-10);
+            assert!((val.middle - val.lower).abs() < 1e-10);
         }
     }
 
@@ -509,9 +483,9 @@ mod tests {
             let nv = narrow.value().unwrap();
             let wv = wide.value().unwrap();
 
-            assert!(wv.upper() - wv.lower() > nv.upper() - nv.lower());
+            assert!(wv.upper - wv.lower > nv.upper - nv.lower);
             // Middle should be the same (same EMA)
-            assert!((nv.middle() - wv.middle()).abs() < 1e-10);
+            assert!((nv.middle - wv.middle).abs() < 1e-10);
         }
     }
 
@@ -576,7 +550,7 @@ mod tests {
             let clone_val = cloned.compute(&ohlc(18.0, 19.0, 17.0, 17.5, 3)).unwrap();
 
             assert!(
-                (orig.middle() - clone_val.middle()).abs() > 1e-10,
+                (orig.middle - clone_val.middle).abs() > 1e-10,
                 "divergent inputs should give different middle"
             );
         }
@@ -776,7 +750,7 @@ mod tests {
             // Middle lines should match (same EMA input values)
             let hl2_val = kc_hl2.value().unwrap();
             let close_val = kc_close.value().unwrap();
-            assert_approx!(hl2_val.middle(), close_val.middle());
+            assert_approx!(hl2_val.middle, close_val.middle);
         }
     }
 }

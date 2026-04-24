@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Price, PriceSource,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Ohlcv, Price, PriceSource,
     internals::{BarAction, BarState},
 };
 
@@ -133,24 +133,10 @@ impl IndicatorConfigBuilder<ParabolicSarConfig> for ParabolicSarConfigBuilder {
 /// On reversal, SAR resets to the extreme point of the prior trend.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ParabolicSarValue {
-    sar: Price,
-    is_long: bool,
-}
-
-impl ParabolicSarValue {
     /// The current SAR price level.
-    #[must_use]
-    #[inline]
-    pub fn sar(&self) -> Price {
-        self.sar
-    }
-
+    pub sar: Price,
     /// `true` when the trend is long (bullish, SAR below price).
-    #[must_use]
-    #[inline]
-    pub fn is_long(&self) -> bool {
-        self.is_long
-    }
+    pub is_long: bool,
 }
 
 impl Display for ParabolicSarValue {
@@ -210,27 +196,21 @@ enum Phase {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{ParabolicSar, ParabolicSarConfig, Multiplier};
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+/// use quantedge_ta::{Ohlcv, ParabolicSar, ParabolicSarConfig};
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let mut sar = ParabolicSar::new(ParabolicSarConfig::default());
 ///
 /// // First bar: collecting initial state
-/// assert!(sar.compute(&Bar { o: 10.0, h: 15.0, l: 5.0, c: 12.0, t: 1 }).is_none());
+/// assert!(sar.compute(&ohlc(10.0, 15.0, 5.0, 12.0, 1)).is_none());
 ///
 /// // Second bar: first SAR value
-/// let val = sar.compute(&Bar { o: 12.0, h: 18.0, l: 8.0, c: 16.0, t: 2 }).unwrap();
-/// assert!(val.is_long());  // close rose → long trend
-/// assert!((val.sar() - 5.0).abs() < f64::EPSILON);  // SAR = init low
+/// let val = sar.compute(&ohlc(12.0, 18.0, 8.0, 16.0, 2)).unwrap();
+/// assert!(val.is_long);  // close rose → long trend
+/// assert!((val.sar - 5.0).abs() < f64::EPSILON);  // SAR = init low
 /// ```
 #[derive(Clone, Debug)]
 pub struct ParabolicSar {
@@ -262,13 +242,13 @@ impl Indicator for ParabolicSar {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         self.current = match self.bar_state.handle(ohlcv) {
             BarAction::Advance(close) => match self.phase {
                 Phase::New => {
                     self.phase = Phase::First {
-                        high: ohlcv.high(),
-                        low: ohlcv.low(),
+                        high: ohlcv.high,
+                        low: ohlcv.low,
                         close,
                     };
 
@@ -292,8 +272,8 @@ impl Indicator for ParabolicSar {
                     ref mut low,
                     ref mut close,
                 } => {
-                    *high = ohlcv.high();
-                    *low = ohlcv.low();
+                    *high = ohlcv.high;
+                    *low = ohlcv.low;
                     *close = price;
 
                     None
@@ -313,13 +293,13 @@ impl Indicator for ParabolicSar {
 }
 
 impl ParabolicSar {
-    fn initialize(&mut self, ohlcv: &impl crate::Ohlcv) -> ParabolicSarValue {
+    fn initialize(&mut self, ohlcv: &Ohlcv) -> ParabolicSarValue {
         let Phase::Seeding { high, low } = self.phase else {
             unreachable!()
         };
 
-        let ohlcv_high = ohlcv.high();
-        let ohlcv_low = ohlcv.low();
+        let ohlcv_high = ohlcv.high;
+        let ohlcv_low = ohlcv.low;
 
         let plus_dm = ohlcv_high - high;
         let minus_dm = low - ohlcv_low;
@@ -355,13 +335,13 @@ impl ParabolicSar {
         }
     }
 
-    fn step(&mut self, ohlcv: &impl crate::Ohlcv) -> ParabolicSarValue {
+    fn step(&mut self, ohlcv: &Ohlcv) -> ParabolicSarValue {
         let Phase::Running(c) = self.phase else {
             unreachable!()
         };
 
-        let ohlcv_high = ohlcv.high();
-        let ohlcv_low = ohlcv.low();
+        let ohlcv_high = ohlcv.high;
+        let ohlcv_low = ohlcv.low;
         let af_step = self.config.af_step.value();
         let af_max = self.config.af_max.value();
         let mut sar = c.sar;
@@ -488,8 +468,8 @@ mod tests {
             sar.compute(&ohlc(10.0, 15.0, 5.0, 12.0, 1));
             let val = sar.compute(&ohlc(12.0, 18.0, 8.0, 16.0, 2)).unwrap();
             // close[1]=16 > close[0]=12 → long, SAR = init_low = 5.0
-            assert!(val.is_long());
-            assert!((val.sar() - 5.0).abs() < f64::EPSILON);
+            assert!(val.is_long);
+            assert!((val.sar - 5.0).abs() < f64::EPSILON);
         }
 
         #[test]
@@ -498,8 +478,8 @@ mod tests {
             // -DM = 8 - 2 = 6, +DM = 14 - 15 = -1 → falling (6 > -1 && 6 > 0)
             sar.compute(&ohlc(10.0, 15.0, 8.0, 12.0, 1));
             let val = sar.compute(&ohlc(12.0, 14.0, 2.0, 8.0, 2)).unwrap();
-            assert!(!val.is_long());
-            assert!((val.sar() - 15.0).abs() < f64::EPSILON);
+            assert!(!val.is_long);
+            assert!((val.sar - 15.0).abs() < f64::EPSILON);
         }
 
         #[test]
@@ -507,7 +487,7 @@ mod tests {
             let mut sar = default_sar();
             sar.compute(&ohlc(10.0, 15.0, 5.0, 12.0, 1));
             let val = sar.compute(&ohlc(12.0, 18.0, 8.0, 12.0, 2)).unwrap();
-            assert!(val.is_long());
+            assert!(val.is_long);
         }
     }
 
@@ -523,8 +503,8 @@ mod tests {
             // Long, SAR=5.0, EP=20.0, AF=0.02
             // Next SAR = 5.0 + 0.02*(20.0-5.0) = 5.3, clamped to min(8.0, 8.0) = 5.3
             let v2 = sar.compute(&ohlc(18.0, 22.0, 12.0, 20.0, 3)).unwrap();
-            assert!(v2.is_long());
-            assert_approx!(v2.sar(), 5.3);
+            assert!(v2.is_long);
+            assert_approx!(v2.sar, 5.3);
         }
 
         #[test]
@@ -537,8 +517,8 @@ mod tests {
             // Bar 3: high=25 > EP=20 → EP=25, AF=0.04
             // SAR for bar 4 = 5.3 + 0.04*(25.0-5.3) = 6.088
             let v = sar.compute(&ohlc(22.0, 30.0, 18.0, 28.0, 4)).unwrap();
-            assert!(v.is_long());
-            assert_approx!(v.sar(), 6.088);
+            assert!(v.is_long);
+            assert_approx!(v.sar, 6.088);
         }
 
         #[test]
@@ -551,7 +531,7 @@ mod tests {
             // Bar 3: high=19 < EP=20 → no EP update, AF stays 0.02
             // SAR for bar 4 = 5.3 + 0.02*(20.0-5.3) = 5.594
             let v = sar.compute(&ohlc(17.0, 21.0, 14.0, 19.0, 4)).unwrap();
-            assert_approx!(v.sar(), 5.594);
+            assert_approx!(v.sar, 5.594);
         }
 
         #[test]
@@ -572,7 +552,7 @@ mod tests {
             // SAR for bar 4 = 5.0 + 0.2*(25.0-5.0) = 9.0, clamped to min(8.0,15.0) = 8.0
             // SAR for bar 5 = 8.0 + 0.2*(30.0-8.0) = 12.4, clamped to min(15.0,18.0) = 12.4
             let v = sar.compute(&ohlc(28.0, 35.0, 22.0, 32.0, 5)).unwrap();
-            assert_approx!(v.sar(), 12.4);
+            assert_approx!(v.sar, 12.4);
         }
 
         #[test]
@@ -580,15 +560,15 @@ mod tests {
             let mut sar = default_sar();
             sar.compute(&ohlc(10.0, 15.0, 5.0, 12.0, 1));
             sar.compute(&ohlc(12.0, 20.0, 8.0, 18.0, 2));
-            assert!(sar.value().unwrap().is_long());
+            assert!(sar.value().unwrap().is_long);
 
             // Bar 3: low=2.0 penetrates SAR → reverse to short
             // Confirmed SAR entering bar 3 = 5.0 (clamped)
             // low=2.0 <= 5.0 → reverse
             // New SAR = old EP = 20.0, clamped max(prev_high=15.0, prev_prev_high=15.0) = 20.0
             let v = sar.compute(&ohlc(8.0, 10.0, 2.0, 4.0, 3)).unwrap();
-            assert!(!v.is_long());
-            assert!((v.sar() - 20.0).abs() < f64::EPSILON);
+            assert!(!v.is_long);
+            assert!((v.sar - 20.0).abs() < f64::EPSILON);
         }
 
         #[test]
@@ -597,7 +577,7 @@ mod tests {
             // -DM = 8 - 2 = 6, +DM = 14 - 15 = -1 → falling
             sar.compute(&ohlc(10.0, 15.0, 8.0, 12.0, 1));
             sar.compute(&ohlc(12.0, 14.0, 2.0, 8.0, 2));
-            assert!(!sar.value().unwrap().is_long());
+            assert!(!sar.value().unwrap().is_long);
 
             // Short: SAR=15.0, EP=2.0
             // Next SAR for bar 3 = 15.0 + 0.02*(2.0-15.0) = 14.74
@@ -605,8 +585,8 @@ mod tests {
             // Bar 3: high=18.0 >= 15.0 → reverse to long
             // New SAR = old EP = 2.0, clamped min(2.0, prev_low=8.0) = 2.0
             let v = sar.compute(&ohlc(10.0, 18.0, 7.0, 16.0, 3)).unwrap();
-            assert!(v.is_long());
-            assert!((v.sar() - 2.0).abs() < f64::EPSILON);
+            assert!(v.is_long);
+            assert!((v.sar - 2.0).abs() < f64::EPSILON);
         }
     }
 
@@ -622,7 +602,7 @@ mod tests {
             let original = sar.compute(&ohlc(12.0, 18.0, 6.0, 16.0, 2)).unwrap();
             // Repaint: +DM=-1, -DM=6 → falling (short)
             let repainted = sar.compute(&ohlc(12.0, 14.0, 2.0, 8.0, 2)).unwrap();
-            assert_ne!(original.is_long(), repainted.is_long());
+            assert_ne!(original.is_long, repainted.is_long);
         }
 
         #[test]

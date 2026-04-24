@@ -1,7 +1,7 @@
 use std::{fmt::Display, num::NonZero};
 
 use crate::{
-    Indicator, IndicatorConfig, IndicatorConfigBuilder, Price,
+    Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price,
     internals::{BarAction, BarState, EmaCore},
 };
 
@@ -138,18 +138,12 @@ impl IndicatorConfigBuilder<AtrConfig> for AtrConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Atr, AtrConfig};
+/// use quantedge_ta::{Atr, AtrConfig, Ohlcv};
 /// use std::num::NonZero;
-/// # use quantedge_ta::{Ohlcv, Price, Timestamp};
-/// #
-/// # struct Bar { o: f64, h: f64, l: f64, c: f64, t: u64 }
-/// # impl Ohlcv for Bar {
-/// #     fn open(&self) -> Price { self.o }
-/// #     fn high(&self) -> Price { self.h }
-/// #     fn low(&self) -> Price { self.l }
-/// #     fn close(&self) -> Price { self.c }
-/// #     fn open_time(&self) -> Timestamp { self.t }
-/// # }
+///
+/// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
+///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
+/// }
 ///
 /// let config = AtrConfig::builder()
 ///     .length(NonZero::new(2).unwrap())
@@ -157,11 +151,11 @@ impl IndicatorConfigBuilder<AtrConfig> for AtrConfigBuilder {
 /// let mut atr = Atr::new(config);
 ///
 /// // Bar 1: TR = high − low = 15 (no previous close)
-/// assert_eq!(atr.compute(&Bar { o: 10.0, h: 20.0, l: 5.0, c: 15.0, t: 1 }), None);
+/// assert_eq!(atr.compute(&ohlc(10.0, 20.0, 5.0, 15.0, 1)), None);
 ///
 /// // Bar 2: TR = max(10, |22−15|, |12−15|) = 10
 /// // SMA seed = (15 + 10) / 2 = 12.5
-/// assert_eq!(atr.compute(&Bar { o: 16.0, h: 22.0, l: 12.0, c: 18.0, t: 2 }), Some(12.5));
+/// assert_eq!(atr.compute(&ohlc(16.0, 22.0, 12.0, 18.0, 2)), Some(12.5));
 /// ```
 #[derive(Clone, Debug)]
 pub struct Atr {
@@ -185,7 +179,7 @@ impl Indicator for Atr {
         }
     }
 
-    fn compute(&mut self, ohlcv: &impl crate::Ohlcv) -> Option<Self::Output> {
+    fn compute(&mut self, ohlcv: &Ohlcv) -> Option<Self::Output> {
         match self.bar_state.handle(ohlcv) {
             BarAction::Advance(price) => self.core.push(price),
             BarAction::Repaint(price) => self.core.replace(price),

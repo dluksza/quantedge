@@ -2,47 +2,37 @@
 
 use std::num::NonZero;
 
-use quantedge_ta::{Ohlcv, Price, Timestamp};
+use quantedge_ta::Ohlcv;
 use serde::{Deserialize, de::DeserializeOwned};
 
 pub fn nz(n: usize) -> NonZero<usize> {
     NonZero::new(n).unwrap()
 }
 
-/// OHLCV bar parsed from Binance CSV.
+/// Alias kept for readability in tests that refer to reference bars.
+pub type RefBar = Ohlcv;
+
+/// CSV row shape for deserialising reference OHLCV bars.
 #[derive(Debug, Clone, Deserialize)]
-pub struct RefBar {
-    pub open_time: u64,
-    pub open: f64,
-    pub high: f64,
-    pub low: f64,
-    pub close: f64,
-    pub volume: f64,
+struct OhlcvRow {
+    open_time: u64,
+    open: f64,
+    high: f64,
+    low: f64,
+    close: f64,
+    volume: f64,
 }
 
-impl Ohlcv for RefBar {
-    fn open(&self) -> Price {
-        self.open
-    }
-
-    fn high(&self) -> Price {
-        self.high
-    }
-
-    fn low(&self) -> Price {
-        self.low
-    }
-
-    fn close(&self) -> Price {
-        self.close
-    }
-
-    fn open_time(&self) -> Timestamp {
-        self.open_time
-    }
-
-    fn volume(&self) -> f64 {
-        self.volume
+impl From<OhlcvRow> for Ohlcv {
+    fn from(row: OhlcvRow) -> Self {
+        Self {
+            open: row.open,
+            high: row.high,
+            low: row.low,
+            close: row.close,
+            volume: row.volume,
+            open_time: row.open_time,
+        }
     }
 }
 
@@ -118,8 +108,9 @@ pub struct RefPsarValue {
 const OHLCV_PATH: &str = "tests/fixtures/data/btcusdt-1h.csv";
 
 /// Load reference OHLCV bars from Binance.
-pub fn load_reference_ohlcvs() -> Vec<RefBar> {
-    load_records(OHLCV_PATH, "invalid OHLCV record")
+pub fn load_reference_ohlcvs() -> Vec<Ohlcv> {
+    let rows: Vec<OhlcvRow> = load_records(OHLCV_PATH, "invalid OHLCV record");
+    rows.into_iter().map(Ohlcv::from).collect()
 }
 
 /// Load single-value reference data (SMA, EMA).
@@ -268,27 +259,15 @@ pub fn assert_channel_values_match<V: std::fmt::Debug>(
 }
 
 pub fn bb_bands(v: &quantedge_ta::BbValue) -> [(&str, f64); 3] {
-    [
-        ("upper", v.upper()),
-        ("middle", v.middle()),
-        ("lower", v.lower()),
-    ]
+    [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
 pub fn dc_bands(v: &quantedge_ta::DcValue) -> [(&str, f64); 3] {
-    [
-        ("upper", v.upper()),
-        ("middle", v.middle()),
-        ("lower", v.lower()),
-    ]
+    [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
 pub fn kc_bands(v: &quantedge_ta::KcValue) -> [(&str, f64); 3] {
-    [
-        ("upper", v.upper()),
-        ("middle", v.middle()),
-        ("lower", v.lower()),
-    ]
+    [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
 /// Assert ADX values match between closed and repainted indicators.
@@ -302,9 +281,9 @@ pub fn assert_adx_values_match(
         (None, None) => {}
         (Some(c), Some(r)) => {
             for (label, cv, rv) in [
-                ("ADX", c.adx(), r.adx()),
-                ("+DI", c.plus_di(), r.plus_di()),
-                ("-DI", c.minus_di(), r.minus_di()),
+                ("ADX", c.adx, r.adx),
+                ("+DI", c.plus_di, r.plus_di),
+                ("-DI", c.minus_di, r.minus_di),
             ] {
                 let diff = (cv - rv).abs();
                 assert!(
@@ -330,11 +309,11 @@ pub fn assert_ichimoku_values_match(
         (None, None) => {}
         (Some(c), Some(r)) => {
             for (label, cv, rv) in [
-                ("tenkan", c.tenkan(), r.tenkan()),
-                ("kijun", c.kijun(), r.kijun()),
-                ("senkou_a", c.senkou_a(), r.senkou_a()),
-                ("senkou_b", c.senkou_b(), r.senkou_b()),
-                ("chikou_close", c.chikou_close(), r.chikou_close()),
+                ("tenkan", c.tenkan, r.tenkan),
+                ("kijun", c.kijun, r.kijun),
+                ("senkou_a", c.senkou_a, r.senkou_a),
+                ("senkou_b", c.senkou_b, r.senkou_b),
+                ("chikou_close", c.chikou_close, r.chikou_close),
             ] {
                 let diff = (cv - rv).abs();
                 assert!(
@@ -359,14 +338,14 @@ pub fn assert_macd_values_match(
     match (closed, repainted) {
         (None, None) => {}
         (Some(c), Some(r)) => {
-            let diff = (c.macd() - r.macd()).abs();
+            let diff = (c.macd - r.macd).abs();
             assert!(
                 diff <= tolerance,
                 "MACD line diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
-                c.macd(),
-                r.macd()
+                c.macd,
+                r.macd
             );
-            match (c.signal(), r.signal()) {
+            match (c.signal, r.signal) {
                 (Some(cs), Some(rs)) => {
                     let diff = (cs - rs).abs();
                     assert!(
@@ -381,7 +360,7 @@ pub fn assert_macd_values_match(
                     );
                 }
             }
-            match (c.histogram(), r.histogram()) {
+            match (c.histogram, r.histogram) {
                 (Some(ch), Some(rh)) => {
                     let diff = (ch - rh).abs();
                     assert!(
@@ -413,14 +392,14 @@ pub fn assert_stoch_values_match(
     match (closed, repainted) {
         (None, None) => {}
         (Some(c), Some(r)) => {
-            let diff = (c.k() - r.k()).abs();
+            let diff = (c.k - r.k).abs();
             assert!(
                 diff <= tolerance,
                 "Stoch %K diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
-                c.k(),
-                r.k()
+                c.k,
+                r.k
             );
-            match (c.d(), r.d()) {
+            match (c.d, r.d) {
                 (Some(cd), Some(rd)) => {
                     let diff = (cd - rd).abs();
                     assert!(
@@ -452,19 +431,17 @@ pub fn assert_supertrend_values_match(
     match (closed, repainted) {
         (None, None) => {}
         (Some(c), Some(r)) => {
-            let diff = (c.value() - r.value()).abs();
+            let diff = (c.value - r.value).abs();
             assert!(
                 diff <= tolerance,
                 "Supertrend value diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
-                c.value(),
-                r.value()
+                c.value,
+                r.value
             );
             assert_eq!(
-                c.is_bullish(),
-                r.is_bullish(),
+                c.is_bullish, r.is_bullish,
                 "Supertrend direction diverged at bar {bar_idx}: closed={}, repainted={}",
-                c.is_bullish(),
-                r.is_bullish()
+                c.is_bullish, r.is_bullish
             );
         }
         (c, r) => {
@@ -485,19 +462,17 @@ pub fn assert_psar_values_match(
     match (closed, repainted) {
         (None, None) => {}
         (Some(c), Some(r)) => {
-            let diff = (c.sar() - r.sar()).abs();
+            let diff = (c.sar - r.sar).abs();
             assert!(
                 diff <= tolerance,
                 "PSAR value diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
-                c.sar(),
-                r.sar()
+                c.sar,
+                r.sar
             );
             assert_eq!(
-                c.is_long(),
-                r.is_long(),
+                c.is_long, r.is_long,
                 "PSAR direction diverged at bar {bar_idx}: closed={}, repainted={}",
-                c.is_long(),
-                r.is_long()
+                c.is_long, r.is_long
             );
         }
         (c, r) => {
@@ -516,14 +491,14 @@ pub fn assert_stoch_rsi_values_match(
     match (closed, repainted) {
         (None, None) => {}
         (Some(c), Some(r)) => {
-            let diff = (c.k() - r.k()).abs();
+            let diff = (c.k - r.k).abs();
             assert!(
                 diff <= tolerance,
                 "StochRsi %K diverged at bar {bar_idx}: closed={:.10}, repainted={:.10}, diff={diff:.2e}",
-                c.k(),
-                r.k()
+                c.k,
+                r.k
             );
-            match (c.d(), r.d()) {
+            match (c.d, r.d) {
                 (Some(cd), Some(rd)) => {
                     let diff = (cd - rd).abs();
                     assert!(
