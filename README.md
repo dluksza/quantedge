@@ -8,8 +8,8 @@ Today: 19 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 
 | Crate              | Version       | Status        | Purpose                                              |
 |--------------------|---------------|---------------|------------------------------------------------------|
-| `quantedge-ta`     | `0.19.0`      | published     | Streaming technical analysis indicators              |
-| `quantedge-core`   | `0.1.0`       | published     | Shared structs, traits, and public interfaces        |
+| `quantedge-ta`     | [![crates.io](https://img.shields.io/crates/v/quantedge-ta.svg)](https://crates.io/crates/quantedge-ta) | published     | Streaming technical analysis indicators              |
+| `quantedge-core`   | [![crates.io](https://img.shields.io/crates/v/quantedge-core.svg)](https://crates.io/crates/quantedge-core) | published     | Shared structs, traits, and public interfaces        |
 | `quantedge-engine` | —             | planned       | Streaming runtime — event loop, multi-TF state, execution |
 | `quantedge-sim`    | —             | planned       | Backtester and forward-tester with honest fill models |
 | `quantedge-ob`     | —             | planned       | Order book reconstruction and L2/L3 event handling   |
