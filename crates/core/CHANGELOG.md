@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-24
+
 ### Added
 
 - `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder` traits and `PriceSource` enum, relocated from `quantedge-ta` so downstream crates can depend on the trait surface without pulling in the full indicator library. `quantedge-ta` continues to re-export them at their existing paths, so no source changes are required for its consumers.
@@ -33,4 +35,5 @@
 
 - Initial release. Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases, extracted from `quantedge-ta` so downstream crates can share a single bar abstraction without depending on the full indicator library.
 
+[0.2.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.2.0
 [0.1.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.1.0
