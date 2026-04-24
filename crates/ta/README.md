@@ -273,12 +273,6 @@ to extract from the Ohlcv input:
 
 ## Benchmarks
 
-> **Note:** the tables below were measured against the 0.18.x hot path, before
-> `Ohlcv` was replaced with a plain struct and every `compute` lost its
-> generic parameter. Hot paths now do direct field loads instead of trait
-> dispatch, so the numbers are **not comparable** to the current release.
-> They will be refreshed on the next bench run.
-
 Measured with [Criterion.rs](https://github.com/bheisler/criterion.rs) on 744
 BTC/USDT 1-hour bars from Binance, split into a 349-bar warm-up seed and 395
 measured bars so every group times steady-state work.
@@ -296,167 +290,167 @@ on a converged indicator.
 
 ### Stream — process 395 post-warmup bars
 
-| Indicator | Period | Time (median) | Throughput     |
-|-----------|--------|---------------|----------------|
-| SMA       | 20     | 422 ns        | 936 Melem/s    |
-| SMA       | 200    | 440 ns        | 898 Melem/s    |
-| EMA       | 20     | 859 ns        | 460 Melem/s    |
-| EMA       | 200    | 860 ns        | 459 Melem/s    |
-| BB        | 20     | 474 ns        | 833 Melem/s    |
-| BB        | 200    | 485 ns        | 815 Melem/s    |
-| RSI       | 14     | 915 ns        | 432 Melem/s    |
-| RSI       | 140    | 914 ns        | 432 Melem/s    |
-| MACD      | 12/26/9 | 954 ns       | 414 Melem/s    |
-| MACD      | 120/260/90 | 954 ns    | 414 Melem/s    |
-| ATR       | 14     | 723 ns        | 547 Melem/s    |
-| ATR       | 140    | 723 ns        | 546 Melem/s    |
-| Stoch     | 14/3/3 | 3.49 µs       | 113 Melem/s    |
-| Stoch     | 140/30/30 | 6.87 µs    | 57.5 Melem/s   |
-| KC        | 20/10  | 957 ns        | 413 Melem/s    |
-| KC        | 200/100 | 956 ns       | 413 Melem/s    |
-| DC        | 20     | 2.43 µs       | 163 Melem/s    |
-| DC        | 200    | 8.61 µs       | 45.9 Melem/s   |
-| ADX       | 14     | 2.06 µs       | 191 Melem/s    |
-| ADX       | 140    | 2.06 µs       | 191 Melem/s    |
-| WillR     | 14     | 2.36 µs       | 167 Melem/s    |
-| WillR     | 140    | 6.05 µs       | 65.3 Melem/s   |
-| CCI       | 20     | 1.42 µs       | 278 Melem/s    |
-| CCI       | 200    | 19.7 µs       | 20.1 Melem/s   |
-| CHOP      | 14     | 3.51 µs       | 113 Melem/s    |
-| CHOP      | 140    | 7.02 µs       | 56.3 Melem/s   |
-| Ichimoku  | 9/26/52/26 | 8.41 µs   | 47.0 Melem/s   |
-| Ichimoku  | 36/104/208/104 | 16.7 µs | 23.7 Melem/s  |
-| StochRSI  | 14/14/3/3 | 4.47 µs    | 88.3 Melem/s   |
-| StochRSI  | 140/140/30/30 | 6.60 µs | 59.8 Melem/s   |
-| Supertrend | 20      | 1.28 µs       | 308 Melem/s    |
-| Supertrend | 200     | 1.31 µs       | 302 Melem/s    |
-| OBV       | —        | 401 ns        | 985 Melem/s    |
-| VWAP      | Day      | 483 ns        | 817 Melem/s    |
-| Parabolic SAR | 0.02/0.2 | 3.59 µs   | 110 Melem/s    |
-| Parabolic SAR | 0.01/0.4 | 3.56 µs   | 111 Melem/s    |
+| Indicator     | Period         | Time (median) | Throughput    |
+|---------------|----------------|---------------|---------------|
+| SMA           | 20             | 411 ns        | 960 Melem/s   |
+| SMA           | 200            | 432 ns        | 915 Melem/s   |
+| EMA           | 20             | 865 ns        | 457 Melem/s   |
+| EMA           | 200            | 861 ns        | 459 Melem/s   |
+| BB            | 20             | 491 ns        | 804 Melem/s   |
+| BB            | 200            | 506 ns        | 780 Melem/s   |
+| RSI           | 14             | 913 ns        | 433 Melem/s   |
+| RSI           | 140            | 909 ns        | 434 Melem/s   |
+| MACD          | 12/26/9        | 957 ns        | 413 Melem/s   |
+| MACD          | 120/260/90     | 957 ns        | 413 Melem/s   |
+| ATR           | 14             | 734 ns        | 538 Melem/s   |
+| ATR           | 140            | 732 ns        | 539 Melem/s   |
+| Stoch         | 14/3/3         | 3.42 µs       | 115 Melem/s   |
+| Stoch         | 140/30/30      | 6.75 µs       | 58.5 Melem/s  |
+| KC            | 20/10          | 1.00 µs       | 393 Melem/s   |
+| KC            | 200/100        | 1.00 µs       | 393 Melem/s   |
+| DC            | 20             | 2.40 µs       | 165 Melem/s   |
+| DC            | 200            | 8.57 µs       | 46.1 Melem/s  |
+| ADX           | 14             | 2.07 µs       | 190 Melem/s   |
+| ADX           | 140            | 2.08 µs       | 190 Melem/s   |
+| WillR         | 14             | 2.46 µs       | 161 Melem/s   |
+| WillR         | 140            | 6.04 µs       | 65.4 Melem/s  |
+| CCI           | 20             | 1.42 µs       | 278 Melem/s   |
+| CCI           | 200            | 19.59 µs      | 20.2 Melem/s  |
+| CHOP          | 14             | 3.63 µs       | 109 Melem/s   |
+| CHOP          | 140            | 7.01 µs       | 56.3 Melem/s  |
+| Ichimoku      | 9/26/52/26     | 8.31 µs       | 47.5 Melem/s  |
+| Ichimoku      | 36/104/208/104 | 16.62 µs      | 23.8 Melem/s  |
+| StochRSI      | 14/14/3/3      | 4.11 µs       | 96.1 Melem/s  |
+| StochRSI      | 140/140/30/30  | 6.26 µs       | 63.1 Melem/s  |
+| Supertrend    | 20             | 1.28 µs       | 309 Melem/s   |
+| Supertrend    | 200            | 1.29 µs       | 307 Melem/s   |
+| OBV           | —              | 530 ns        | 746 Melem/s   |
+| VWAP          | Day            | 654 ns        | 604 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 3.42 µs       | 116 Melem/s   |
+| Parabolic SAR | 0.01/0.4       | 3.40 µs       | 116 Melem/s   |
 
 ### Tick — single `compute()` on a converged indicator
 
-| Indicator | Period | Time (median) |
-|-----------|--------|---------------|
-| SMA       | 20     | 8.55 ns       |
-| SMA       | 200    | 15.8 ns       |
-| EMA       | 20     | 1.54 ns       |
-| EMA       | 200    | 1.57 ns       |
-| BB        | 20     | 9.57 ns       |
-| BB        | 200    | 17.5 ns       |
-| RSI       | 14     | 1.70 ns       |
-| RSI       | 140    | 1.73 ns       |
-| MACD      | 12/26/9 | 3.70 ns      |
-| MACD      | 120/260/90 | 4.34 ns   |
-| ATR       | 14     | 1.60 ns       |
-| ATR       | 140    | 1.60 ns       |
-| Stoch     | 14/3/3 | 37.5 ns       |
-| Stoch     | 140/30/30 | 120 ns    |
-| KC        | 20/10  | 3.72 ns       |
-| KC        | 200/100 | 3.81 ns      |
-| DC        | 20     | 25.7 ns       |
-| DC        | 200    | 57.3 ns       |
-| ADX       | 14     | 11.3 ns       |
-| ADX       | 140    | 11.6 ns       |
-| WillR     | 14     | 18.5 ns       |
-| WillR     | 140    | 60.7 ns       |
-| CCI       | 20     | 10.1 ns       |
-| CCI       | 200    | 63.1 ns       |
-| CHOP      | 14     | 29.4 ns       |
-| CHOP      | 140    | 75.8 ns       |
-| Ichimoku  | 9/26/52/26 | 83.9 ns  |
-| Ichimoku  | 36/104/208/104 | 237 ns |
-| StochRSI  | 14/14/3/3 | 43.6 ns    |
-| StochRSI  | 140/140/30/30 | 122 ns  |
-| Supertrend | 20      | 3.01 ns       |
-| Supertrend | 200     | 3.08 ns       |
-| OBV       | —        | 0.99 ns       |
-| VWAP      | Day      | 2.46 ns       |
-| Parabolic SAR | 0.02/0.2 | 9.20 ns  |
-| Parabolic SAR | 0.01/0.4 | 9.20 ns  |
+| Indicator     | Period         | Time (median) |
+|---------------|----------------|---------------|
+| SMA           | 20             | 11.41 ns      |
+| SMA           | 200            | 26.26 ns      |
+| EMA           | 20             | 1.88 ns       |
+| EMA           | 200            | 1.88 ns       |
+| BB            | 20             | 14.09 ns      |
+| BB            | 200            | 30.72 ns      |
+| RSI           | 14             | 5.23 ns       |
+| RSI           | 140            | 5.00 ns       |
+| MACD          | 12/26/9        | 8.28 ns       |
+| MACD          | 120/260/90     | 8.59 ns       |
+| ATR           | 14             | 2.09 ns       |
+| ATR           | 140            | 2.04 ns       |
+| Stoch         | 14/3/3         | 41.75 ns      |
+| Stoch         | 140/30/30      | 121 ns        |
+| KC            | 20/10          | 4.56 ns       |
+| KC            | 200/100        | 4.36 ns       |
+| DC            | 20             | 27.35 ns      |
+| DC            | 200            | 58.99 ns      |
+| ADX           | 14             | 11.43 ns      |
+| ADX           | 140            | 11.70 ns      |
+| WillR         | 14             | 19.07 ns      |
+| WillR         | 140            | 65.02 ns      |
+| CCI           | 20             | 13.67 ns      |
+| CCI           | 200            | 68.32 ns      |
+| CHOP          | 14             | 31.51 ns      |
+| CHOP          | 140            | 78.72 ns      |
+| Ichimoku      | 9/26/52/26     | 86.25 ns      |
+| Ichimoku      | 36/104/208/104 | 236 ns        |
+| StochRSI      | 14/14/3/3      | 44.97 ns      |
+| StochRSI      | 140/140/30/30  | 127 ns        |
+| Supertrend    | 20             | 9.29 ns       |
+| Supertrend    | 200            | 9.01 ns       |
+| OBV           | —              | 1.29 ns       |
+| VWAP          | Day            | 7.06 ns       |
+| Parabolic SAR | 0.02/0.2       | 9.36 ns       |
+| Parabolic SAR | 0.01/0.4       | 9.15 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
 
-| Indicator | Period | Time (median) |
-|-----------|--------|---------------|
-| SMA       | 20     | 8.69 ns       |
-| SMA       | 200    | 16.0 ns       |
-| EMA       | 20     | 1.92 ns       |
-| EMA       | 200    | 1.60 ns       |
-| BB        | 20     | 9.44 ns       |
-| BB        | 200    | 17.3 ns       |
-| RSI       | 14     | 1.76 ns       |
-| RSI       | 140    | 1.68 ns       |
-| MACD      | 12/26/9 | 3.75 ns      |
-| MACD      | 120/260/90 | 3.70 ns   |
-| ATR       | 14     | 1.59 ns       |
-| ATR       | 140    | 1.59 ns       |
-| Stoch     | 14/3/3 | 37.3 ns       |
-| Stoch     | 140/30/30 | 112 ns    |
-| KC        | 20/10  | 3.59 ns       |
-| KC        | 200/100 | 4.50 ns      |
-| DC        | 20     | 17.2 ns       |
-| DC        | 200    | 55.1 ns       |
-| ADX       | 14     | 10.5 ns       |
-| ADX       | 140    | 10.7 ns       |
-| WillR     | 14     | 17.1 ns       |
-| WillR     | 140    | 54.7 ns       |
-| CCI       | 20     | 10.1 ns       |
-| CCI       | 200    | 63.6 ns       |
-| CHOP      | 14     | 27.7 ns       |
-| CHOP      | 140    | 74.8 ns       |
-| Ichimoku  | 9/26/52/26 | 81.9 ns  |
-| Ichimoku  | 36/104/208/104 | 229 ns |
-| StochRSI  | 14/14/3/3 | 42.5 ns    |
-| StochRSI  | 140/140/30/30 | 120 ns  |
-| Supertrend | 20      | 2.98 ns       |
-| Supertrend | 200     | 3.08 ns       |
-| OBV       | —        | 0.99 ns       |
-| VWAP      | Day      | 3.00 ns       |
-| Parabolic SAR | 0.02/0.2 | 5.83 ns  |
-| Parabolic SAR | 0.01/0.4 | 5.85 ns  |
+| Indicator     | Period         | Time (median) |
+|---------------|----------------|---------------|
+| SMA           | 20             | 11.19 ns      |
+| SMA           | 200            | 25.30 ns      |
+| EMA           | 20             | 1.85 ns       |
+| EMA           | 200            | 2.12 ns       |
+| BB            | 20             | 13.67 ns      |
+| BB            | 200            | 29.29 ns      |
+| RSI           | 14             | 3.97 ns       |
+| RSI           | 140            | 3.85 ns       |
+| MACD          | 12/26/9        | 7.72 ns       |
+| MACD          | 120/260/90     | 8.45 ns       |
+| ATR           | 14             | 2.04 ns       |
+| ATR           | 140            | 2.00 ns       |
+| Stoch         | 14/3/3         | 40.34 ns      |
+| Stoch         | 140/30/30      | 122 ns        |
+| KC            | 20/10          | 4.35 ns       |
+| KC            | 200/100        | 4.45 ns       |
+| DC            | 20             | 19.15 ns      |
+| DC            | 200            | 55.46 ns      |
+| ADX           | 14             | 10.84 ns      |
+| ADX           | 140            | 10.35 ns      |
+| WillR         | 14             | 18.58 ns      |
+| WillR         | 140            | 55.87 ns      |
+| CCI           | 20             | 13.36 ns      |
+| CCI           | 200            | 68.92 ns      |
+| CHOP          | 14             | 29.57 ns      |
+| CHOP          | 140            | 77.78 ns      |
+| Ichimoku      | 9/26/52/26     | 83.30 ns      |
+| Ichimoku      | 36/104/208/104 | 234 ns        |
+| StochRSI      | 14/14/3/3      | 42.55 ns      |
+| StochRSI      | 140/140/30/30  | 126 ns        |
+| Supertrend    | 20             | 7.55 ns       |
+| Supertrend    | 200            | 7.75 ns       |
+| OBV           | —              | 1.16 ns       |
+| VWAP          | Day            | 6.63 ns       |
+| Parabolic SAR | 0.02/0.2       | 5.74 ns       |
+| Parabolic SAR | 0.01/0.4       | 5.54 ns       |
 
 ### Repaint Stream — process 395 bars × 3 ticks post-warmup
 
-| Indicator | Period | Time (median) | Throughput     |
-|-----------|--------|---------------|----------------|
-| SMA       | 20     | 1.31 µs       | 904 Melem/s    |
-| SMA       | 200    | 1.30 µs       | 913 Melem/s    |
-| EMA       | 20     | 1.96 µs       | 605 Melem/s    |
-| EMA       | 200    | 1.96 µs       | 605 Melem/s    |
-| BB        | 20     | 1.47 µs       | 804 Melem/s    |
-| BB        | 200    | 1.46 µs       | 810 Melem/s    |
-| RSI       | 14     | 2.81 µs       | 421 Melem/s    |
-| RSI       | 140    | 2.81 µs       | 421 Melem/s    |
-| MACD      | 12/26/9 | 1.94 µs      | 612 Melem/s    |
-| MACD      | 120/260/90 | 1.94 µs   | 612 Melem/s    |
-| ATR       | 14     | 1.16 µs       | 1.02 Gelem/s   |
-| ATR       | 140    | 1.16 µs       | 1.02 Gelem/s   |
-| Stoch     | 14/3/3 | 7.28 µs       | 163 Melem/s    |
-| Stoch     | 140/30/30 | 10.6 µs   | 112 Melem/s    |
-| KC        | 20/10  | 2.19 µs       | 540 Melem/s    |
-| KC        | 200/100 | 2.19 µs      | 541 Melem/s    |
-| DC        | 20     | 3.97 µs       | 298 Melem/s    |
-| DC        | 200    | 9.77 µs       | 121 Melem/s    |
-| ADX       | 14     | 5.08 µs       | 233 Melem/s    |
-| ADX       | 140    | 5.07 µs       | 234 Melem/s    |
-| WillR     | 14     | 3.96 µs       | 299 Melem/s    |
-| WillR     | 140    | 7.43 µs       | 159 Melem/s    |
-| CCI       | 20     | 4.28 µs       | 277 Melem/s    |
-| CCI       | 200    | 59.4 µs       | 19.9 Melem/s   |
-| CHOP      | 14     | 6.60 µs       | 180 Melem/s    |
-| CHOP      | 140    | 10.0 µs       | 118 Melem/s    |
-| Ichimoku  | 9/26/52/26 | 14.8 µs   | 80.3 Melem/s   |
-| Ichimoku  | 36/104/208/104 | 22.4 µs | 52.9 Melem/s  |
-| StochRSI  | 14/14/3/3 | 10.9 µs    | 109 Melem/s    |
-| StochRSI  | 140/140/30/30 | 12.6 µs | 93.8 Melem/s   |
-| Supertrend | 20      | 3.00 µs       | 395 Melem/s    |
-| Supertrend | 200     | 2.99 µs       | 396 Melem/s    |
-| OBV       | —        | 1.64 µs       | 723 Melem/s    |
-| VWAP      | Day      | 1.47 µs       | 809 Melem/s    |
-| Parabolic SAR | 0.02/0.2 | 5.62 µs  | 211 Melem/s    |
-| Parabolic SAR | 0.01/0.4 | 5.63 µs  | 211 Melem/s    |
+| Indicator     | Period         | Time (median) | Throughput    |
+|---------------|----------------|---------------|---------------|
+| SMA           | 20             | 1.28 µs       | 928 Melem/s   |
+| SMA           | 200            | 1.31 µs       | 908 Melem/s   |
+| EMA           | 20             | 1.95 µs       | 607 Melem/s   |
+| EMA           | 200            | 1.95 µs       | 607 Melem/s   |
+| BB            | 20             | 1.70 µs       | 696 Melem/s   |
+| BB            | 200            | 1.70 µs       | 699 Melem/s   |
+| RSI           | 14             | 2.83 µs       | 419 Melem/s   |
+| RSI           | 140            | 2.85 µs       | 416 Melem/s   |
+| MACD          | 12/26/9        | 1.66 µs       | 716 Melem/s   |
+| MACD          | 120/260/90     | 1.66 µs       | 716 Melem/s   |
+| ATR           | 14             | 1.11 µs       | 1.07 Gelem/s  |
+| ATR           | 140            | 1.11 µs       | 1.07 Gelem/s  |
+| Stoch         | 14/3/3         | 7.29 µs       | 163 Melem/s   |
+| Stoch         | 140/30/30      | 10.72 µs      | 111 Melem/s   |
+| KC            | 20/10          | 2.54 µs       | 466 Melem/s   |
+| KC            | 200/100        | 2.57 µs       | 461 Melem/s   |
+| DC            | 20             | 4.10 µs       | 289 Melem/s   |
+| DC            | 200            | 10.06 µs      | 118 Melem/s   |
+| ADX           | 14             | 5.24 µs       | 226 Melem/s   |
+| ADX           | 140            | 5.24 µs       | 226 Melem/s   |
+| WillR         | 14             | 4.19 µs       | 283 Melem/s   |
+| WillR         | 140            | 7.60 µs       | 156 Melem/s   |
+| CCI           | 20             | 4.25 µs       | 279 Melem/s   |
+| CCI           | 200            | 60.16 µs      | 19.7 Melem/s  |
+| CHOP          | 14             | 7.53 µs       | 157 Melem/s   |
+| CHOP          | 140            | 10.76 µs      | 110 Melem/s   |
+| Ichimoku      | 9/26/52/26     | 14.75 µs      | 80.3 Melem/s  |
+| Ichimoku      | 36/104/208/104 | 22.66 µs      | 52.3 Melem/s  |
+| StochRSI      | 14/14/3/3      | 9.66 µs       | 123 Melem/s   |
+| StochRSI      | 140/140/30/30  | 11.52 µs      | 103 Melem/s   |
+| Supertrend    | 20             | 2.91 µs       | 408 Melem/s   |
+| Supertrend    | 200            | 2.93 µs       | 404 Melem/s   |
+| OBV           | —              | 1.72 µs       | 687 Melem/s   |
+| VWAP          | Day            | 1.53 µs       | 772 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 5.48 µs       | 216 Melem/s   |
+| Parabolic SAR | 0.01/0.4       | 5.48 µs       | 216 Melem/s   |
 
 Run locally:
 

@@ -13,10 +13,6 @@
 
 - `Ohlcv`, `Price`, `Timestamp`, `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers. Test-only helpers (`assert_approx!`, `nz`, `bar`, `ohlc`, `bar_at`, `Ohlcv::new`/`at`/`vol`) likewise moved; tests import them from `quantedge_core::test_util` with the `test-util` dev-feature enabled.
 
-### Note
-
-- Benchmark tables in `README.md` predate the `Ohlcv` trait → struct migration and are therefore **not comparable** to the new release. Hot paths now read `Ohlcv` fields directly instead of through trait dispatch. The tables will be refreshed alongside a regenerated Criterion run.
-
 ## [0.18.1] - 2026-04-21
 
 ### Changed
