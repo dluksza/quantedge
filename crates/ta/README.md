@@ -141,8 +141,8 @@ Each indicator defines its output type. No downcasting needed:
 
 ```rust
 trait Indicator: Sized + Clone + Display + Debug {
-    type Config: IndicatorConfig;
-    type Output: Send + Sync + Display + Debug;
+    type Config: IndicatorConfig<Output = Self::Output>;
+    type Output: 'static + Copy + Send + Sync + Display + Debug;
 
     fn new(config: Self::Config) -> Self;
     fn compute(&mut self, kline: &Ohlcv) -> Option<Self::Output>;
@@ -272,6 +272,12 @@ to extract from the Ohlcv input:
 | Parabolic SAR | `ParabolicSarValue` | Parabolic Stop and Reverse (SAR + direction) |
 
 ## Benchmarks
+
+> **Note:** the tables below were measured against the 0.18.x hot path, before
+> `Ohlcv` was replaced with a plain struct and every `compute` lost its
+> generic parameter. Hot paths now do direct field loads instead of trait
+> dispatch, so the numbers are **not comparable** to the current release.
+> They will be refreshed on the next bench run.
 
 Measured with [Criterion.rs](https://github.com/bheisler/criterion.rs) on 744
 BTC/USDT 1-hour bars from Binance, split into a 349-bar warm-up seed and 395

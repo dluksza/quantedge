@@ -8,7 +8,7 @@
 
 Core types shared across the [quantedge](https://github.com/dluksza/quantedge) crates.
 
-Defines the `Ohlcv` bar struct, its `Price` and `Timestamp` aliases, and the `Timeframe` type for bar boundary alignment, so downstream crates can share a single bar abstraction without depending on the full indicator library.
+Defines the `Ohlcv` bar struct, the `Indicator`/`IndicatorConfig` trait surface, the `Instrument` subscription key, streaming snapshot traits (`Bar`, `TimeframeSnapshot`, `MarketSnapshot`), and the `Timeframe` type for bar boundary alignment. Downstream crates share these primitives without pulling in the full indicator library.
 
 ## Features
 
@@ -16,11 +16,23 @@ Defines the `Ohlcv` bar struct, its `Price` and `Timestamp` aliases, and the `Ti
 
 `Ohlcv` is a `Copy` struct with six public fields (`open`, `high`, `low`, `close`, `open_time`, `volume`). Build one per kline, pass it by reference to consumer crates — no trait to implement, no generic parameters to thread through signatures. Volume-dependent indicators (OBV, VWAP) require a real `volume`; pass `0.0` when feeding indicators that ignore it.
 
+### Shared indicator trait surface
+
+`Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` live here and are re-exported by `quantedge-ta`. Engine, sim, and snapshot crates can target the traits directly without depending on `quantedge-ta`. `IndicatorConfig::Output` pairs with `Indicator::Output` so generic code can resolve an indicator's output type from its config alone.
+
+### Instrument identifiers
+
+`Instrument` combines a `Venue`, a `Ticker` (base/quote `Asset` pair), and a `MarketKind`. Each leaf is an ASCII-validated, case-normalized newtype over `Arc<str>`; cloning an `Instrument` is four atomic increments, cheap enough to pass through strategies, order paths, and log lines. Grammar separators (`/`, `:`, `@`) are rejected at the leaf so `Ticker::from_str` and `Instrument`'s `Display` cannot be broken by pathological input. `Display` renders `<venue>:<base>/<quote>@<market>`.
+
+### Streaming snapshot traits
+
+`Bar`, `TimeframeSnapshot`, and `MarketSnapshot` define the surface strategy code reads at one tick. Each snapshot is immutable — successive ticks surface as new snapshots rather than mutating prior ones. `at(0)` / `bars(0..)` treat the forming bar as index 0 with closed history at `1..`; `closed(0)` skips the forming bar. Querying an unsubscribed indicator (`Bar::value`) or timeframe (`MarketSnapshot::for_timeframe`) panics — subscriptions are fixed at construction, so a miss is a caller bug.
+
 ### Bar timeframes
 
 `Timeframe` maps a Unix-μs timestamp to bar boundaries: `open_time` returns the start of the containing period, `close_time` the last μs before the next period starts. Adjacent bars form a contiguous cover of the timeline (`close_time(t) + 1 == open_time` of the next period). Use `bounds(t)` to get both at once, it shares computation between the two halves, worth ~30% for monthly/yearly dispatch.
 
-Handles second-through-year units with calendar-correct month and year arithmetic, using Howard Hinnant's [`civil_from_days`](https://howardhinnant.github.io/date_algorithms.html) — no `chrono` at runtime. Multi-month periods are epoch-anchored from January 1970, matching calendar quarters (`MONTH_3`) and halves (`MONTH_6`) for any N dividing 12.
+Handles second-through-year units with calendar-correct month and year arithmetic, using Howard Hinnant's [`civil_from_days`](https://howardhinnant.github.io/date_algorithms.html) — no `chrono` at runtime. Multi-month periods are epoch-anchored from January 1970, matching calendar quarters (`MONTH_3`) and halves (`MONTH_6`) for any N dividing 12. `Display` uses Binance-style compact notation (`5m`, `1h`, `1d`, `1w`, `3M`, `1Y`).
 
 ### Zero runtime dependencies
 
@@ -84,6 +96,23 @@ let (open, close) = Timeframe::HOUR_1.bounds(ts);
 // via `Timeframe::new(NonZero::new(n).unwrap(), TimeUnit::X)`;
 // canonicalizes `60s → 1 minute`, `7d → 1 week`, etc.
 ```
+
+### Instrument
+
+```rust
+use quantedge_core::{Asset, Instrument, MarketKind, Ticker, Venue};
+
+let instrument = Instrument::new(
+    Venue::new("binance").unwrap(),
+    "BTC/USDT".parse::<Ticker>().unwrap(),
+    MarketKind::new("perp").unwrap(),
+);
+
+assert_eq!(instrument.to_string(), "binance:BTC/USDT@perp");
+assert_eq!(instrument.base().as_str(), "BTC");
+```
+
+Leaf newtypes (`Venue`, `Asset`, `MarketKind`) trim whitespace, validate the charset (ASCII alphanumeric or `_`), cap length at 32 bytes, and normalize case per type (lowercase for `Venue`/`MarketKind`, uppercase for `Asset`). Prefer `"BTC/USDT".parse()` over `Ticker::new(Asset, Asset)` when the input is textual — it cannot silently swap base and quote.
 
 ### Bar boundaries
 

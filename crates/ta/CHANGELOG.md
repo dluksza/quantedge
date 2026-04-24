@@ -6,10 +6,16 @@
 
 - **Breaking:** `Ohlcv` changed from a trait to a concrete struct with public fields re-exported from `quantedge-core`. `Indicator::compute` (and every indicator's inherent `compute`) now takes `&Ohlcv` instead of `&impl Ohlcv`. Callers that previously implemented the trait on their own kline type now produce an `Ohlcv` value per bar (fields: `open`, `high`, `low`, `close`, `open_time`, `volume`) and pass it by reference. Simplifies every indicator signature, removes the generic parameter, and turns hot paths into direct field loads.
 - **Breaking:** Value types (`AdxValue`, `BbValue`, `DcValue`, `IchimokuValue`, `KcValue`, `MacdValue`, `ParabolicSarValue`, `StochValue`, `StochRsiValue`, `SupertrendValue`, `VwapValue`) expose their components as public fields instead of getter methods. Migration: replace `value.upper()` with `value.upper`, `value.adx()` with `value.adx`, etc. Field names match the previous method names exactly.
+- **Breaking:** `IndicatorConfig` gained a required `Output` associated type, bound `'static + Copy + Send + Sync + Display + Debug`, mirroring `Indicator::Output`. Every built-in config now declares it (e.g. `type Output = BbValue` on `BbConfig`); external types that implement `IndicatorConfig` must add a matching `type Output = …;` line. Enables generic code to resolve an indicator's output from its config alone, without instantiating the indicator.
+- **Breaking:** `Indicator::Config` is now constrained as `IndicatorConfig<Output = Self::Output>`, so the output type is shared across the config/indicator pair. Custom `Indicator` impls that declared a divergent `Config::Output` no longer compile; set them to the same type.
 
 ### Changed
 
-- `Ohlcv`, `Price`, and `Timestamp` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers.
+- `Ohlcv`, `Price`, `Timestamp`, `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers. Test-only helpers (`assert_approx!`, `nz`, `bar`, `ohlc`, `bar_at`, `Ohlcv::new`/`at`/`vol`) likewise moved; tests import them from `quantedge_core::test_util` with the `test-util` dev-feature enabled.
+
+### Note
+
+- Benchmark tables in `README.md` predate the `Ohlcv` trait → struct migration and are therefore **not comparable** to the new release. Hot paths now read `Ohlcv` fields directly instead of through trait dispatch. The tables will be refreshed alongside a regenerated Criterion run.
 
 ## [0.18.1] - 2026-04-21
 
