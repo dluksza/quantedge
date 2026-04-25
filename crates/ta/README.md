@@ -308,7 +308,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 6.75 µs       | 58.5 Melem/s  |
 | KC            | 20/10          | 1.00 µs       | 393 Melem/s   |
 | KC            | 200/100        | 1.00 µs       | 393 Melem/s   |
-| DC            | 20             | 2.42 µs       | 163 Melem/s   |
+| DC            | 20             | 2.39 µs       | 165 Melem/s   |
 | DC            | 200            | 8.57 µs       | 46.1 Melem/s  |
 | ADX           | 14             | 2.07 µs       | 190 Melem/s   |
 | ADX           | 140            | 2.08 µs       | 190 Melem/s   |
@@ -326,7 +326,7 @@ on a converged indicator.
 | Supertrend    | 200            | 1.29 µs       | 307 Melem/s   |
 | OBV           | —              | 530 ns        | 746 Melem/s   |
 | VWAP          | Day            | 654 ns        | 604 Melem/s   |
-| Parabolic SAR | 0.02/0.2       | 3.30 µs       | 120 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 3.24 µs       | 122 Melem/s   |
 | Parabolic SAR | 0.01/0.4       | 3.40 µs       | 116 Melem/s   |
 
 ### Tick — single `compute()` on a converged indicator
@@ -349,7 +349,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 121 ns        |
 | KC            | 20/10          | 4.56 ns       |
 | KC            | 200/100        | 4.36 ns       |
-| DC            | 20             | 27.0 ns       |
+| DC            | 20             | 26.6 ns       |
 | DC            | 200            | 58.99 ns      |
 | ADX           | 14             | 11.43 ns      |
 | ADX           | 140            | 11.70 ns      |
@@ -367,7 +367,7 @@ on a converged indicator.
 | Supertrend    | 200            | 9.01 ns       |
 | OBV           | —              | 1.29 ns       |
 | VWAP          | Day            | 7.06 ns       |
-| Parabolic SAR | 0.02/0.2       | 8.99 ns       |
+| Parabolic SAR | 0.02/0.2       | 8.92 ns       |
 | Parabolic SAR | 0.01/0.4       | 9.15 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
@@ -431,7 +431,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 10.72 µs      | 111 Melem/s   |
 | KC            | 20/10          | 2.54 µs       | 466 Melem/s   |
 | KC            | 200/100        | 2.57 µs       | 461 Melem/s   |
-| DC            | 20             | 4.09 µs       | 290 Melem/s   |
+| DC            | 20             | 4.05 µs       | 293 Melem/s   |
 | DC            | 200            | 10.06 µs      | 118 Melem/s   |
 | ADX           | 14             | 5.24 µs       | 226 Melem/s   |
 | ADX           | 140            | 5.24 µs       | 226 Melem/s   |

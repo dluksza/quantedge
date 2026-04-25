@@ -1,3 +1,5 @@
+use std::hint::cold_path;
+
 use crate::Price;
 
 #[derive(Clone, Debug)]
@@ -37,6 +39,7 @@ impl RingBuffer {
 
             Some(old)
         } else {
+            cold_path();
             self.buffer[self.len] = value;
             self.tail = self.len;
             self.len += 1;

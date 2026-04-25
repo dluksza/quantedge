@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, hint::cold_path};
 
 use crate::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Multiplier, Ohlcv, Price, PriceSource,
@@ -294,6 +294,7 @@ impl Indicator for ParabolicSar {
 
 impl ParabolicSar {
     fn initialize(&mut self, ohlcv: &Ohlcv) -> ParabolicSarValue {
+        cold_path();
         let Phase::Seeding { high, low } = self.phase else {
             unreachable!()
         };
