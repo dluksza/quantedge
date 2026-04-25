@@ -1,0 +1,15 @@
+[package]
+name = "quantedge-strategy"
+version = "0.1.0"
+edition = "2024"
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+quantedge-core = { workspace = true }
+quantedge-ta = { workspace = true }
+
+[lints]
+workspace = true

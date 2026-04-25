@@ -345,6 +345,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "quantedge-strategy"
+version = "0.1.0"
+dependencies = [
+ "quantedge-core",
+ "quantedge-ta",
+]
+
+[[package]]
 name = "quantedge-ta"
 version = "0.20.0"
 dependencies = [

@@ -8,11 +8,12 @@ Today: 19 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 
 | Crate              | Version       | Status        | Purpose                                              |
 |--------------------|---------------|---------------|------------------------------------------------------|
-| `quantedge-ta`     | [![crates.io](https://img.shields.io/crates/v/quantedge-ta.svg)](https://crates.io/crates/quantedge-ta) | published     | Streaming technical analysis indicators              |
-| `quantedge-core`   | [![crates.io](https://img.shields.io/crates/v/quantedge-core.svg)](https://crates.io/crates/quantedge-core) | published     | Shared structs, traits, and public interfaces        |
-| `quantedge-engine` | —             | planned       | Streaming runtime — event loop, multi-TF state, execution |
-| `quantedge-sim`    | —             | planned       | Backtester and forward-tester with honest fill models |
-| `quantedge-ob`     | —             | planned       | Order book reconstruction and L2/L3 event handling   |
+| `quantedge-ta`       | [![crates.io](https://img.shields.io/crates/v/quantedge-ta.svg)](https://crates.io/crates/quantedge-ta) | published     | Streaming technical analysis indicators              |
+| `quantedge-core`     | [![crates.io](https://img.shields.io/crates/v/quantedge-core.svg)](https://crates.io/crates/quantedge-core) | published     | Shared structs, traits, and public interfaces        |
+| `quantedge-strategy` | —             | scaffolding   | User-facing API for authoring strategies executed by the engine |
+| `quantedge-engine`   | —             | planned       | Streaming runtime — event loop, multi-TF state, execution |
+| `quantedge-sim`      | —             | planned       | Backtester and forward-tester with honest fill models |
+| `quantedge-ob`       | —             | planned       | Order book reconstruction and L2/L3 event handling   |
 
 `quantedge-ta` (`0.20.0`) and `quantedge-core` (`0.2.0`) are published on crates.io. Both are feature-complete for v1.0; the v1.0 bump is gated on validation under real streaming workloads.
 
@@ -43,6 +44,7 @@ crates/
   core/         # shared types (Ohlcv struct, Price, Timestamp, Timeframe)
   ta/           # technical analysis indicators
     example/    # runnable WebSocket demo
+  strategy/     # user-facing API for authoring strategies (re-exports core + ta surface)
 ```
 
 More crates (`engine`, `sim`, `ob`) will land here as they're built.
@@ -51,9 +53,10 @@ More crates (`engine`, `sim`, `ob`) will land here as they're built.
 
 1. `quantedge-ta` v1.0 — publish to crates.io once validated under streaming workloads
 2. `quantedge-core` — shared structs, traits, and public interfaces
-3. `quantedge-engine` — streaming runtime with multi-timeframe state and deterministic event loop
-4. `quantedge-sim` — backtester with realistic fills, slippage, and drawdown reporting
-5. `quantedge-ob` — streaming order book with deterministic event replay
+3. `quantedge-strategy` — user-facing API for authoring strategies; co-evolves with the engine
+4. `quantedge-engine` — streaming runtime with multi-timeframe state and deterministic event loop
+5. `quantedge-sim` — backtester with realistic fills, slippage, and drawdown reporting
+6. `quantedge-ob` — streaming order book with deterministic event replay
 
 ## Contributing
 
