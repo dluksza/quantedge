@@ -257,12 +257,13 @@ impl Indicator for ParabolicSar {
                 Phase::First { high, low, .. } => {
                     self.phase = Phase::Seeding { high, low };
 
-                    Some(self.initialize(ohlcv))
+                    Some(self.initialize(ohlcv, high, low))
                 }
                 Phase::Seeding { .. } | Phase::Running(_) => {
-                    self.phase = Phase::Running(self.pending);
+                    let c = self.pending;
+                    self.phase = Phase::Running(c);
 
-                    Some(self.step(ohlcv))
+                    Some(self.step(ohlcv, c))
                 }
             },
             BarAction::Repaint(price) => match self.phase {
@@ -278,8 +279,8 @@ impl Indicator for ParabolicSar {
 
                     None
                 }
-                Phase::Seeding { .. } => Some(self.initialize(ohlcv)),
-                Phase::Running(_) => Some(self.step(ohlcv)),
+                Phase::Seeding { high, low } => Some(self.initialize(ohlcv, high, low)),
+                Phase::Running(c) => Some(self.step(ohlcv, c)),
             },
         };
 
@@ -293,12 +294,8 @@ impl Indicator for ParabolicSar {
 }
 
 impl ParabolicSar {
-    fn initialize(&mut self, ohlcv: &Ohlcv) -> ParabolicSarValue {
+    fn initialize(&mut self, ohlcv: &Ohlcv, high: f64, low: f64) -> ParabolicSarValue {
         cold_path();
-        let Phase::Seeding { high, low } = self.phase else {
-            unreachable!()
-        };
-
         let ohlcv_high = ohlcv.high;
         let ohlcv_low = ohlcv.low;
 
@@ -336,11 +333,7 @@ impl ParabolicSar {
         }
     }
 
-    fn step(&mut self, ohlcv: &Ohlcv) -> ParabolicSarValue {
-        let Phase::Running(c) = self.phase else {
-            unreachable!()
-        };
-
+    fn step(&mut self, ohlcv: &Ohlcv, c: SarState) -> ParabolicSarValue {
         let ohlcv_high = ohlcv.high;
         let ohlcv_low = ohlcv.low;
         let af_step = self.config.af_step.value();

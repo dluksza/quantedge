@@ -326,7 +326,7 @@ on a converged indicator.
 | Supertrend    | 200            | 1.29 µs       | 307 Melem/s   |
 | OBV           | —              | 530 ns        | 746 Melem/s   |
 | VWAP          | Day            | 654 ns        | 604 Melem/s   |
-| Parabolic SAR | 0.02/0.2       | 3.24 µs       | 122 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 3.08 µs       | 128 Melem/s   |
 | Parabolic SAR | 0.01/0.4       | 3.40 µs       | 116 Melem/s   |
 
 ### Tick — single `compute()` on a converged indicator
@@ -367,7 +367,7 @@ on a converged indicator.
 | Supertrend    | 200            | 9.01 ns       |
 | OBV           | —              | 1.29 ns       |
 | VWAP          | Day            | 7.06 ns       |
-| Parabolic SAR | 0.02/0.2       | 8.92 ns       |
+| Parabolic SAR | 0.02/0.2       | 8.51 ns       |
 | Parabolic SAR | 0.01/0.4       | 9.15 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
@@ -408,7 +408,7 @@ on a converged indicator.
 | Supertrend    | 200            | 7.75 ns       |
 | OBV           | —              | 1.16 ns       |
 | VWAP          | Day            | 6.63 ns       |
-| Parabolic SAR | 0.02/0.2       | 5.57 ns       |
+| Parabolic SAR | 0.02/0.2       | 6.42 ns       |
 | Parabolic SAR | 0.01/0.4       | 5.54 ns       |
 
 ### Repaint Stream — process 395 bars × 3 ticks post-warmup
@@ -449,7 +449,7 @@ on a converged indicator.
 | Supertrend    | 200            | 2.93 µs       | 404 Melem/s   |
 | OBV           | —              | 1.72 µs       | 687 Melem/s   |
 | VWAP          | Day            | 1.53 µs       | 772 Melem/s   |
-| Parabolic SAR | 0.02/0.2       | 5.30 µs       | 224 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 5.27 µs       | 225 Melem/s   |
 | Parabolic SAR | 0.01/0.4       | 5.48 µs       | 216 Melem/s   |
 
 Run locally:
