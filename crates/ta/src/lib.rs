@@ -98,7 +98,7 @@ impl_inherent_methods!(Rsi, RsiConfig, RsiConfigBuilder);
 impl_inherent_methods!(Ema, EmaConfig, EmaConfigBuilder);
 impl_inherent_methods!(Kc, KcConfig, KcConfigBuilder);
 impl_inherent_methods!(Bb, BbConfig, BbConfigBuilder);
-impl_inherent_methods!(Ichimoku, IchimokuConfig, IchimokuBuilder);
+impl_inherent_methods!(Ichimoku, IchimokuConfig, IchimokuConfigBuilder);
 impl_inherent_methods!(Macd, MacdConfig, MacdConfigBuilder);
 impl_inherent_methods!(Obv, ObvConfig, ObvConfigBuilder);
 impl_inherent_methods!(ParabolicSar, ParabolicSarConfig, ParabolicSarConfigBuilder);

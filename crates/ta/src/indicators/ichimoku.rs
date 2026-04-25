@@ -44,11 +44,11 @@ pub struct IchimokuConfig {
 }
 
 impl IndicatorConfig for IchimokuConfig {
-    type Builder = IchimokuBuilder;
+    type Builder = IchimokuConfigBuilder;
     type Output = IchimokuValue;
 
     fn builder() -> Self::Builder {
-        IchimokuBuilder::new()
+        IchimokuConfigBuilder::new()
     }
 
     fn source(&self) -> crate::PriceSource {
@@ -62,7 +62,7 @@ impl IndicatorConfig for IchimokuConfig {
     }
 
     fn to_builder(&self) -> Self::Builder {
-        IchimokuBuilder {
+        IchimokuConfigBuilder {
             tenkan_length: Some(self.tenkan_length),
             kijun_length: Some(self.kijun_length),
             senkou_b_length: Some(self.senkou_b_length),
@@ -125,14 +125,14 @@ impl Display for IchimokuConfig {
 /// All four parameters must be set before calling
 /// [`build`](IndicatorConfigBuilder::build). Use [`default()`](Self::default)
 /// to set the standard 9/26/52/26 parameters.
-pub struct IchimokuBuilder {
+pub struct IchimokuConfigBuilder {
     tenkan_length: Option<usize>,
     kijun_length: Option<usize>,
     senkou_b_length: Option<usize>,
     displacement: Option<usize>,
 }
 
-impl IchimokuBuilder {
+impl IchimokuConfigBuilder {
     fn new() -> Self {
         Self {
             tenkan_length: None,
@@ -182,7 +182,7 @@ impl IchimokuBuilder {
     }
 }
 
-impl IndicatorConfigBuilder<IchimokuConfig> for IchimokuBuilder {
+impl IndicatorConfigBuilder<IchimokuConfig> for IchimokuConfigBuilder {
     fn source(self, _source: crate::PriceSource) -> Self {
         self
     }
