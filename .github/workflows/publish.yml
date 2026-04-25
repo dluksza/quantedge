@@ -78,7 +78,7 @@ jobs:
             echo "$TAG_NAME matches Cargo.toml ($TAG_VERSION)."
           done <<< "${{ steps.discover.outputs.tags }}"
 
-      - uses: dtolnay/rust-toolchain@1.93
+      - uses: dtolnay/rust-toolchain@1.95
       - uses: Swatinem/rust-cache@v2
 
       - name: Publish in dependency order

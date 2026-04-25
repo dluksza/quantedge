@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95.
+
 ## [0.20.0] - 2026-04-24
 
 ### Changed

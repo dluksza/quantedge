@@ -285,7 +285,7 @@ on a converged indicator.
 **Repaint Stream** measures end-to-end throughput with 3 ticks per bar
 (open → mid → final), 1185 total observations on a pre-converged seed.
 
-**Hardware:** Apple M5 Max (18 cores), 128 GB RAM, macOS 26.4.1, rustc 1.93.1,
+**Hardware:** Apple M5 Max (18 cores), 128 GB RAM, macOS 26.4.1, rustc 1.95.0,
 `--release` profile.
 
 ### Stream — process 395 post-warmup bars
@@ -294,7 +294,7 @@ on a converged indicator.
 |---------------|----------------|---------------|---------------|
 | SMA           | 20             | 411 ns        | 960 Melem/s   |
 | SMA           | 200            | 432 ns        | 915 Melem/s   |
-| EMA           | 20             | 865 ns        | 457 Melem/s   |
+| EMA           | 20             | 886 ns        | 446 Melem/s   |
 | EMA           | 200            | 861 ns        | 459 Melem/s   |
 | BB            | 20             | 491 ns        | 804 Melem/s   |
 | BB            | 200            | 506 ns        | 780 Melem/s   |
@@ -308,7 +308,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 6.75 µs       | 58.5 Melem/s  |
 | KC            | 20/10          | 1.00 µs       | 393 Melem/s   |
 | KC            | 200/100        | 1.00 µs       | 393 Melem/s   |
-| DC            | 20             | 2.40 µs       | 165 Melem/s   |
+| DC            | 20             | 2.42 µs       | 163 Melem/s   |
 | DC            | 200            | 8.57 µs       | 46.1 Melem/s  |
 | ADX           | 14             | 2.07 µs       | 190 Melem/s   |
 | ADX           | 140            | 2.08 µs       | 190 Melem/s   |
@@ -326,7 +326,7 @@ on a converged indicator.
 | Supertrend    | 200            | 1.29 µs       | 307 Melem/s   |
 | OBV           | —              | 530 ns        | 746 Melem/s   |
 | VWAP          | Day            | 654 ns        | 604 Melem/s   |
-| Parabolic SAR | 0.02/0.2       | 3.42 µs       | 116 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 3.30 µs       | 120 Melem/s   |
 | Parabolic SAR | 0.01/0.4       | 3.40 µs       | 116 Melem/s   |
 
 ### Tick — single `compute()` on a converged indicator
@@ -335,7 +335,7 @@ on a converged indicator.
 |---------------|----------------|---------------|
 | SMA           | 20             | 11.41 ns      |
 | SMA           | 200            | 26.26 ns      |
-| EMA           | 20             | 1.88 ns       |
+| EMA           | 20             | 1.84 ns       |
 | EMA           | 200            | 1.88 ns       |
 | BB            | 20             | 14.09 ns      |
 | BB            | 200            | 30.72 ns      |
@@ -349,7 +349,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 121 ns        |
 | KC            | 20/10          | 4.56 ns       |
 | KC            | 200/100        | 4.36 ns       |
-| DC            | 20             | 27.35 ns      |
+| DC            | 20             | 27.0 ns       |
 | DC            | 200            | 58.99 ns      |
 | ADX           | 14             | 11.43 ns      |
 | ADX           | 140            | 11.70 ns      |
@@ -367,7 +367,7 @@ on a converged indicator.
 | Supertrend    | 200            | 9.01 ns       |
 | OBV           | —              | 1.29 ns       |
 | VWAP          | Day            | 7.06 ns       |
-| Parabolic SAR | 0.02/0.2       | 9.36 ns       |
+| Parabolic SAR | 0.02/0.2       | 8.99 ns       |
 | Parabolic SAR | 0.01/0.4       | 9.15 ns       |
 
 ### Repaint — single `compute()` repaint on a converged indicator
@@ -376,7 +376,7 @@ on a converged indicator.
 |---------------|----------------|---------------|
 | SMA           | 20             | 11.19 ns      |
 | SMA           | 200            | 25.30 ns      |
-| EMA           | 20             | 1.85 ns       |
+| EMA           | 20             | 2.05 ns       |
 | EMA           | 200            | 2.12 ns       |
 | BB            | 20             | 13.67 ns      |
 | BB            | 200            | 29.29 ns      |
@@ -390,7 +390,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 122 ns        |
 | KC            | 20/10          | 4.35 ns       |
 | KC            | 200/100        | 4.45 ns       |
-| DC            | 20             | 19.15 ns      |
+| DC            | 20             | 18.1 ns       |
 | DC            | 200            | 55.46 ns      |
 | ADX           | 14             | 10.84 ns      |
 | ADX           | 140            | 10.35 ns      |
@@ -408,7 +408,7 @@ on a converged indicator.
 | Supertrend    | 200            | 7.75 ns       |
 | OBV           | —              | 1.16 ns       |
 | VWAP          | Day            | 6.63 ns       |
-| Parabolic SAR | 0.02/0.2       | 5.74 ns       |
+| Parabolic SAR | 0.02/0.2       | 5.57 ns       |
 | Parabolic SAR | 0.01/0.4       | 5.54 ns       |
 
 ### Repaint Stream — process 395 bars × 3 ticks post-warmup
@@ -417,7 +417,7 @@ on a converged indicator.
 |---------------|----------------|---------------|---------------|
 | SMA           | 20             | 1.28 µs       | 928 Melem/s   |
 | SMA           | 200            | 1.31 µs       | 908 Melem/s   |
-| EMA           | 20             | 1.95 µs       | 607 Melem/s   |
+| EMA           | 20             | 1.92 µs       | 619 Melem/s   |
 | EMA           | 200            | 1.95 µs       | 607 Melem/s   |
 | BB            | 20             | 1.70 µs       | 696 Melem/s   |
 | BB            | 200            | 1.70 µs       | 699 Melem/s   |
@@ -431,7 +431,7 @@ on a converged indicator.
 | Stoch         | 140/30/30      | 10.72 µs      | 111 Melem/s   |
 | KC            | 20/10          | 2.54 µs       | 466 Melem/s   |
 | KC            | 200/100        | 2.57 µs       | 461 Melem/s   |
-| DC            | 20             | 4.10 µs       | 289 Melem/s   |
+| DC            | 20             | 4.09 µs       | 290 Melem/s   |
 | DC            | 200            | 10.06 µs      | 118 Melem/s   |
 | ADX           | 14             | 5.24 µs       | 226 Melem/s   |
 | ADX           | 140            | 5.24 µs       | 226 Melem/s   |
@@ -449,7 +449,7 @@ on a converged indicator.
 | Supertrend    | 200            | 2.93 µs       | 404 Melem/s   |
 | OBV           | —              | 1.72 µs       | 687 Melem/s   |
 | VWAP          | Day            | 1.53 µs       | 772 Melem/s   |
-| Parabolic SAR | 0.02/0.2       | 5.48 µs       | 216 Melem/s   |
+| Parabolic SAR | 0.02/0.2       | 5.30 µs       | 224 Melem/s   |
 | Parabolic SAR | 0.01/0.4       | 5.48 µs       | 216 Melem/s   |
 
 Run locally:
@@ -464,7 +464,7 @@ cargo bench -- repaint_stream  # repaint stream only
 
 ## Minimum Supported Rust Version
 
-1.93
+1.95
 
 ## Licence
 
