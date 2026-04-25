@@ -4,6 +4,7 @@
 name = "quantedge-ta-example"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.95"
 
 [dependencies]
 binance = "^0.21.0"
