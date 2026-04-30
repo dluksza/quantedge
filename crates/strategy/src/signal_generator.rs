@@ -164,12 +164,14 @@ pub trait MarketSignalConfig: Sync + Send {
     /// Declares timeframes the generator needs bar history at.
     ///
     /// Additive across calls.
+    #[must_use]
     fn require_timeframes(self, timeframes: &[Timeframe]) -> Self;
 
     /// Declares the minimum number of closed bars to retain at each
     /// required timeframe.
     ///
     /// Repeated calls take the maximum.
+    #[must_use]
     fn require_closed_bars(self, bars: usize) -> Self;
 
     /// Declares an indicator dependency.
@@ -179,6 +181,7 @@ pub trait MarketSignalConfig: Sync + Send {
     /// same `config`.
     ///
     /// [`Bar::value`]: quantedge_core::Bar::value
+    #[must_use]
     fn register(self, config: &impl IndicatorConfig) -> Self;
 }
 
