@@ -15,3 +15,7 @@ pub use quantedge_ta::{
     SupertrendConfigBuilder, SupertrendValue, VwapAnchor, VwapBand, VwapConfig, VwapConfigBuilder,
     VwapValue, WillRConfig, WillRConfigBuilder,
 };
+
+mod signal_generator;
+
+pub use crate::signal_generator::*;
