@@ -35,7 +35,7 @@ pub trait Bar: Send + Sync + Display + Debug {
     fn is_closed(&self) -> bool;
 
     /// Underlying OHLCV data for this bar.
-    fn ohlcv(&self) -> &Ohlcv;
+    fn ohlcv(&self) -> Ohlcv;
 
     /// Indicator output for `config` at this bar.
     ///
@@ -113,7 +113,7 @@ pub trait TimeframeSnapshot: Send + Sync + Display + Debug {
 /// timeframe panics.
 pub trait MarketSnapshot: Send + Sync + Display + Debug {
     /// The instrument this snapshot describes.
-    fn instrument(&self) -> &Instrument;
+    fn instrument(&self) -> Instrument;
 
     /// Timestamp of the latest event observed across all subscribed
     /// timeframes.

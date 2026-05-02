@@ -3,11 +3,11 @@
 //! needs — indicator configs as fields, `configure` to declare
 //! dependencies, `evaluate` to detect and emit signals.
 
-use std::{collections::BTreeSet, num::NonZero};
+use std::num::NonZero;
 
 use quantedge_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
-    SignalReason, Timeframe, TimeframeSnapshot,
+    Timeframe, TimeframeSnapshot,
 };
 
 // Recommended pattern: store indicator configs as struct fields so
@@ -67,7 +67,6 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
     // calls this on every tick and on each required-timeframe close.
     fn evaluate(&self, snapshot: &impl MarketSnapshot) -> Option<MarketSignal> {
         let h4 = snapshot.for_timeframe(&Timeframe::HOUR_4);
-        let instrument = snapshot.instrument().clone();
 
         // `closed(0)` is the most recent closed bar; `forming()` is
         // the currently-building bar.
@@ -87,41 +86,28 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
         // bar - fires intra-bar. The cross can un-fire if the forming
         // bar reverts before close; downstream dedup handles that.
         if prev_ema9 < prev_ema21 && forming_ema9 > forming_ema21 {
-            return Some(MarketSignal {
-                // `key` discriminates among the signal types this
-                // generator emits (bull vs bear here). `(generator_id,
-                // key)` is globally unique across all generators.
-                key: "bull_cross",
-                generator_id: self.id(),
-                generator_name: self.name(),
-                timeframe: Timeframe::HOUR_4,
-                instrument: instrument,
-                // `Some(side)` for directional signals; `None` for
-                // filters or non-directional context.
-                market_side: Some(MarketSide::Long),
-                // Set semantics — duplicates by `SignalReason::id`
-                // collapse on insert.
-                reasons: BTreeSet::from([SignalReason {
-                    id: "bull_cross",
-                    description: "BULL EMA9 cross EMA21",
-                }]),
-                // The bar that triggered the signal, at `timeframe`.
-                ohlcv: *forming.ohlcv(),
-            });
+            // `from_forming` captures the forming bar's OHLCV at the
+            // given timeframe and the snapshot's instrument. `key`
+            // discriminates among the signal types this generator
+            // emits (bull vs bear here); `(generator_id, key)` is
+            // globally unique across all generators.
+            return Some(
+                MarketSignal::from_forming(self, snapshot, Timeframe::HOUR_4, "bull_cross")
+                    // `Some(side)` for directional signals; `None`
+                    // for filters or non-directional context.
+                    .with_side(MarketSide::Long)
+                    // Reasons form a set keyed by `SignalReason::id`
+                    // — duplicates by id collapse on insert.
+                    .add_reason("bull_cross", "BULL EMA9 cross EMA21")
+                    .build(),
+            );
         } else if prev_ema9 > prev_ema21 && forming_ema9 < forming_ema21 {
-            return Some(MarketSignal {
-                key: "bear_cross",
-                generator_id: self.id(),
-                generator_name: self.name(),
-                timeframe: Timeframe::HOUR_4,
-                instrument: instrument,
-                market_side: Some(MarketSide::Short),
-                reasons: BTreeSet::from([SignalReason {
-                    id: "bear_cross",
-                    description: "BEAR EMA9 cross EMA21",
-                }]),
-                ohlcv: *forming.ohlcv(),
-            });
+            return Some(
+                MarketSignal::from_forming(self, snapshot, Timeframe::HOUR_4, "bear_cross")
+                    .with_side(MarketSide::Short)
+                    .add_reason("bear_cross", "BEAR EMA9 cross EMA21")
+                    .build(),
+            );
         }
 
         None

@@ -16,6 +16,8 @@ pub use quantedge_ta::{
     VwapValue, WillRConfig, WillRConfigBuilder,
 };
 
+mod market_signal;
 mod signal_generator;
 
+pub use crate::market_signal::*;
 pub use crate::signal_generator::*;
