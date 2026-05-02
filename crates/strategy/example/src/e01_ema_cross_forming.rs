@@ -3,11 +3,9 @@
 //! needs — indicator configs as fields, `configure` to declare
 //! dependencies, `evaluate` to detect and emit signals.
 
-use std::num::NonZero;
-
 use quantedge_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
-    Timeframe, TimeframeSnapshot,
+    Timeframe, TimeframeSnapshot, nz,
 };
 
 // Recommended pattern: store indicator configs as struct fields so
@@ -26,12 +24,8 @@ pub struct EmaCrossingFormingSignalGenerator {
 impl Default for EmaCrossingFormingSignalGenerator {
     fn default() -> Self {
         Self {
-            ema9: EmaConfig::builder()
-                .length(NonZero::new(9).unwrap())
-                .build(),
-            ema21: EmaConfig::builder()
-                .length(NonZero::new(21).unwrap())
-                .build(),
+            ema9: EmaConfig::builder().length(nz(9)).build(),
+            ema21: EmaConfig::builder().length(nz(21)).build(),
         }
     }
 }

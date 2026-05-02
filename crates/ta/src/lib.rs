@@ -111,7 +111,7 @@ impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 #[cfg(test)]
 mod inherent_methods {
     use super::{Bb, BbConfig, BbValue, Ema, EmaConfig, Sma, SmaConfig};
-    use quantedge_core::test_util::{bar, nz};
+    use quantedge_core::{nz, test_util::bar};
 
     #[test]
     fn sma_without_indicator_import() {

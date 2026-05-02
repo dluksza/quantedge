@@ -1,12 +1,7 @@
-use std::num::NonZero;
-
 use crate::{Ohlcv, Price, Timestamp};
 
-/// # Panics
-/// Panics if `n` is zero.
-pub fn nz(n: usize) -> NonZero<usize> {
-    NonZero::new(n).unwrap()
-}
+#[doc(inline)]
+pub use crate::nz;
 
 /// Asserts that two `f64` values are approximately equal using a
 /// relative epsilon of `4 * f64::EPSILON`.

@@ -1,7 +1,7 @@
 pub use quantedge_core::{
     Asset, AssetError, Bar, IndicatorConfig, IndicatorConfigBuilder, Instrument, MarketKind,
     MarketKindError, MarketSnapshot, Ohlcv, Price, PriceSource, Ticker, TickerError, TimeUnit,
-    Timeframe, TimeframeSnapshot, Timestamp, Venue, VenueError,
+    Timeframe, TimeframeSnapshot, Timestamp, Venue, VenueError, nz,
 };
 
 pub use quantedge_ta::{
