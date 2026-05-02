@@ -53,6 +53,17 @@ jobs:
           workspaces: crates/ta/example
       - run: cargo check --manifest-path crates/ta/example/Cargo.toml --locked
 
+  example-strategy:
+    name: quantedge-strategy example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/strategy/example
+      - run: cargo check --manifest-path crates/strategy/example/Cargo.toml --locked
+
   wasm:
     name: WASM
     runs-on: ubuntu-latest
