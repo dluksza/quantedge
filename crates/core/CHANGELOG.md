@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `ErasedIndicatorConfig` trait: an object-safe view of `IndicatorConfig` so heterogeneous configs can live in a single collection (e.g. `HashSet<Box<dyn ErasedIndicatorConfig>>`). Identity is `(TypeId, hash)` — two boxes compare equal iff they hold the same concrete type with equal contents. Blanket-impl'd for every `IndicatorConfig`, so downstream config types participate automatically.
+
 ### Changed
 
 - MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95.
+- **Breaking:** `IndicatorConfig` now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Required to support the `ErasedIndicatorConfig` blanket impl. Existing config types in `quantedge-ta` already satisfy these bounds; custom impls that don't will need to add them.
 
 ## [0.2.0] - 2026-04-24
 

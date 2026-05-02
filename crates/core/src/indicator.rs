@@ -1,8 +1,9 @@
 use crate::{Ohlcv, PriceSource};
 
 use std::{
+    any::{Any, TypeId},
     fmt::{Debug, Display},
-    hash::Hash,
+    hash::{Hash, Hasher},
 };
 
 /// Configuration for a technical [`Indicator`].
@@ -10,13 +11,15 @@ use std::{
 /// Every indicator has a corresponding config type that holds its parameters
 /// (length, price source, etc). Configs are value types: cheap to clone,
 /// compare, and hash.
-pub trait IndicatorConfig: Default + Sized + PartialEq + Eq + Hash + Display + Debug {
+pub trait IndicatorConfig:
+    Sized + Default + Clone + Eq + Hash + Display + Debug + Send + Sync + 'static
+{
     /// Builder type for constructing this config.
     type Builder: IndicatorConfigBuilder<Self>;
 
     /// Computed output type. `f64` for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: 'static + Copy + Send + Sync + Display + Debug;
+    type Output: Copy + Clone + Send + Sync + Display + Debug + 'static;
 
     /// Returns a new builder with default values.
     fn builder() -> Self::Builder;
@@ -29,6 +32,55 @@ pub trait IndicatorConfig: Default + Sized + PartialEq + Eq + Hash + Display + D
 
     /// Returns a builder pre-filled with this config's values.
     fn to_builder(&self) -> Self::Builder;
+}
+
+/// Object-safe view of an [`IndicatorConfig`].
+///
+/// Use to store heterogeneous configs in a single collection
+/// (e.g. `HashSet<Box<dyn ErasedIndicatorConfig>>`). Identity is the
+/// pair `(TypeId, hash)`: two boxes compare equal iff they hold the
+/// same concrete type with equal contents.
+///
+/// Blanket-impl'd for every [`IndicatorConfig`]; downstream crates
+/// that define new config types automatically participate.
+pub trait ErasedIndicatorConfig: Any + Send + Sync + Debug {
+    fn as_any(&self) -> &dyn Any;
+    fn dyn_eq(&self, other: &dyn ErasedIndicatorConfig) -> bool;
+    fn dyn_hash(&self, hasher: &mut dyn Hasher);
+    fn clone_erased(&self) -> Box<dyn ErasedIndicatorConfig>;
+}
+
+impl<C: IndicatorConfig> ErasedIndicatorConfig for C {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn dyn_eq(&self, other: &dyn ErasedIndicatorConfig) -> bool {
+        other.as_any().downcast_ref::<C>() == Some(self)
+    }
+
+    fn dyn_hash(&self, mut hasher: &mut dyn Hasher) {
+        TypeId::of::<C>().hash(&mut hasher);
+        Hash::hash(self, &mut hasher);
+    }
+
+    fn clone_erased(&self) -> Box<dyn ErasedIndicatorConfig> {
+        Box::new(self.clone())
+    }
+}
+
+impl PartialEq for dyn ErasedIndicatorConfig {
+    fn eq(&self, other: &Self) -> bool {
+        self.dyn_eq(other)
+    }
+}
+
+impl Eq for dyn ErasedIndicatorConfig {}
+
+impl Hash for dyn ErasedIndicatorConfig {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.dyn_hash(state);
+    }
 }
 
 /// Builder for an [`IndicatorConfig`].
@@ -56,7 +108,7 @@ pub trait Indicator: Sized + Clone + Display + Debug {
 
     /// Computed output type. `f64` for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: 'static + Copy + Send + Sync + Display + Debug;
+    type Output: 'static + Copy + Clone + Send + Sync + Display + Debug;
 
     /// Creates a new indicator from the given config.
     fn new(config: Self::Config) -> Self;
