@@ -23,9 +23,12 @@ pub struct EmaCrossingFormingSignalGenerator {
 // (here: the EMA lengths) are baked into `Default`.
 impl Default for EmaCrossingFormingSignalGenerator {
     fn default() -> Self {
+        // `EmaConfig::close(len)` is shorthand for the close-priced
+        // EMA; reach for `EmaConfig::builder().source(...).build()`
+        // when you need a different `PriceSource`.
         Self {
-            ema9: EmaConfig::builder().length(nz(9)).build(),
-            ema21: EmaConfig::builder().length(nz(21)).build(),
+            ema9: EmaConfig::close(nz(9)),
+            ema21: EmaConfig::close(nz(21)),
         }
     }
 }
