@@ -291,7 +291,6 @@ impl Display for Kdj {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
     use quantedge_core::test_util::{nz, ohlc};
@@ -311,8 +310,6 @@ mod tests {
     }
 
     // ---------------------------------------------------------------------------
-    // Ported from /data/home/swei/github/financial_indicators/src/kdj.rs
-    //
     // Reference tests verify:
     //   - correct output count (len - convergence values)
     //   - K, D in [0, 100]
@@ -323,7 +320,7 @@ mod tests {
     mod reference {
         use super::*;
 
-        /// Reference input data from financial_indicators:
+        /// Reference input data:
         /// highs  = [11, 12, 13, 14, 15, 16]
         /// lows   = [10, 9,  8,  7,  6,  5]
         /// closes = [10.5, 11, 12, 13, 14, 15]
@@ -346,9 +343,9 @@ mod tests {
             let mut kdj = kdj(3);
             let mut all_bars = reference_bars().to_vec();
 
-            for t in 7..=12u64 {
-                let tf = t as f64;
-                all_bars.push(ohlc(tf + 5.0, tf + 7.0, tf + 3.0, tf + 6.0, t));
+            for t in 7..=12u32 {
+                let tf = f64::from(t);
+                all_bars.push(ohlc(tf + 5.0, tf + 7.0, tf + 3.0, tf + 6.0, u64::from(t)));
             }
 
             let mut results = Vec::new();
@@ -373,7 +370,9 @@ mod tests {
             kdj.compute(&ohlc(18.0, 18.0, 3.0, 17.0, 8));
             kdj.compute(&ohlc(19.0, 19.0, 2.0, 18.0, 9));
 
-            let v = kdj.value().expect("expected KDJ output after 9 bars (period=3)");
+            let v = kdj
+                .value()
+                .expect("expected KDJ output after 9 bars (period=3)");
             assert!(v.k >= 0.0 && v.k <= 100.0, "K out of range: {}", v.k);
             assert!(v.d >= 0.0 && v.d <= 100.0, "D out of range: {}", v.d);
         }
@@ -388,7 +387,9 @@ mod tests {
             kdj.compute(&ohlc(18.0, 18.0, 3.0, 17.0, 8));
             kdj.compute(&ohlc(19.0, 19.0, 2.0, 18.0, 9));
 
-            let v = kdj.value().expect("expected KDJ output after 9 bars (period=3)");
+            let v = kdj
+                .value()
+                .expect("expected KDJ output after 9 bars (period=3)");
             assert!(
                 (v.j - (3.0 * v.k - 2.0 * v.d)).abs() < 1e-14,
                 "J = 3K - 2D relation failed: J={} expected={}",
@@ -410,7 +411,10 @@ mod tests {
             }
 
             // KDJ(3,1,1): convergence at bar 5 → bars 5,6 → 2 outputs
-            assert!(!results.is_empty(), "expected KDJ output from reference data");
+            assert!(
+                !results.is_empty(),
+                "expected KDJ output from reference data"
+            );
             for (i, v) in results.iter().enumerate() {
                 assert!(v.k > 0.0, "K[{}] should be positive: {}", i, v.k);
                 assert!(v.d > 0.0, "D[{}] should be positive: {}", i, v.d);
@@ -425,12 +429,12 @@ mod tests {
         fn none_until_window_full() {
             // KDJ(2,3,3) → convergence at bar 8
             let mut kdj = kdj(2);
-            for t in 1..=7u64 {
+            for t in 1..=7u32 {
+                let tf = f64::from(t);
                 assert_eq!(
-                    kdj.compute(&ohlc(t as f64, t as f64 + 2., t as f64, t as f64 + 1., t)),
+                    kdj.compute(&ohlc(tf, tf + 2., tf, tf + 1., u64::from(t))),
                     None,
-                    "should be None at bar {}",
-                    t
+                    "should be None at bar {t}"
                 );
             }
         }
@@ -438,11 +442,15 @@ mod tests {
         #[test]
         fn returns_value_at_convergence() {
             let mut kdj = kdj(2);
-            for t in 1..=7u64 {
-                kdj.compute(&ohlc(t as f64, t as f64 + 2., t as f64, t as f64 + 1., t));
+            for t in 1..=7u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf, tf + 2., tf, tf + 1., u64::from(t)));
             }
             let val = kdj.compute(&ohlc(8.0, 10.0, 7.0, 9.0, 8));
-            assert!(val.is_some(), "expected Some at bar 8 (period=2, convergence=8)");
+            assert!(
+                val.is_some(),
+                "expected Some at bar 8 (period=2, convergence=8)"
+            );
         }
 
         #[test]
@@ -478,14 +486,15 @@ mod tests {
         #[test]
         fn values_respond_to_price() {
             let mut kdj = kdj(2);
-            for t in 1..=7u64 {
-                kdj.compute(&ohlc(t as f64, t as f64 + 5.0, t as f64, t as f64 + 2.5, t));
+            for t in 1..=7u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf, tf + 5.0, tf, tf + 2.5, u64::from(t)));
             }
             kdj.compute(&ohlc(8.0, 13.0, 8.0, 12.0, 8));
 
-            for t in 9..=20u64 {
-                let tf = t as f64;
-                kdj.compute(&ohlc(tf + 10., tf + 15., tf, tf + 13., t));
+            for t in 9..=20u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf + 10., tf + 15., tf, tf + 13., u64::from(t)));
             }
             let v = kdj.value().unwrap();
 
@@ -568,9 +577,9 @@ mod tests {
             let mut kdj = kdj(3);
             kdj.compute(&ohlc(10.0, 20.0, 10.0, 15.0, 1));
             kdj.compute(&ohlc(12.0, 22.0, 8.0, 16.0, 1)); // repaint bar 1
-            for t in 2..=10u64 {
-                let tf = t as f64;
-                kdj.compute(&ohlc(tf + 5.0, tf + 15.0, tf, tf + 10.0, t));
+            for t in 2..=10u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf + 5.0, tf + 15.0, tf, tf + 10.0, u64::from(t)));
             }
             assert!(kdj.value().is_some(), "expected value after convergence");
         }
@@ -582,9 +591,9 @@ mod tests {
         #[test]
         fn produces_independent_state() {
             let mut kdj = kdj(2);
-            for t in 1..=8u64 {
-                let tf = t as f64;
-                kdj.compute(&ohlc(tf, tf + 5.0, tf, tf + 2.5, t));
+            for t in 1..=8u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf, tf + 5.0, tf, tf + 2.5, u64::from(t)));
             }
 
             let mut cloned = kdj.clone();
@@ -795,8 +804,9 @@ mod tests {
         #[test]
         fn matches_last_compute() {
             let mut kdj = kdj(2);
-            for t in 1..=7u64 {
-                kdj.compute(&ohlc(t as f64, t as f64 + 2., t as f64, t as f64 + 1., t));
+            for t in 1..=7u32 {
+                let tf = f64::from(t);
+                kdj.compute(&ohlc(tf, tf + 2., tf, tf + 1., u64::from(t)));
             }
             let computed = kdj.compute(&ohlc(8.0, 10.0, 7.0, 9.0, 8));
             assert_eq!(kdj.value(), computed);

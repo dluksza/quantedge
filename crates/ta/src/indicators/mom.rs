@@ -219,7 +219,6 @@ mod tests {
     }
 
     // ---------------------------------------------------------------------------
-    // Ported from financial_indicators/mom.rs
     // Reference: momentum(prices, period) returns prices[i] - prices[i-period]
     // for i >= period.
     // ---------------------------------------------------------------------------
@@ -227,12 +226,12 @@ mod tests {
     mod reference {
         use super::*;
 
-        /// Reference data from financial_indicators:
+        /// Reference data:
         /// prices = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89]
         /// period = 10
         /// mom[10] = prices[10] - prices[0] = 45.89 - 44.34 = 1.55
         #[test]
-        fn matches_financial_indicators_basic() {
+        fn matches_reference_basic() {
             let mut mom = mom(10);
             let prices = [
                 44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42, 45.84, 46.08, 45.89,
@@ -241,12 +240,12 @@ mod tests {
             for (i, &price) in prices.iter().enumerate() {
                 let result = mom.compute(&bar(price, i as u64));
                 if i < 10 {
-                    assert_eq!(result, None, "bar {} should be None", i);
+                    assert_eq!(result, None, "bar {i} should be None");
                 }
             }
 
             let val = mom.value().unwrap();
-            assert!((val - 1.55).abs() < 1e-10, "MOM should be 1.55, got {}", val);
+            assert!((val - 1.55).abs() < 1e-10, "MOM should be 1.55, got {val}");
         }
 
         #[test]
@@ -287,7 +286,10 @@ mod tests {
                     output_count += 1;
                 }
             }
-            assert_eq!(output_count, 1, "expected 1 output from 11 bars with period=10");
+            assert_eq!(
+                output_count, 1,
+                "expected 1 output from 11 bars with period=10"
+            );
         }
     }
 
@@ -408,12 +410,12 @@ mod tests {
             mom.compute(&bar(10.0, 2));
             // push(20) evicts 100 → 20 - 100 = -80
             let v1 = mom.compute(&bar(20.0, 3)).unwrap();
-            assert_eq!(v1, -80.0);
+            assert!((v1 + 80.0).abs() < 1e-10);
 
             // Advance: bar 2 (price=10) expires from buffer
             // push(30) evicts 10 → 30 - 10 = 20
             let v2 = mom.compute(&bar(30.0, 4)).unwrap();
-            assert_eq!(v2, 20.0);
+            assert!((v2 - 20.0).abs() < 1e-10);
         }
 
         #[test]
@@ -439,8 +441,11 @@ mod tests {
             let v1 = mom.compute(&bar(30.0, 3)).unwrap();
             // Repaint bar 3 to 40: 40 - 10 = 30
             let v2 = mom.compute(&bar(40.0, 3)).unwrap();
-            assert_eq!(v1, 20.0);
-            assert_eq!(v2, 30.0, "repaint with higher price should increase momentum");
+            assert!((v1 - 20.0).abs() < 1e-10);
+            assert!(
+                (v2 - 30.0).abs() < 1e-10,
+                "repaint with higher price should increase momentum"
+            );
         }
 
         #[test]
@@ -455,9 +460,7 @@ mod tests {
             let v2 = mom.compute(&bar(50.0, 4)).unwrap();
             assert!(
                 v2 > v1,
-                "repaint with higher price should increase momentum: v1={} v2={}",
-                v1,
-                v2
+                "repaint with higher price should increase momentum: v1={v1} v2={v2}"
             );
         }
 
@@ -470,7 +473,10 @@ mod tests {
             mom.compute(&bar(40.0, 3)); // None (fills buffer)
             // Bar 4: evicts bar 1 (price=20 after repaint) → 50 - 20 = 30
             let v = mom.compute(&bar(50.0, 4)).unwrap();
-            assert_eq!(v, 30.0, "repaint during filling should affect future outputs");
+            assert!(
+                (v - 30.0).abs() < 1e-10,
+                "repaint during filling should affect future outputs"
+            );
         }
 
         #[test]
@@ -491,7 +497,10 @@ mod tests {
             clean.compute(&bar(40.0, 3));
             let v2 = clean.value().unwrap();
 
-            assert!((v1 - v2).abs() < 1e-14, "repaints should match clean: v1={} v2={}", v1, v2);
+            assert!(
+                (v1 - v2).abs() < 1e-14,
+                "repaints should match clean: v1={v1} v2={v2}"
+            );
         }
     }
 
