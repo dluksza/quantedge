@@ -19,7 +19,7 @@ pub trait IndicatorConfig:
 
     /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: Copy + Clone + PartialEq + Send + Sync + Display + Debug + 'static;
+    type Output: Copy + PartialEq + Display + Debug + Send + Sync + 'static;
 
     /// Returns a new builder with default values.
     fn builder() -> Self::Builder;
@@ -36,14 +36,16 @@ pub trait IndicatorConfig:
 
 /// Object-safe view of an [`IndicatorConfig`].
 ///
-/// Use to store heterogeneous configs in a single collection
-/// (e.g. `HashSet<Box<dyn ErasedIndicatorConfig>>`). Identity is the
-/// pair `(TypeId, hash)`: two boxes compare equal iff they hold the
-/// same concrete type with equal contents.
+/// Plumbing for crates that store heterogeneous configs (engines,
+/// test utilities). Strategy code should use the typed
+/// [`IndicatorConfig`] API. Identity is the pair `(TypeId, hash)`:
+/// two boxes compare equal iff they hold the same concrete type with
+/// equal contents.
 ///
 /// Blanket-impl'd for every [`IndicatorConfig`]; downstream crates
 /// that define new config types automatically participate.
-pub trait ErasedIndicatorConfig: Any + Send + Sync + Debug {
+#[doc(hidden)]
+pub trait ErasedIndicatorConfig: Any + Debug + Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn dyn_eq(&self, other: &dyn ErasedIndicatorConfig) -> bool;
     fn dyn_hash(&self, hasher: &mut dyn Hasher);
@@ -83,6 +85,37 @@ impl Hash for dyn ErasedIndicatorConfig {
     }
 }
 
+/// Object-safe view of an [`IndicatorConfig::Output`] value.
+///
+/// Plumbing for crates that store heterogeneous indicator outputs
+/// (engines, test utilities). Strategy code should query outputs via
+/// the typed [`crate::Bar::value`] API. Two boxes compare equal iff
+/// they hold the same concrete type with equal contents.
+///
+/// Blanket-impl'd for every type satisfying the
+/// [`IndicatorConfig::Output`] bounds.
+#[doc(hidden)]
+pub trait ErasedIndicatorOutput: Any + Debug + Send + Sync {
+    fn as_any(&self) -> &dyn Any;
+    fn dyn_eq(&self, other: &dyn ErasedIndicatorOutput) -> bool;
+}
+
+impl<T: Copy + PartialEq + Debug + Send + Sync + 'static> ErasedIndicatorOutput for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn dyn_eq(&self, other: &dyn ErasedIndicatorOutput) -> bool {
+        other.as_any().downcast_ref::<T>() == Some(self)
+    }
+}
+
+impl PartialEq for dyn ErasedIndicatorOutput {
+    fn eq(&self, other: &Self) -> bool {
+        self.dyn_eq(other)
+    }
+}
+
 /// Builder for an [`IndicatorConfig`].
 pub trait IndicatorConfigBuilder<Config>
 where
@@ -108,7 +141,7 @@ pub trait Indicator: Sized + Clone + Display + Debug {
 
     /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: 'static + Copy + Clone + Send + Sync + Display + Debug;
+    type Output: Copy + PartialEq + Display + Debug + Send + Sync + 'static;
 
     /// Creates a new indicator from the given config.
     fn new(config: Self::Config) -> Self;
