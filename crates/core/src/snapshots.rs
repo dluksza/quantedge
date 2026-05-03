@@ -124,5 +124,5 @@ pub trait MarketSnapshot: Send + Sync + Display + Debug {
     /// # Panics
     ///
     /// Panics if `timeframe` was not subscribed for this market.
-    fn for_timeframe(&self, timeframe: &Timeframe) -> &impl TimeframeSnapshot;
+    fn for_timeframe(&self, timeframe: Timeframe) -> &impl TimeframeSnapshot;
 }

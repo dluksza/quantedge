@@ -218,7 +218,7 @@ impl MarketSignalBuilder {
         timeframe: Timeframe,
         key: &'static str,
     ) -> Self {
-        let ohlcv = snapshot.for_timeframe(&timeframe).forming().ohlcv();
+        let ohlcv = snapshot.for_timeframe(timeframe).forming().ohlcv();
 
         Self {
             key,
@@ -239,7 +239,7 @@ impl MarketSignalBuilder {
         idx: usize,
         key: &'static str,
     ) -> Option<Self> {
-        let ohlcv = snapshot.for_timeframe(&timeframe).closed(idx)?.ohlcv();
+        let ohlcv = snapshot.for_timeframe(timeframe).closed(idx)?.ohlcv();
 
         Some(Self {
             key,

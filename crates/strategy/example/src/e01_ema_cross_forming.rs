@@ -63,7 +63,7 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
     // Stateless: same `snapshot` in → same result out. The engine
     // calls this on every tick and on each required-timeframe close.
     fn evaluate(&self, snapshot: &impl MarketSnapshot) -> Option<MarketSignal> {
-        let h4 = snapshot.for_timeframe(&Timeframe::HOUR_4);
+        let h4 = snapshot.for_timeframe(Timeframe::HOUR_4);
 
         // `closed(0)` is the most recent closed bar; `forming()` is
         // the currently-building bar.
