@@ -55,6 +55,7 @@ Each indicator defines its own output type via an associated type on the
 `DcValue { upper, middle, lower }`. ADX returns
 `AdxValue { adx, plus_di, minus_di }`. Ichimoku Cloud returns
 `IchimokuValue { tenkan, kijun, senkou_a, senkou_b, chikou_close }`.
+KDJ returns `KdjValue { k, d, j }`. Momentum returns `f64`.
 VWAP returns `VwapValue { vwap, band_1, band_2, band_3 }`.
 Supertrend returns `SupertrendValue { value, is_bullish }`.
 Parabolic SAR returns `ParabolicSarValue { sar, is_long }`.
@@ -162,8 +163,10 @@ trait Indicator: Sized + Clone + Display + Debug {
 // Ichimoku: Output = IchimokuValue { tenkan: f64, kijun: f64, senkou_a: f64, senkou_b: f64, chikou_close: f64 }
 // WillR:    Output = f64
 // Cci:      Output = f64
-// Chop:      Output = f64
+// Chop:     Output = f64
 // StochRsi:  Output = StochRsiValue { k: f64, d: Option<f64> }
+// Kdj:       Output = KdjValue { k: f64, d: f64, j: f64 }
+// Mom:       Output = f64
 // Obv:       Output = f64
 // Vwap:       Output = VwapValue { vwap: f64, band_1: Option<VwapBand>, band_2: Option<VwapBand>, band_3: Option<VwapBand> }
 // Supertrend:    Output = SupertrendValue { value: f64, is_bullish: bool }
@@ -266,6 +269,8 @@ to extract from the Ohlcv input:
 | CHOP       | `f64`      | Choppiness Index                            |
 | Ichimoku   | `IchimokuValue`| Ichimoku Cloud (tenkan, kijun, senkou A/B, chikou) |
 | StochRSI   | `StochRsiValue`| Stochastic RSI (%K, %D)                 |
+| KDJ        | `KdjValue`  | KDJ Oscillator (K, D, J)                |
+| MOM        | `f64`      | Momentum (price change over period)      |
 | OBV        | `f64`      | On-Balance Volume                           |
 | VWAP       | `VwapValue`| Volume Weighted Average Price               |
 | Supertrend | `SupertrendValue` | Supertrend (trend line + direction)  |
