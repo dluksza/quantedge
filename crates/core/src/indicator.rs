@@ -17,7 +17,7 @@ pub trait IndicatorConfig:
     /// Builder type for constructing this config.
     type Builder: IndicatorConfigBuilder<Self>;
 
-    /// Computed output type. `f64` for simple indicators,
+    /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
     type Output: Copy + Clone + PartialEq + Send + Sync + Display + Debug + 'static;
 
@@ -106,7 +106,7 @@ pub trait Indicator: Sized + Clone + Display + Debug {
     /// Configuration type for this indicator.
     type Config: IndicatorConfig<Output = Self::Output>;
 
-    /// Computed output type. `f64` for simple indicators,
+    /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
     type Output: 'static + Copy + Clone + Send + Sync + Display + Debug;
 
