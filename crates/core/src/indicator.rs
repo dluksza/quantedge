@@ -19,7 +19,7 @@ pub trait IndicatorConfig:
 
     /// Computed output type. `f64` for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: Copy + Clone + Send + Sync + Display + Debug + 'static;
+    type Output: Copy + Clone + PartialEq + Send + Sync + Display + Debug + 'static;
 
     /// Returns a new builder with default values.
     fn builder() -> Self::Builder;

@@ -25,7 +25,7 @@ use crate::{IndicatorConfig, Instrument, Ohlcv, Timeframe, Timestamp};
 /// bar shows the in-progress state for the current period; closed bars
 /// show the final state of periods that have ended. Across successive
 /// snapshots the forming bar advances while closed bars stay fixed.
-pub trait Bar: Send + Sync + Display + Debug {
+pub trait Bar: PartialEq + Eq + Send + Sync + Display + Debug {
     /// Whether this bar's period has ended.
     ///
     /// Always `false` for the forming bar and always `true` for any
