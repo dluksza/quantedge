@@ -16,9 +16,9 @@ mod timeframe;
 #[cfg(any(test, feature = "test-util"))]
 pub mod test_util;
 
-pub use crate::indicator::{Indicator, IndicatorConfig, IndicatorConfigBuilder};
 #[doc(hidden)]
 pub use crate::indicator::{ErasedIndicatorConfig, ErasedIndicatorOutput};
+pub use crate::indicator::{Indicator, IndicatorConfig, IndicatorConfigBuilder};
 pub use crate::instrument::{
     Asset, AssetError, Instrument, MarketKind, MarketKindError, Ticker, TickerError, Venue,
     VenueError,
