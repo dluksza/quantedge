@@ -85,37 +85,6 @@ impl Hash for dyn ErasedIndicatorConfig {
     }
 }
 
-/// Object-safe view of an [`IndicatorConfig::Output`] value.
-///
-/// Plumbing for crates that store heterogeneous indicator outputs
-/// (engines, test utilities). Strategy code should query outputs via
-/// the typed [`crate::Bar::value`] API. Two boxes compare equal iff
-/// they hold the same concrete type with equal contents.
-///
-/// Blanket-impl'd for every type satisfying the
-/// [`IndicatorConfig::Output`] bounds.
-#[doc(hidden)]
-pub trait ErasedIndicatorOutput: Any + Debug + Send + Sync {
-    fn as_any(&self) -> &dyn Any;
-    fn dyn_eq(&self, other: &dyn ErasedIndicatorOutput) -> bool;
-}
-
-impl<T: Copy + PartialEq + Debug + Send + Sync + 'static> ErasedIndicatorOutput for T {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn dyn_eq(&self, other: &dyn ErasedIndicatorOutput) -> bool {
-        other.as_any().downcast_ref::<T>() == Some(self)
-    }
-}
-
-impl PartialEq for dyn ErasedIndicatorOutput {
-    fn eq(&self, other: &Self) -> bool {
-        self.dyn_eq(other)
-    }
-}
-
 /// Builder for an [`IndicatorConfig`].
 pub trait IndicatorConfigBuilder<Config>
 where
