@@ -6,10 +6,10 @@ use crate::fixtures::{RefBar, load_reference_ohlcvs, repaint_sequence};
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
-    Ema, EmaConfig, Ichimoku, IchimokuConfig, IndicatorConfig, Kc, KcConfig, Macd, MacdConfig,
-    Multiplier, Obv, ObvConfig, ParabolicSar, ParabolicSarConfig, Rsi, RsiConfig, Sma, SmaConfig,
-    Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend, SupertrendConfig, Vwap, VwapConfig,
-    WillR, WillRConfig,
+    Ema, EmaConfig, Ichimoku, IchimokuConfig, IndicatorConfig, Kc, KcConfig, Kdj, KdjConfig, Macd,
+    MacdConfig, Multiplier, Obv, ObvConfig, ParabolicSar, ParabolicSarConfig, Rsi, RsiConfig, Sma,
+    SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend, SupertrendConfig, Vwap,
+    VwapConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, sync::OnceLock, time::Duration};
 
@@ -148,6 +148,24 @@ macro_rules! all_indicators {
             StochRsiConfig::builder()
                 .rsi_length(nz(140))
                 .stoch_length(nz(140))
+                .k_smooth(nz(30))
+                .d_smooth(nz(30))
+                .build()
+        );
+        $m!(
+            "kdj933",
+            Kdj,
+            KdjConfig::builder()
+                .period(nz(9))
+                .k_smooth(nz(3))
+                .d_smooth(nz(3))
+                .build()
+        );
+        $m!(
+            "kdj903030",
+            Kdj,
+            KdjConfig::builder()
+                .period(nz(90))
                 .k_smooth(nz(30))
                 .d_smooth(nz(30))
                 .build()

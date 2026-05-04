@@ -327,6 +327,8 @@ on a converged indicator.
 | Ichimoku      | 36/104/208/104 | 16.94 µs      | 23.3 Melem/s  |
 | StochRSI      | 14/14/3/3      | 4.06 µs       | 97.3 Melem/s  |
 | StochRSI      | 140/140/30/30  | 6.24 µs       | 63.3 Melem/s  |
+| KDJ           | 9/3/3          | 3.48 µs       | 114 Melem/s   |
+| KDJ           | 90/30/30       | 6.38 µs       | 61.9 Melem/s  |
 | Supertrend    | 20             | 1.04 µs       | 380 Melem/s   |
 | Supertrend    | 200            | 1.04 µs       | 380 Melem/s   |
 | OBV           | —              | 450 ns        | 877 Melem/s   |
@@ -368,6 +370,8 @@ on a converged indicator.
 | Ichimoku      | 36/104/208/104 | 233 ns        |
 | StochRSI      | 14/14/3/3      | 40.80 ns      |
 | StochRSI      | 140/140/30/30  | 124 ns        |
+| KDJ           | 9/3/3          | 49.94 ns      |
+| KDJ           | 90/30/30       | 142 ns        |
 | Supertrend    | 20             | 9.39 ns       |
 | Supertrend    | 200            | 9.08 ns       |
 | OBV           | —              | 1.36 ns       |
@@ -409,6 +413,8 @@ on a converged indicator.
 | Ichimoku      | 36/104/208/104 | 223 ns        |
 | StochRSI      | 14/14/3/3      | 40.79 ns      |
 | StochRSI      | 140/140/30/30  | 120 ns        |
+| KDJ           | 9/3/3          | 50.58 ns      |
+| KDJ           | 90/30/30       | 143 ns        |
 | Supertrend    | 20             | 7.52 ns       |
 | Supertrend    | 200            | 7.75 ns       |
 | OBV           | —              | 1.40 ns       |
@@ -450,6 +456,8 @@ on a converged indicator.
 | Ichimoku      | 36/104/208/104 | 22.04 µs      | 53.8 Melem/s  |
 | StochRSI      | 14/14/3/3      | 9.58 µs       | 124 Melem/s   |
 | StochRSI      | 140/140/30/30  | 11.46 µs      | 103 Melem/s   |
+| KDJ           | 9/3/3          | 11.59 µs      | 102 Melem/s   |
+| KDJ           | 90/30/30       | 13.75 µs      | 86.2 Melem/s  |
 | Supertrend    | 20             | 2.67 µs       | 444 Melem/s   |
 | Supertrend    | 200            | 2.69 µs       | 440 Melem/s   |
 | OBV           | —              | 1.42 µs       | 833 Melem/s   |
