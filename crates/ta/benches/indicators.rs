@@ -7,9 +7,9 @@ use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_mai
 use quantedge_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
     Ema, EmaConfig, Ichimoku, IchimokuConfig, IndicatorConfig, Kc, KcConfig, Kdj, KdjConfig, Macd,
-    MacdConfig, Multiplier, Obv, ObvConfig, ParabolicSar, ParabolicSarConfig, Rsi, RsiConfig, Sma,
-    SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend, SupertrendConfig, Vwap,
-    VwapConfig, WillR, WillRConfig,
+    MacdConfig, Mom, MomConfig, Multiplier, Obv, ObvConfig, ParabolicSar, ParabolicSarConfig, Rsi,
+    RsiConfig, Sma, SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend,
+    SupertrendConfig, Vwap, VwapConfig, WillR, WillRConfig,
 };
 use std::{hint::black_box, num::NonZero, sync::OnceLock, time::Duration};
 
@@ -170,6 +170,8 @@ macro_rules! all_indicators {
                 .d_smooth(nz(30))
                 .build()
         );
+        $m!("mom10", Mom, MomConfig::close(nz(10)));
+        $m!("mom100", Mom, MomConfig::close(nz(100)));
         $m!("obv", Obv, ObvConfig::builder().build());
         $m!("vwap", Vwap, VwapConfig::builder().build());
         $m!("supertrend20", Supertrend, SupertrendConfig::default());
