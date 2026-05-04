@@ -2,9 +2,19 @@
 
 ## [Unreleased]
 
+### Added
+
+- KDJ Oscillator — thin wrapper around [`Stoch`] that adds a %J line (`%J = 3×%K − 2×%D`) amplifying the divergence between %K and %D. Configurable RSV lookback period and %K/%D smoothing windows. Standard settings via `KdjConfig::default()` (9/3/3). Returns `KdjValue { k, d, j }`. Reference tests against a composed talipp Stoch+SMA pipeline (729 BTC/USDT bars, 1e-6 tolerance) — talipp has no native KDJ and pandas_ta uses Wilder's RMA, so the reference mirrors the Rust impl's SMA-via-Stoch semantics. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/quantedge/pull/2).
+- Momentum (MOM) — price-difference oscillator (`price[i] − price[i−period]`) using a `RingBuffer` for O(1) streaming updates with live repaint support. Configurable lookback period and price source (default Close). Standard settings via `MomConfig::default()` (period=10). Returns `f64`. Reference tests against TA-Lib (734 BTC/USDT bars, 1e-6 tolerance) — talipp lacks MOM. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/quantedge/pull/2).
+
 ### Changed
 
-- MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95.
+- MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95. Enables stabilizations like `core::hint::cold_path` and if-let match guards.
+- **Breaking:** Renamed `IchimokuBuilder` to `IchimokuConfigBuilder` to match the `*ConfigBuilder` convention used by every other indicator (`SmaConfigBuilder`, `EmaConfigBuilder`, `BbConfigBuilder`, …). External callers naming the type explicitly must rename their import; users who only go through `IchimokuConfig::builder()` are unaffected.
+- `nz(n: usize) -> NonZero<usize>` promoted from `quantedge_core::test_util` to the crate root as a `const fn` and re-exported from `quantedge_ta`. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so gating the helper behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. Existing `quantedge_core::test_util::nz` imports keep working via re-export.
+- `RingBuffer::push` warm-up arm and `ParabolicSar::initialize` seeding arm tagged with `core::hint::cold_path` so LLVM lays out the steady-state path linearly. Measured (rustc 1.95.0, Apple M5 Max): `stream/dc20` +1.0%, `stream/parabolicsar0.02` +1.8%, `tick/dc20` +1.5%.
+- ParabolicSar `initialize`/`step` helpers now take `Phase` fields as parameters, bound at the dispatch site in `compute`, instead of re-extracting them via `let-else { unreachable!() }`. Drops the unreachable arms. Measured: `stream/parabolicsar0.02` +4.7%, `tick/parabolicsar0.02` +4.6%.
+- Benchmark tables in `README.md` re-run end-to-end on Apple M5 Max with rustc 1.95.0. Notable post-`cold_path`/perf-tweak gains: ATR stream ~30% faster, RSI/Supertrend stream ~18–19%, OBV stream ~15%, BB/RSI repaint_stream 12–21%.
 
 ## [0.20.0] - 2026-04-24
 
