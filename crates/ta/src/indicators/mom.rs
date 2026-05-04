@@ -158,7 +158,7 @@ pub struct Mom {
     bar_state: BarState,
     buffer: RingBuffer,
     current: Option<Price>,
-    /// Cached oldest price in the ring buffer (valid when buffer is ready).
+    /// Cached oldest price in the ring buffer (valid when `current.is_some()`).
     /// Used for repaints so we don't need to query the ring buffer.
     oldest_price: Price,
 }
