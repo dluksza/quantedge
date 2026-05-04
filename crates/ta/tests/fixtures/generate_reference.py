@@ -57,6 +57,7 @@ ICHIMOKU_TENKAN = 9
 ICHIMOKU_KIJUN = 26
 ICHIMOKU_SENKOU_B = 52
 ICHIMOKU_DISPLACEMENT = 26
+MOM_PERIOD = 10
 OUTPUT_DIR = "tests/fixtures/data"
 
 
@@ -433,6 +434,20 @@ def main():
                 w.writerow([times[i], f"{val:.10f}", is_long])
                 psar_count += 1
 
+    # Momentum (using TA-Lib — talipp does not provide MOM)
+    # talib.MOM(real, timeperiod) = real[i] - real[i - timeperiod].
+    # This maps to Rust Mom(period=10) on close.
+    close_arr = np.array(closes)
+    mom_arr = talib.MOM(close_arr, timeperiod=MOM_PERIOD)
+    with open(f"{OUTPUT_DIR}/mom-10-close.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "expected"])
+        mom_count = 0
+        for i, val in enumerate(mom_arr):
+            if not np.isnan(val):
+                w.writerow([times[i], f"{val:.10f}"])
+                mom_count += 1
+
     sma_count = sum(1 for v in sma if v is not None)
     ema_count = sum(1 for v in ema if v is not None)
     bb_count = sum(1 for v in bb if v is not None)
@@ -478,7 +493,8 @@ def main():
         f"{ichimoku_count} Ichimoku, "
         f"{obv_count} OBV, "
         f"{vwap_count} VWAP, "
-        f"{psar_count} PSAR reference values "
+        f"{psar_count} PSAR, "
+        f"{mom_count} MOM reference values "
         f"from {len(rows)} OHLCV bars."
     )
 

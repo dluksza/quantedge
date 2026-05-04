@@ -187,10 +187,9 @@ impl Indicator for Mom {
                 self.current
             }
             BarAction::Repaint(price) => {
-                if self.buffer.is_ready() {
+                self.buffer.replace(price);
+                if self.current.is_some() {
                     self.current = Some(price - self.oldest_price);
-                } else {
-                    self.buffer.replace(price);
                 }
                 self.current
             }
