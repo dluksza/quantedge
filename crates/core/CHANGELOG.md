@@ -4,12 +4,16 @@
 
 ### Added
 
-- `ErasedIndicatorConfig` trait: an object-safe view of `IndicatorConfig` so heterogeneous configs can live in a single collection (e.g. `HashSet<Box<dyn ErasedIndicatorConfig>>`). Identity is `(TypeId, hash)` — two boxes compare equal iff they hold the same concrete type with equal contents. Blanket-impl'd for every `IndicatorConfig`, so downstream config types participate automatically.
+- `nz(n: usize) -> NonZero<usize>` `const fn` at the crate root. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so the previous gating behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. The existing `quantedge_core::test_util::nz` import path keeps working via re-export.
 
 ### Changed
 
-- MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95.
-- **Breaking:** `IndicatorConfig` now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Required to support the `ErasedIndicatorConfig` blanket impl. Existing config types in `quantedge-ta` already satisfy these bounds; custom impls that don't will need to add them.
+- MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95. Enables stabilizations like `core::hint::cold_path` and if-let match guards.
+- **Breaking:** `IndicatorConfig` now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Existing config types in `quantedge-ta` already satisfy these bounds; custom impls that don't will need to add them.
+- **Breaking:** `IndicatorConfig::Output` (and therefore `Indicator::Output`) now requires `PartialEq`. Lets callers compare snapshot values directly without workarounds (test assertions, deduplication, change detection). The redundant `Clone` bound was dropped at the same time — `Copy` already implies it. Net bound: `Copy + PartialEq + Display + Debug + Send + Sync + 'static`. Custom output types must derive or implement `PartialEq`; every built-in indicator output already does.
+- **Breaking:** `Bar::ohlcv()` returns `Ohlcv` by value instead of `&Ohlcv`. `Ohlcv` is `Copy`, and the by-reference signature forced lifetimes through a non-dyn-compatible trait surface that downstream builders (`MarketSignal`) need to capture.
+- **Breaking:** `MarketSnapshot::instrument()` returns `Instrument` by value instead of `&Instrument`. `Instrument` clones are four atomic increments (`Arc<str>` leaves), and the by-value signature lets builders capture it without threading lifetimes.
+- **Breaking:** `MarketSnapshot::for_timeframe()` takes `Timeframe` by value instead of `&Timeframe`. `Timeframe` is `Copy`; the by-reference signature forced callers to write `&timeframe` and the implementation to dereference for no benefit.
 
 ## [0.2.0] - 2026-04-24
 
