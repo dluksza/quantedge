@@ -2,7 +2,7 @@
 
 Streaming-first Rust primitives for systematic trading. Zero-alloc hot paths.
 
-Today: 19 streaming indicators in `quantedge-ta`, verified against talipp, TA-Lib, and pandas-ta, benchmarked with Criterion. MSRV 1.93.
+Today: 21 streaming indicators in `quantedge-ta`, verified against talipp, TA-Lib, and pandas-ta, benchmarked with Criterion. MSRV 1.95.
 
 ## Status
 

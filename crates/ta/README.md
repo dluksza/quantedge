@@ -250,7 +250,7 @@ to extract from the Ohlcv input:
 | HLCC4     | (high + low + close + close) / 4                          |
 | TrueRange | max(high - low, \|high - prev_close\|, \|low - prev_close\|) |
 
-## Indicators
+## Indicators (21)
 
 | Indicator | Output     | Description                                  |
 |-----------|------------|----------------------------------------------|
