@@ -264,13 +264,6 @@ mod tests {
         }
 
         #[test]
-        fn zero_period_edge() {
-            // Reference: period=0 → all None
-            // We can't create NonZero(0), but the reference explicitly rejects it.
-            // Our API requires NonZero<usize> so this is enforced at compile time.
-        }
-
-        #[test]
         fn output_count_matches_reference() {
             // Reference: prices.len() = 11, period = 10 → 1 output (index 10)
             // Our streaming: 11 bars, period 10 → output starts at bar 11 (10 pushes fill, 11th evicts)
