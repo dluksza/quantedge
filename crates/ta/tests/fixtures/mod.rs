@@ -61,6 +61,15 @@ pub struct RefStochValue {
     pub d: f64,
 }
 
+/// Reference KDJ value with timestamp (%K, %D, %J).
+#[derive(Debug, Deserialize)]
+pub struct RefKdjValue {
+    pub open_time: u64,
+    pub k: f64,
+    pub d: f64,
+    pub j: f64,
+}
+
 /// Reference ADX value with timestamp (adx, +DI, -DI).
 #[derive(Debug, Deserialize)]
 pub struct RefAdxValue {
@@ -126,6 +135,11 @@ pub fn load_channel_ref(path: &str) -> Vec<RefChannelValue> {
 /// Load Stoch reference data (k, d).
 pub fn load_stoch_ref(path: &str) -> Vec<RefStochValue> {
     load_records(path, "invalid Stoch reference record")
+}
+
+/// Load KDJ reference data (k, d, j).
+pub fn load_kdj_ref(path: &str) -> Vec<RefKdjValue> {
+    load_records(path, "invalid KDJ reference record")
 }
 
 /// Load ADX reference data (`adx`, `plus_di`, `minus_di`).
@@ -417,6 +431,30 @@ pub fn assert_stoch_values_match(
         }
         (c, r) => {
             panic!("Stoch convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
+        }
+    }
+}
+
+/// Assert KDJ values match between closed and repainted indicators.
+pub fn assert_kdj_values_match(
+    bar_idx: usize,
+    closed: Option<quantedge_ta::KdjValue>,
+    repainted: Option<quantedge_ta::KdjValue>,
+    tolerance: f64,
+) {
+    match (closed, repainted) {
+        (None, None) => {}
+        (Some(c), Some(r)) => {
+            for (label, cv, rv) in [("%K", c.k, r.k), ("%D", c.d, r.d), ("%J", c.j, r.j)] {
+                let diff = (cv - rv).abs();
+                assert!(
+                    diff <= tolerance,
+                    "KDJ {label} diverged at bar {bar_idx}: closed={cv:.10}, repainted={rv:.10}, diff={diff:.2e}"
+                );
+            }
+        }
+        (c, r) => {
+            panic!("KDJ convergence mismatch at bar {bar_idx}: closed={c:?}, repainted={r:?}");
         }
     }
 }

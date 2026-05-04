@@ -36,6 +36,9 @@ RSI_PERIOD = 14
 ATR_PERIOD = 14
 STOCH_PERIOD = 14
 STOCH_SMOOTH = 3
+KDJ_PERIOD = 9
+KDJ_K_SMOOTH = 3
+KDJ_D_SMOOTH = 3
 STOCH_RSI_RSI_PERIOD = 14
 STOCH_RSI_STOCH_PERIOD = 14
 STOCH_RSI_K_SMOOTH = 3
@@ -188,6 +191,35 @@ def main():
                         f"{val.d:.10f}",
                     ]
                 )
+
+    # KDJ Oscillator
+    # talipp has no KDJ — compose from Stoch + SMA primitives, mirroring Rust:
+    #   K = SMA(RSV, k_smooth) — equals talipp Stoch.d when smoothing_period=k_smooth
+    #   D = SMA(K, d_smooth)
+    #   J = 3K - 2D
+    # Note: pandas_ta.kdj uses Wilder's RMA, not SMA, so it does not match.
+    # Rust KDJ first emits at bar `period + k_smooth + d_smooth`; talipp's stream
+    # converges 1–2 bars earlier, so skip those leading rows.
+    kdj_stoch = Stoch(period=KDJ_PERIOD, smoothing_period=KDJ_K_SMOOTH, input_values=ohlcv_bars)
+    kdj_sma_d = SMA(period=KDJ_D_SMOOTH)
+    kdj_convergence = KDJ_PERIOD + KDJ_K_SMOOTH + KDJ_D_SMOOTH
+    kdj_count = 0
+    with open(f"{OUTPUT_DIR}/kdj-9-3-3-close.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["open_time", "k", "d", "j"])
+        for i, sv in enumerate(kdj_stoch):
+            if sv is None or sv.d is None:
+                continue
+            k = sv.d
+            kdj_sma_d.add(k)
+            d = kdj_sma_d[-1] if len(kdj_sma_d) > 0 else None
+            if d is None:
+                continue
+            if (i + 1) < kdj_convergence:
+                continue
+            j = 3.0 * k - 2.0 * d
+            w.writerow([times[i], f"{k:.10f}", f"{d:.10f}", f"{j:.10f}"])
+            kdj_count += 1
 
     # Stochastic RSI
     # talipp StochRSI(rsi_period, stoch_period, k_smoothing_period, d_smoothing_period)
@@ -434,6 +466,7 @@ def main():
         f"{macd_count} MACD, "
         f"{atr_count} ATR, "
         f"{stoch_count} Stoch, "
+        f"{kdj_count} KDJ, "
         f"{stoch_rsi_count} StochRSI, "
         f"{kc_count} KC, "
         f"{dc_count} DC, "
