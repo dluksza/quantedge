@@ -110,3 +110,101 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
         None
     }
 }
+
+// Two slices of the generator's contract, each covered with the
+// minimum machinery:
+//   - `configure` - pass in a `RecordingMarketSignalConfig` and assert
+//     it captured the declared dependencies.
+//   - `evaluate` - hand-build a `FakeMarketSnapshot` with the EMA
+//     values the generator will read, call `evaluate`, assert the
+//     produced (or absent) `MarketSignal`.
+//
+// End-to-end coverage (driving the generator across a tick sequence
+// under `EnforcingMarketSnapshot`) belongs in a higher-level harness
+// once `FakeEngine` lands; these tests stay focused on the generator's
+// own input → output contract.
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quantedge_strategy::{
+        EmaConfig, MarketSide, MarketSignal, SignalGenerator, Timeframe, nz,
+        test_util::{FakeMarketSnapshot, RecordingMarketSignalConfig},
+    };
+
+    // Same configs the generator stores on itself; reused across tests
+    // so the recorder identifies them by `IndicatorConfig` equality.
+    fn ema9() -> EmaConfig {
+        EmaConfig::close(nz(9))
+    }
+
+    fn ema21() -> EmaConfig {
+        EmaConfig::close(nz(21))
+    }
+
+    /// Builds an H4 snapshot with the given EMA values on the previous
+    /// closed bar and the forming bar - exactly what `evaluate` reads,
+    /// nothing else. Times default to midnight 2026-01-01 with
+    /// timeframe-aligned bars; we don't care about the exact values
+    /// because the generator doesn't either.
+    fn evaluate(
+        prev_ema9: f64,
+        prev_ema21: f64,
+        forming_ema9: f64,
+        forming_ema21: f64,
+    ) -> Option<MarketSignal> {
+        let market = FakeMarketSnapshot::btcusdt().with_timeframe(Timeframe::HOUR_4, |t| {
+            t.customize_forming(|b| {
+                b.add_value(&ema9(), forming_ema9)
+                    .add_value(&ema21(), forming_ema21)
+            })
+            .add_closed_with(|b| {
+                b.add_value(&ema9(), prev_ema9)
+                    .add_value(&ema21(), prev_ema21)
+            })
+        });
+
+        EmaCrossingFormingSignalGenerator::default().evaluate(&market)
+    }
+
+    #[test]
+    fn configure_declares_h4_one_closed_bar_and_both_emas() {
+        // `RecordingMarketSignalConfig` is itself a `MarketSignalConfig`,
+        // so it can be passed straight into `configure` to record what
+        // the generator asks for.
+        let recorder = EmaCrossingFormingSignalGenerator::default()
+            .configure(RecordingMarketSignalConfig::new());
+
+        assert!(recorder.has_timeframe(&Timeframe::HOUR_4));
+        assert_eq!(recorder.required_closed_bars(), 1);
+        assert!(recorder.has_indicator(&ema9()));
+        assert!(recorder.has_indicator(&ema21()));
+    }
+
+    #[test]
+    fn bull_cross_emits_long_signal() {
+        // Prev: EMA9 below EMA21. Forming: EMA9 above. Bullish cross.
+        let signal = evaluate(99.0, 100.0, 101.0, 100.5).unwrap();
+
+        assert_eq!(signal.key, "bull_cross");
+        assert_eq!(signal.market_side, Some(MarketSide::Long));
+        assert_eq!(signal.timeframe, Timeframe::HOUR_4);
+        assert_eq!(signal.generator_id, "ema_9_21_crossing");
+    }
+
+    #[test]
+    fn bear_cross_emits_short_signal() {
+        // Prev: EMA9 above EMA21. Forming: EMA9 below. Bearish cross.
+        let signal = evaluate(101.0, 100.0, 99.0, 100.5).unwrap();
+
+        assert_eq!(signal.key, "bear_cross");
+        assert_eq!(signal.market_side, Some(MarketSide::Short));
+    }
+
+    #[test]
+    fn no_cross_returns_none() {
+        // EMA9 stays above EMA21 across both bars — no crossing.
+        let signal = evaluate(102.0, 100.0, 103.0, 100.5);
+
+        assert!(signal.is_none());
+    }
+}

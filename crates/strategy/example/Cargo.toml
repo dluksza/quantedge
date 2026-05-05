@@ -8,3 +8,6 @@ rust-version = "1.95"
 
 [dependencies]
 quantedge-strategy = { path = "../" }
+
+[dev-dependencies]
+quantedge-strategy = { path = "../", features = ["test-util"] }

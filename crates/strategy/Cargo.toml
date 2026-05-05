@@ -7,9 +7,15 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[features]
+test-util = ["quantedge-core/test-util"]
+
 [dependencies]
 quantedge-core = { workspace = true }
 quantedge-ta = { workspace = true }
+
+[dev-dependencies]
+quantedge-core = { workspace = true, features = ["test-util"] }
 
 [lints]
 workspace = true

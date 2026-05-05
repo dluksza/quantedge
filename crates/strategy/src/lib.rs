@@ -21,3 +21,6 @@ mod signal_generator;
 
 pub use crate::market_signal::*;
 pub use crate::signal_generator::*;
+
+#[cfg(any(test, feature = "test-util"))]
+pub mod test_util;
