@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "quantedge-core"
-version = "0.2.0"
+version = "0.3.0"
 
 [[package]]
 name = "quantedge-strategy"
@@ -23,7 +23,7 @@ dependencies = [
 
 [[package]]
 name = "quantedge-ta"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "quantedge-core",
 ]

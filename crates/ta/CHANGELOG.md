@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.21.0] - 2026-05-05
 
 ### Added
 
@@ -10,6 +10,8 @@
 ### Changed
 
 - MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95. Enables stabilizations like `core::hint::cold_path` and if-let match guards.
+- **Breaking:** `IndicatorConfig` (re-exported from `quantedge-core 0.3.0`) now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Every built-in config in `quantedge-ta` already satisfies these; custom impls in downstream crates must add the missing bounds.
+- **Breaking:** `IndicatorConfig::Output` (and therefore `Indicator::Output`) now requires `PartialEq`, propagated from `quantedge-core 0.3.0`. Lets callers compare snapshot values directly without workarounds (test assertions, deduplication, change detection). The redundant `Clone` bound was dropped at the same time — `Copy` already implies it. Net bound: `Copy + PartialEq + Display + Debug + Send + Sync + 'static`. Every built-in indicator output already derives `PartialEq`; custom output types in downstream crates must add it.
 - **Breaking:** Renamed `IchimokuBuilder` to `IchimokuConfigBuilder` to match the `*ConfigBuilder` convention used by every other indicator (`SmaConfigBuilder`, `EmaConfigBuilder`, `BbConfigBuilder`, …). External callers naming the type explicitly must rename their import; users who only go through `IchimokuConfig::builder()` are unaffected.
 - `nz(n: usize) -> NonZero<usize>` promoted from `quantedge_core::test_util` to the crate root as a `const fn` and re-exported from `quantedge_ta`. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so gating the helper behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. Existing `quantedge_core::test_util::nz` imports keep working via re-export.
 - `RingBuffer::push` warm-up arm and `ParabolicSar::initialize` seeding arm tagged with `core::hint::cold_path` so LLVM lays out the steady-state path linearly. Measured (rustc 1.95.0, Apple M5 Max): `stream/dc20` +1.0%, `stream/parabolicsar0.02` +1.8%, `tick/dc20` +1.5%.
@@ -224,6 +226,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.21.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.21.0
 [0.20.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.20.0
 [0.19.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.19.0
 [0.18.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.18.1

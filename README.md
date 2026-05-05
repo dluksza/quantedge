@@ -15,7 +15,7 @@ Today: 21 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 | `quantedge-sim`      | —             | planned       | Backtester and forward-tester with honest fill models |
 | `quantedge-ob`       | —             | planned       | Order book reconstruction and L2/L3 event handling   |
 
-`quantedge-ta` (`0.20.0`) and `quantedge-core` (`0.3.0`) are published on crates.io. Both are feature-complete for v1.0; the v1.0 bump is gated on validation under real streaming workloads.
+`quantedge-ta` (`0.21.0`) and `quantedge-core` (`0.3.0`) are published on crates.io. Both are feature-complete for v1.0; the v1.0 bump is gated on validation under real streaming workloads.
 
 ## Design principles
 

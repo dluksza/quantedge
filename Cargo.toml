@@ -15,7 +15,7 @@ authors = ["Darek Luksza <dariusz@luksza.org>"]
 
 [workspace.dependencies]
 quantedge-core = { version = "0.3.0", path = "crates/core" }
-quantedge-ta = { version = "0.20.0", path = "crates/ta" }
+quantedge-ta = { version = "0.21.0", path = "crates/ta" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

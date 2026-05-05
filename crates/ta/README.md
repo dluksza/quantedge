@@ -143,7 +143,7 @@ Each indicator defines its output type. No downcasting needed:
 ```rust
 trait Indicator: Sized + Clone + Display + Debug {
     type Config: IndicatorConfig<Output = Self::Output>;
-    type Output: 'static + Copy + Send + Sync + Display + Debug;
+    type Output: Copy + PartialEq + Display + Debug + Send + Sync + 'static;
 
     fn new(config: Self::Config) -> Self;
     fn compute(&mut self, kline: &Ohlcv) -> Option<Self::Output>;
