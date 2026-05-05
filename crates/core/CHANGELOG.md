@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.0] - 2026-05-05
 
 ### Added
 
@@ -48,5 +48,6 @@
 
 - Initial release. Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases, extracted from `quantedge-ta` so downstream crates can share a single bar abstraction without depending on the full indicator library.
 
+[0.3.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.3.0
 [0.2.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.2.0
 [0.1.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.1.0
