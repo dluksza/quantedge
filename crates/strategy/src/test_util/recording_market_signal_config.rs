@@ -62,7 +62,8 @@ impl RecordingMarketSignalConfig {
     /// different parameters (e.g. a different length) is a different
     /// indicator and will not match.
     pub fn has_indicator(&self, config: &impl IndicatorConfig) -> bool {
-        self.indicators.contains(&config.clone_erased())
+        let key: &dyn ErasedIndicatorConfig = config;
+        self.indicators.contains(key)
     }
 }
 
