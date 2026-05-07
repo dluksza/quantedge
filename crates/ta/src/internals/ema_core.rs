@@ -54,26 +54,25 @@ impl EmaCore {
                 .mul_add(price - self.previous_value, self.previous_value);
         } else {
             cold_path();
-            if self.seen_bars < self.length {
+            self.seen_bars += 1;
+
+            if self.seen_bars <= self.length {
                 self.current_price = price;
                 self.sma_sum += price;
-                self.seen_bars += 1;
 
                 if self.seen_bars == self.length {
+                    self.converged = true;
                     self.value = self.sma_sum * self.length_reciprocal;
                 } else {
                     return None;
                 }
             } else {
-                self.seen_bars += 1;
                 self.previous_value = self.value;
 
                 self.value = self
                     .alpha
                     .mul_add(price - self.previous_value, self.previous_value);
             }
-
-            self.converged = self.seen_bars >= self.length;
         }
 
         self.value()
