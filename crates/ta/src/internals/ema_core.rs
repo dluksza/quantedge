@@ -1,3 +1,5 @@
+use std::hint::cold_path;
+
 use crate::Price;
 
 #[derive(Clone, Debug)]
@@ -53,6 +55,8 @@ impl EmaCore {
             return Some(self.value);
         }
 
+        cold_path();
+
         if self.seen_bars < self.length {
             self.current_price = price;
             self.sma_sum += price;
@@ -79,6 +83,7 @@ impl EmaCore {
 
     pub(crate) fn replace(&mut self, price: Price) -> Option<Price> {
         if self.seen_bars <= self.length {
+            cold_path();
             self.sma_sum = self.sma_sum - self.current_price + price;
             self.current_price = price;
 
@@ -100,6 +105,7 @@ impl EmaCore {
         if self.converged {
             Some(self.value)
         } else {
+            cold_path();
             None
         }
     }
