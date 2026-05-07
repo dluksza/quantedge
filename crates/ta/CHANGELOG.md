@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `EmaCore::push` and `EmaCore::replace` seed branches and `EmaCore::value` un-converged arm tagged with `core::hint::cold_path`. `EmaCore::push` restructured so its steady-state arm falls through to a shared `self.value()` tail matching `EmaCore::replace`, and its cold seed-phase bookkeeping consolidated to a single `seen_bars` increment with `converged` set directly at seed completion. After fat-LTO inlines `EmaCore` into the EMA-driven indicator compute() functions, LLVM places seed-handling blocks in the function epilogue and the steady-state path runs straight to a single exit. Measured (rustc 1.95.0, Apple M5 Max): `stream/atr14` ~−7%, `stream/atr140` ~−8%, `stream/supertrend20` ~−4%, `stream/supertrend200` ~−2%. Other EmaCore-driven benchmarks moved within run-to-run noise.
+
 ## [0.21.0] - 2026-05-05
 
 ### Added
