@@ -52,31 +52,29 @@ impl EmaCore {
             self.value = self
                 .alpha
                 .mul_add(price - self.previous_value, self.previous_value);
-            return Some(self.value);
-        }
-
-        cold_path();
-
-        if self.seen_bars < self.length {
-            self.current_price = price;
-            self.sma_sum += price;
-            self.seen_bars += 1;
-
-            if self.seen_bars == self.length {
-                self.value = self.sma_sum * self.length_reciprocal;
-            } else {
-                return None;
-            }
         } else {
-            self.seen_bars += 1;
-            self.previous_value = self.value;
+            cold_path();
+            if self.seen_bars < self.length {
+                self.current_price = price;
+                self.sma_sum += price;
+                self.seen_bars += 1;
 
-            self.value = self
-                .alpha
-                .mul_add(price - self.previous_value, self.previous_value);
+                if self.seen_bars == self.length {
+                    self.value = self.sma_sum * self.length_reciprocal;
+                } else {
+                    return None;
+                }
+            } else {
+                self.seen_bars += 1;
+                self.previous_value = self.value;
+
+                self.value = self
+                    .alpha
+                    .mul_add(price - self.previous_value, self.previous_value);
+            }
+
+            self.converged = self.seen_bars >= self.length;
         }
-
-        self.converged = self.seen_bars >= self.length;
 
         self.value()
     }
