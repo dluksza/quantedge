@@ -1,7 +1,17 @@
 //! Reference `SignalGenerator` implementation: EMA9 vs EMA21 cross on
 //! the H4 timeframe. Demonstrates the three pieces every generator
-//! needs — indicator configs as fields, `configure` to declare
+//! needs - indicator configs as fields, `configure` to declare
 //! dependencies, `evaluate` to detect and emit signals.
+//!
+//! The test module at the bottom doubles as a worked tour of the
+//! `quantedge_strategy::test_util` API. It covers the three slices a
+//! generator deserves coverage on:
+//!
+//!   1. declared dependencies - via `RecordingMarketSignalConfig`,
+//!   2. single-tick evaluation - via a hand-built `FakeMarketSnapshot`,
+//!   3. multi-tick driving - via `FakeEngine`, which also enforces
+//!      the `configure` <-> `evaluate` contract by panicking on any
+//!      undeclared read.
 
 use quantedge_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
@@ -52,6 +62,12 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
     //   `register(&config)` subscribes an indicator — the engine
     //     computes it on every required timeframe and surfaces its
     //     value via `Bar::value(&config)`.
+    //
+    // Anything `evaluate` reads must be declared here. The production
+    // engine never feeds undeclared data, so contract drift between
+    // `configure` and `evaluate` stays silent until prod. `FakeEngine`
+    // makes the gap loud by panicking on undeclared reads — see the
+    // `end_to_end` test module for the catch-net in action.
     fn configure<C: MarketSignalConfig>(&self, config: C) -> C {
         config
             .require_closed_bars(1)
@@ -112,7 +128,10 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
 }
 
 // Three slices of the generator's contract, each with its own kind
-// of fake:
+// of fake. Full API reference for the helpers below lives in
+// `quantedge_strategy::test_util`; the tests here are the worked
+// tutorial.
+//
 //   - `configure` - pass in a `RecordingMarketSignalConfig` and
 //     assert it captured the declared dependencies.
 //   - `evaluate` (single tick) - hand-build a `FakeMarketSnapshot`
