@@ -111,24 +111,23 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
     }
 }
 
-// Two slices of the generator's contract, each covered with the
-// minimum machinery:
-//   - `configure` - pass in a `RecordingMarketSignalConfig` and assert
-//     it captured the declared dependencies.
-//   - `evaluate` - hand-build a `FakeMarketSnapshot` with the EMA
-//     values the generator will read, call `evaluate`, assert the
-//     produced (or absent) `MarketSignal`.
-//
-// End-to-end coverage (driving the generator across a tick sequence
-// under `EnforcingMarketSnapshot`) belongs in a higher-level harness
-// once `FakeEngine` lands; these tests stay focused on the generator's
-// own input → output contract.
+// Three slices of the generator's contract, each with its own kind
+// of fake:
+//   - `configure` - pass in a `RecordingMarketSignalConfig` and
+//     assert it captured the declared dependencies.
+//   - `evaluate` (single tick) - hand-build a `FakeMarketSnapshot`
+//     with the EMA values the generator will read, call `evaluate`,
+//     assert the produced (or absent) `MarketSignal`.
+//   - `evaluate` (tick sequence) - drive the generator with
+//     `FakeEngine` across multiple ticks. Each tick reuses a
+//     per-tick helper so the test reads as a table of inputs,
+//     not a wall of nested closures.
 #[cfg(test)]
 mod tests {
     use super::*;
     use quantedge_strategy::{
         EmaConfig, MarketSide, MarketSignal, SignalGenerator, Timeframe, nz,
-        test_util::{FakeMarketSnapshot, RecordingMarketSignalConfig},
+        test_util::{FakeEngine, FakeMarketSnapshot, RecordingMarketSignalConfig},
     };
 
     // Same configs the generator stores on itself; reused across tests
@@ -143,9 +142,9 @@ mod tests {
 
     /// Builds an H4 snapshot with the given EMA values on the previous
     /// closed bar and the forming bar - exactly what `evaluate` reads,
-    /// nothing else. Times default to midnight 2026-01-01 with
-    /// timeframe-aligned bars; we don't care about the exact values
-    /// because the generator doesn't either.
+    /// nothing else. Both bars carry two indicators (EMA9 + EMA21), so
+    /// the closure forms `forming_with` / `add_closed_with` are a
+    /// better fit than the single-indicator shorthands.
     fn evaluate(
         prev_ema9: f64,
         prev_ema21: f64,
@@ -153,7 +152,7 @@ mod tests {
         forming_ema21: f64,
     ) -> Option<MarketSignal> {
         let market = FakeMarketSnapshot::btcusdt().with_timeframe(Timeframe::HOUR_4, |t| {
-            t.customize_forming(|b| {
+            t.forming_with(|b| {
                 b.add_value(&ema9(), forming_ema9)
                     .add_value(&ema21(), forming_ema21)
             })
@@ -206,5 +205,67 @@ mod tests {
         let signal = evaluate(102.0, 100.0, 103.0, 100.5);
 
         assert!(signal.is_none());
+    }
+
+    // The `evaluate`-tick-sequence slice. `FakeEngine` drives the
+    // generator across multiple ticks the way the production engine
+    // would. `Default::default()` to construct, `configure` once,
+    // `evaluate` per tick under an `EnforcingMarketSnapshot`.
+    //
+    // The enforcement is the point: every `evaluate` call panics if
+    // it reads a timeframe, closed-bar index, or indicator the
+    // generator didn't declare in `configure`. So a passing run here
+    // doubles as a contract check between `configure` and `evaluate`,
+    // drift between the two surfaces immediately, instead of in
+    // prod when the engine quietly serves an empty bar.
+    //
+    // That guarantee is qualitatively different from the per-tick
+    // unit tests above, so this slice lives in its own module to make
+    // the intent obvious at a glance.
+    mod end_to_end {
+        use super::*;
+
+        // Per-tick helper. This is the pattern recommended in the
+        // `FakeEngine` module docs: one function that builds a single
+        // tick, parameterised by the values that change tick-to-tick.
+        // Inline closures explode visually when several ticks share
+        // the same shape; the helper keeps the test body shaped like
+        // a table of inputs.
+        fn tick(
+            snapshot: FakeMarketSnapshot,
+            prev_ema9: f64,
+            prev_ema21: f64,
+            forming_ema9: f64,
+            forming_ema21: f64,
+        ) -> FakeMarketSnapshot {
+            snapshot.with_timeframe(Timeframe::HOUR_4, |t| {
+                t.forming_with(|b| {
+                    b.add_value(&ema9(), forming_ema9)
+                        .add_value(&ema21(), forming_ema21)
+                })
+                .add_closed_with(|b| {
+                    b.add_value(&ema9(), prev_ema9)
+                        .add_value(&ema21(), prev_ema21)
+                })
+            })
+        }
+
+        #[test]
+        fn engine_drives_generator_across_a_three_tick_cross() {
+            // Three ticks: pre-cross (no signal), the cross itself
+            // (bullish), then post-cross drift (no signal). Reads
+            // top-to-bottom as the price path the generator sees.
+            let signals = FakeEngine::btcusdt()
+                //                prev9  prev21  forming9  forming21
+                .tick(|s| tick(s, 99.0, 100.0, 99.5, 100.5))
+                .tick(|s| tick(s, 99.0, 100.0, 101.0, 100.5))
+                .tick(|s| tick(s, 101.0, 100.5, 102.0, 101.0))
+                .execute::<EmaCrossingFormingSignalGenerator>();
+
+            assert_eq!(signals.len(), 3);
+            assert!(signals[0].is_none());
+            assert_eq!(signals[1].as_ref().unwrap().key, "bull_cross");
+            assert!(signals[2].is_none());
+        }
     }
 }

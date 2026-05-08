@@ -251,8 +251,10 @@ impl FakeTimeframeSnapshot {
     /// from it. Override the anchor via [`forming_at`](Self::forming_at).
     ///
     /// Customize the forming bar's *content* (OHLCV, indicators) with
-    /// [`customize_forming`](Self::customize_forming) (closure) or
-    /// [`replace_forming`](Self::replace_forming) (explicit replacement).
+    /// [`forming_with`](Self::forming_with) (closure),
+    /// [`forming_value`](Self::forming_value) (single-indicator
+    /// shorthand), or [`replace_forming`](Self::replace_forming)
+    /// (explicit replacement).
     ///
     /// `tick_time` defaults to the forming bar's `open_time` and
     /// `max_bars` defaults to `closed_count() + 1`; override via
@@ -286,7 +288,9 @@ impl FakeTimeframeSnapshot {
     /// receives the current forming bar; the returned bar's OHLCV
     /// (excluding `open_time`) and indicator values are kept.
     ///
-    /// Typical use: `.customize_forming(|b| b.add_value(&ema9, 1.0))`.
+    /// Typical use: `.forming_with(|b| b.add_value(&ema9, 1.0).add_value(&ema21, 2.0))`.
+    /// For the single-indicator case, prefer the
+    /// [`forming_value`](Self::forming_value) shorthand.
     ///
     /// # Panics
     ///
@@ -295,17 +299,28 @@ impl FakeTimeframeSnapshot {
     /// to change the anchor; this method is for content only.
     #[must_use]
     #[track_caller]
-    pub fn customize_forming(mut self, f: impl FnOnce(FakeBar) -> FakeBar) -> Self {
+    pub fn forming_with(mut self, f: impl FnOnce(FakeBar) -> FakeBar) -> Self {
         let anchor = self.forming.ohlcv.open_time;
         let new_forming = f(self.forming);
         assert_eq!(
             new_forming.ohlcv.open_time, anchor,
-            "FakeTimeframeSnapshot::customize_forming: closure returned a bar with open_time={} but snapshot anchor is {}. \
-             Use `forming_at(time)` to change the anchor; `customize_forming` is for content only.",
+            "FakeTimeframeSnapshot::forming_with: closure returned a bar with open_time={} but snapshot anchor is {}. \
+             Use `forming_at(time)` to change the anchor; `forming_with` is for content only.",
             new_forming.ohlcv.open_time, anchor
         );
         self.forming = new_forming;
         self
+    }
+
+    /// Attaches a single indicator value to the forming bar.
+    ///
+    /// Shorthand for `.forming_with(|b| b.add_value(cfg, value))` —
+    /// covers the common single-indicator case without the closure
+    /// noise. For multi-indicator bars, use
+    /// [`forming_with`](Self::forming_with).
+    #[must_use]
+    pub fn forming_value<C: IndicatorConfig>(self, config: &C, value: C::Output) -> Self {
+        self.forming_with(|b| b.add_value(config, value))
     }
 
     /// Replaces the forming bar's content with `forming`.
@@ -398,6 +413,22 @@ impl FakeTimeframeSnapshot {
         new_closed.ohlcv.open_time = new_open_time;
         self.closed.push(new_closed);
         self
+    }
+
+    /// Pushes one closed bar carrying a single indicator value.
+    ///
+    /// Shorthand for `.add_closed_with(|b| b.add_value(cfg, value))` —
+    /// covers the common single-indicator case without the closure
+    /// noise. For multi-indicator closed bars, use
+    /// [`add_closed_with`](Self::add_closed_with).
+    ///
+    /// # Panics
+    ///
+    /// Same as [`add_closed`](Self::add_closed).
+    #[must_use]
+    #[track_caller]
+    pub fn add_closed_value<C: IndicatorConfig>(self, config: &C, value: C::Output) -> Self {
+        self.add_closed_with(|b| b.add_value(config, value))
     }
 
     /// Pushes closed bars whose OHLC collapses to each `prices` entry,
@@ -928,18 +959,18 @@ mod tests {
         }
 
         #[test]
-        fn customize_forming_preserves_open_time() {
+        fn forming_with_preserves_open_time() {
             let snapshot = FakeTimeframeSnapshot::new(Timeframe::HOUR_1)
-                .customize_forming(|b| b.add_value(&quantedge_ta::EmaConfig::default(), 1.0));
+                .forming_with(|b| b.add_value(&quantedge_ta::EmaConfig::default(), 1.0));
 
             assert_eq!(snapshot.forming().open_time(), DEFAULT_FORMING_TIME);
         }
 
         #[test]
         #[should_panic(expected = "anchor")]
-        fn customize_forming_panics_on_time_mutation() {
+        fn forming_with_panics_on_time_mutation() {
             let _ = FakeTimeframeSnapshot::new(Timeframe::HOUR_1)
-                .customize_forming(|_| FakeBar::forming(bar(42.0, 999)));
+                .forming_with(|_| FakeBar::forming(bar(42.0, 999)));
         }
 
         #[test]
