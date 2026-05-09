@@ -171,11 +171,7 @@ mod tests {
 
     // Per-tick helper: `extract a tick helper` pattern from the module
     // docs. Each test parameterises the values that change tick-to-tick.
-    fn tick(
-        s: FakeMarketSnapshot,
-        h4_forming: f64,
-        h4_prev: f64,
-    ) -> FakeMarketSnapshot {
+    fn tick(s: FakeMarketSnapshot, h4_forming: f64, h4_prev: f64) -> FakeMarketSnapshot {
         s.with_timeframe(Timeframe::HOUR_4, |t| {
             t.forming_value(&ema9(), h4_forming)
                 .add_closed_value(&ema9(), h4_prev)
