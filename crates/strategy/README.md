@@ -96,10 +96,18 @@ use quantedge_strategy::{
     SignalGenerator, Timeframe, TimeframeSnapshot, nz,
 };
 
-#[derive(Default)]
 pub struct MyEmaCross {
     ema9: EmaConfig,
     ema21: EmaConfig,
+}
+
+impl Default for MyEmaCross {
+    fn default() -> Self {
+        Self {
+            ema9: EmaConfig::close(nz(9)),
+            ema21: EmaConfig::close(nz(21)),
+        }
+    }
 }
 
 impl SignalGenerator for MyEmaCross {
@@ -135,7 +143,7 @@ impl SignalGenerator for MyEmaCross {
 }
 
 # fn main() {
-let _ = MyEmaCross { ema9: EmaConfig::close(nz(9)), ema21: EmaConfig::close(nz(21)) };
+let _ = MyEmaCross::default();
 # }
 ```
 
