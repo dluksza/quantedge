@@ -2,8 +2,6 @@
 
 ## [Unreleased]
 
-## [0.0.1] - 2026-05-09
-
 Initial preview release. The engine that consumes `SignalGenerator` is not
 yet implemented; the trait shape is informed by the in-crate test harness
 but has not been validated end-to-end by a real engine. Each `0.0.x` bump
