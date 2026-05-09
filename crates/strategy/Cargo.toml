@@ -6,6 +6,10 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
+description = "Trait surface and test harness for writing market-signal generators in the quantedge ecosystem"
+keywords = ["trading", "finance", "signals", "strategy"]
+categories = ["finance"]
+readme = "README.md"
 
 [features]
 test-util = ["quantedge-core/test-util"]
