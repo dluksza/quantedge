@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.21.1](https://github.com/dluksza/quantedge/compare/quantedge-ta-v0.21.0...quantedge-ta-v0.21.1) (2026-05-09)
 
-### Changed
+### Performance Improvements
 
-- `EmaCore::push` and `EmaCore::replace` seed branches and `EmaCore::value` un-converged arm tagged with `core::hint::cold_path`. `EmaCore::push` restructured so its steady-state arm falls through to a shared `self.value()` tail matching `EmaCore::replace`, and its cold seed-phase bookkeeping consolidated to a single `seen_bars` increment with `converged` set directly at seed completion. After fat-LTO inlines `EmaCore` into the EMA-driven indicator compute() functions, LLVM places seed-handling blocks in the function epilogue and the steady-state path runs straight to a single exit. Measured (rustc 1.95.0, Apple M5 Max): `stream/atr14` ~−7%, `stream/atr140` ~−8%, `stream/supertrend20` ~−4%, `stream/supertrend200` ~−2%. Other EmaCore-driven benchmarks moved within run-to-run noise.
+* **ta:** merge EmaCore::push tails through self.value() ([ba0e15b](https://github.com/dluksza/quantedge/commit/ba0e15b6735ade7376df0980a2828cf9a571d7d7))
+* **ta:** tag EmaCore cold paths with cold_path() ([c629ca9](https://github.com/dluksza/quantedge/commit/c629ca9450f33a2a00a02d0948320882a09a697e))
 
 ## [0.21.0] - 2026-05-05
 
@@ -232,6 +233,7 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
+[0.21.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.21.1
 [0.21.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.21.0
 [0.20.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.20.0
 [0.19.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.19.0
