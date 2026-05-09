@@ -5,6 +5,7 @@ on:
     tags:
       - "quantedge-core-v*"
       - "quantedge-ta-v*"
+      - "quantedge-strategy-v*"
 
 concurrency:
   group: publish-${{ github.sha }}
@@ -27,7 +28,7 @@ jobs:
         id: discover
         run: |
           TAGS=$(git tag --points-at HEAD \
-            | grep -E '^quantedge-(core|ta)-v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+            | grep -E '^quantedge-(core|ta|strategy)-v[0-9]+\.[0-9]+\.[0-9]+$' || true)
           if [ -z "$TAGS" ]; then
             echo "::error::No quantedge-*-v* tags point at ${{ github.sha }}"
             exit 1
@@ -67,8 +68,8 @@ jobs:
         run: |
           while IFS= read -r TAG_NAME; do
             [ -z "$TAG_NAME" ] && continue
-            CRATE_DIR=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta)-v.*$/\1/')
-            TAG_VERSION=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta)-v(.*)$/\2/')
+            CRATE_DIR=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta|strategy)-v.*$/\1/')
+            TAG_VERSION=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta|strategy)-v(.*)$/\2/')
             CARGO_VERSION=$(grep '^version' "crates/$CRATE_DIR/Cargo.toml" \
               | head -1 | sed 's/.*"\(.*\)".*/\1/')
             if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
@@ -108,3 +109,4 @@ jobs:
 
           publish_if_tagged core
           publish_if_tagged ta
+          publish_if_tagged strategy

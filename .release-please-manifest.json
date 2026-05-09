@@ -1,0 +1,5 @@
+{
+  "crates/core": "0.3.0",
+  "crates/ta": "0.21.0",
+  "crates/strategy": "0.0.0"
+}
