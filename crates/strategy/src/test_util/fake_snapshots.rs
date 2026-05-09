@@ -176,6 +176,22 @@ impl FakeBar {
         self.values.insert(config.clone_erased(), Box::new(value));
         self
     }
+
+    /// Replaces OHLC by collapsing all four prices to `close`,
+    /// preserving `open_time`, `volume`, `is_closed`, and any
+    /// indicator values already attached.
+    ///
+    /// Useful inside [`FakeTimeframeSnapshot::forming_with`] or
+    /// [`FakeTimeframeSnapshot::add_closed_with`] closures when the
+    /// generator under test reads `bar.ohlcv().close` and the test
+    /// needs a specific close price without rebuilding the bar from
+    /// scratch (which would lose indicator values and require manual
+    /// `open_time` preservation).
+    #[must_use]
+    pub fn with_close(mut self, close: Price) -> Self {
+        self.ohlcv = bar(close, self.ohlcv.open_time).vol(self.ohlcv.volume);
+        self
+    }
 }
 
 impl Bar for FakeBar {
