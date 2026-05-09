@@ -62,7 +62,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: crates/strategy/example
-      - run: cargo check --manifest-path crates/strategy/example/Cargo.toml --locked
+      - run: cargo build --manifest-path crates/strategy/example/Cargo.toml --locked --all-targets
+      - run: cargo test --manifest-path crates/strategy/example/Cargo.toml --locked
 
   wasm:
     name: WASM
@@ -77,6 +78,8 @@ jobs:
       - run: cargo test --locked -p quantedge-core --target wasm32-wasip1
       - run: cargo build --locked -p quantedge-ta --lib --target wasm32-unknown-unknown
       - run: cargo test --locked -p quantedge-ta --target wasm32-wasip1
+      - run: cargo build --locked -p quantedge-strategy --lib --target wasm32-unknown-unknown
+      - run: cargo test --locked -p quantedge-strategy --target wasm32-wasip1
 
   msrv:
     name: MSRV
@@ -87,6 +90,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check --locked -p quantedge-core --lib --all-features
       - run: cargo check --locked -p quantedge-ta --lib --all-features
+      - run: cargo check --locked -p quantedge-strategy --lib --all-features
 
   coverage:
     name: Coverage
@@ -112,4 +116,11 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov-ta.info
           flags: quantedge-ta
+          fail_ci_if_error: false
+      - run: cargo llvm-cov --locked nextest -p quantedge-strategy --all-features --lcov --output-path lcov-strategy.info
+      - uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov-strategy.info
+          flags: quantedge-strategy
           fail_ci_if_error: false
