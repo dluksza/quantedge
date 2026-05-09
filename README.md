@@ -55,12 +55,12 @@ More crates (`engine`, `sim`, `ob`) will land here as they're built.
 
 ## Roadmap
 
-1. `quantedge-ta` v1.0 — published; v1.0 bump gated on validation under streaming workloads
-2. `quantedge-core` v1.0 — published; v1.0 bump gated on the same
-3. `quantedge-strategy` v0.1.0 — preview shipped (`0.0.1`); `0.1.0` cut once the engine has consumed the trait end-to-end
-4. `quantedge-engine` — streaming runtime with multi-timeframe state, deterministic event loop, and wasmtime-based generator registration
-5. `quantedge-sim` — backtester with realistic fills, slippage, and drawdown reporting
-6. `quantedge-ob` — streaming order book with deterministic event replay
+1. `quantedge-core` v1.0 - currently at `0.3.0`; v1.0 cut once validated under real streaming workloads
+2. `quantedge-ta` v1.0 - currently at `0.21.0`; v1.0 cut on the same gate
+3. `quantedge-strategy` v0.1.0 - currently at `0.0.1` preview; `0.1.0` cut once the engine has consumed the trait end-to-end
+4. `quantedge-engine` - streaming runtime with multi-timeframe state, deterministic event loop, and wasmtime-based generator registration
+5. `quantedge-sim` - backtester with realistic fills, slippage, and drawdown reporting
+6. `quantedge-ob` - streaming order book with deterministic event replay
 
 ## Contributing
 
