@@ -12,7 +12,7 @@ use std::{
 /// (length, price source, etc). Configs are value types: cheap to clone,
 /// compare, and hash.
 pub trait IndicatorConfig:
-    Sized + Default + Clone + Eq + Hash + Display + Debug + Send + Sync + 'static
+    Sized + Default + Clone + Eq + Hash + Debug + Display + Send + Sync + 'static
 {
     /// The [`Indicator`] this config produces. Lets generic code resolve
     /// the indicator from the config alone.
@@ -23,7 +23,7 @@ pub trait IndicatorConfig:
 
     /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: Copy + PartialEq + Display + Debug + Send + Sync + 'static;
+    type Output: Copy + PartialEq + Debug + Display + Send + Sync + 'static;
 
     /// Returns a new builder with default values.
     fn builder() -> Self::Builder;
@@ -108,13 +108,13 @@ where
 /// Indicators maintain internal state and update incrementally on each call to
 /// [`compute`](Indicator::compute). Output is `None` until enough data has been
 /// received for convergence.
-pub trait Indicator: Sized + Clone + Display + Debug + Send + Sync + 'static {
+pub trait Indicator: Sized + Clone + Debug + Display + Send + Sync + 'static {
     /// Configuration type for this indicator.
     type Config: IndicatorConfig<Output = Self::Output>;
 
     /// Computed output type. [`crate::Price`] for simple indicators,
     /// a struct for composite ones (e.g. Bollinger Bands).
-    type Output: Copy + PartialEq + Display + Debug + Send + Sync + 'static;
+    type Output: Copy + PartialEq + Debug + Display + Send + Sync + 'static;
 
     /// Creates a new indicator from the given config.
     fn new(config: Self::Config) -> Self;
