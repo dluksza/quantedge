@@ -14,6 +14,8 @@ use std::{
 pub trait IndicatorConfig:
     Sized + Default + Clone + Eq + Hash + Display + Debug + Send + Sync + 'static
 {
+    /// The [`Indicator`] this config produces. Lets generic code resolve
+    /// the indicator from the config alone.
     type Indicator: Indicator<Config = Self, Output = Self::Output> + Send + Sync + 'static;
 
     /// Builder type for constructing this config.
