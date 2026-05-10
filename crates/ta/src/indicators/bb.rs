@@ -34,6 +34,7 @@ pub struct BbConfig {
 
 impl IndicatorConfig for BbConfig {
     type Builder = BbConfigBuilder;
+    type Indicator = Bb;
     type Output = BbValue;
 
     fn builder() -> Self::Builder {

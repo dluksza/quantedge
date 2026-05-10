@@ -29,6 +29,7 @@ pub struct RsiConfig {
 
 impl IndicatorConfig for RsiConfig {
     type Builder = RsiConfigBuilder;
+    type Indicator = Rsi;
     type Output = Price;
 
     fn builder() -> Self::Builder {

@@ -30,6 +30,7 @@ pub struct WillRConfig {
 
 impl IndicatorConfig for WillRConfig {
     type Builder = WillRConfigBuilder;
+    type Indicator = WillR;
     type Output = f64;
 
     fn builder() -> Self::Builder {

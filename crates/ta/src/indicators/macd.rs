@@ -44,6 +44,7 @@ pub struct MacdConfig {
 
 impl IndicatorConfig for MacdConfig {
     type Builder = MacdConfigBuilder;
+    type Indicator = Macd;
     type Output = MacdValue;
 
     fn builder() -> Self::Builder {

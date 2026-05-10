@@ -117,6 +117,7 @@ impl VwapConfig {
 
 impl IndicatorConfig for VwapConfig {
     type Builder = VwapConfigBuilder;
+    type Indicator = Vwap;
     type Output = VwapValue;
 
     fn builder() -> Self::Builder {

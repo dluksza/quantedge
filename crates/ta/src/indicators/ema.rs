@@ -41,6 +41,7 @@ pub struct EmaConfig {
 
 impl IndicatorConfig for EmaConfig {
     type Builder = EmaConfigBuilder;
+    type Indicator = Ema;
     type Output = Price;
 
     fn builder() -> Self::Builder {

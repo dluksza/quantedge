@@ -43,6 +43,7 @@ pub struct KdjConfig {
 
 impl IndicatorConfig for KdjConfig {
     type Builder = KdjConfigBuilder;
+    type Indicator = Kdj;
     type Output = KdjValue;
 
     fn builder() -> Self::Builder {

@@ -45,6 +45,7 @@ pub struct IchimokuConfig {
 
 impl IndicatorConfig for IchimokuConfig {
     type Builder = IchimokuConfigBuilder;
+    type Indicator = Ichimoku;
     type Output = IchimokuValue;
 
     fn builder() -> Self::Builder {

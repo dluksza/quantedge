@@ -31,6 +31,7 @@ pub struct ChopConfig {
 
 impl IndicatorConfig for ChopConfig {
     type Builder = ChopConfigBuilder;
+    type Indicator = Chop;
     type Output = f64;
 
     fn builder() -> Self::Builder {

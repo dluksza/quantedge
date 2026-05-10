@@ -32,6 +32,7 @@ pub struct AdxConfig {
 
 impl IndicatorConfig for AdxConfig {
     type Builder = AdxConfigBuilder;
+    type Indicator = Adx;
     type Output = AdxValue;
 
     fn builder() -> Self::Builder {

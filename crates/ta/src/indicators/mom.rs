@@ -27,6 +27,7 @@ pub struct MomConfig {
 
 impl IndicatorConfig for MomConfig {
     type Builder = MomConfigBuilder;
+    type Indicator = Mom;
     type Output = Price;
 
     fn builder() -> Self::Builder {

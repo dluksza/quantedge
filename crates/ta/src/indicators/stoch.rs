@@ -44,6 +44,7 @@ pub struct StochConfig {
 
 impl IndicatorConfig for StochConfig {
     type Builder = StochConfigBuilder;
+    type Indicator = Stoch;
     type Output = StochValue;
 
     fn builder() -> Self::Builder {

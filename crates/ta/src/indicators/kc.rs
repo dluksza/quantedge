@@ -44,6 +44,7 @@ pub struct KcConfig {
 
 impl IndicatorConfig for KcConfig {
     type Builder = KcConfigBuilder;
+    type Indicator = Kc;
     type Output = KcValue;
 
     fn builder() -> Self::Builder {

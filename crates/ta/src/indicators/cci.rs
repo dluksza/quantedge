@@ -50,6 +50,7 @@ impl CciConfig {
 
 impl IndicatorConfig for CciConfig {
     type Builder = CciConfigBuilder;
+    type Indicator = Cci;
     type Output = f64;
 
     fn builder() -> Self::Builder {
