@@ -16,7 +16,7 @@ pub trait IndicatorConfig:
 {
     /// The [`Indicator`] this config produces. Lets generic code resolve
     /// the indicator from the config alone.
-    type Indicator: Indicator<Config = Self, Output = Self::Output> + Send + Sync + 'static;
+    type Indicator: Indicator<Config = Self, Output = Self::Output>;
 
     /// Builder type for constructing this config.
     type Builder: IndicatorConfigBuilder<Self>;
@@ -108,7 +108,7 @@ where
 /// Indicators maintain internal state and update incrementally on each call to
 /// [`compute`](Indicator::compute). Output is `None` until enough data has been
 /// received for convergence.
-pub trait Indicator: Sized + Clone + Display + Debug {
+pub trait Indicator: Sized + Clone + Display + Debug + Send + Sync + 'static {
     /// Configuration type for this indicator.
     type Config: IndicatorConfig<Output = Self::Output>;
 
