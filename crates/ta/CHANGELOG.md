@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/dluksza/quantedge/compare/quantedge-ta-v0.21.1...quantedge-ta-v0.22.0) (2026-05-11)
+
+
+### Features
+
+* **core:** add Indicator associated type to IndicatorConfig ([a6456d6](https://github.com/dluksza/quantedge/commit/a6456d6b5effa174c8c6fca5537b47866c99546e))
+
 ## [0.21.1](https://github.com/dluksza/quantedge/compare/quantedge-ta-v0.21.0...quantedge-ta-v0.21.1) (2026-05-09)
 
 ### Performance Improvements

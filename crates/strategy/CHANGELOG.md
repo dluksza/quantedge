@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.0.2](https://github.com/dluksza/quantedge/compare/quantedge-strategy-v0.0.1...quantedge-strategy-v0.0.2) (2026-05-11)
+
 ## 0.0.1 (2026-05-09)
 
 ### Features
