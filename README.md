@@ -35,6 +35,7 @@ Today: 21 streaming indicators in `quantedge-ta`, verified against talipp, TA-Li
 
 Design notes and per-indicator writeups at [luksza.org/category/quantedge](https://luksza.org/category/quantedge/):
 
+- [I Marked My Cold Path #[cold] and It Got 134% Slower](https://luksza.org/2026/i-marked-my-cold-path-cold-and-it-got-134-slower/) — 2026-05-11
 - [Why the Forming Bar Makes It Hard](https://luksza.org/2026/why-the-forming-bar-makes-it-hard/) — 2026-04-13
 - [Donchian Channels: When the Infrastructure Does All the Work](https://luksza.org/2026/donchian-channels-when-the-infrastructure-does-all-the-work/) — 2026-04-05
 - [quantedge-ta: Real-Time Technical Analysis for Rust](https://luksza.org/2026/quantedge-ta-real-time-technical-analysis-for-rust/) — 2026-03-08
