@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/dluksza/quantedge/compare/quantedge-core-v0.3.0...quantedge-core-v0.4.0) (2026-05-11)
+
+
+### Features
+
+* **core:** add Indicator associated type to IndicatorConfig ([a6456d6](https://github.com/dluksza/quantedge/commit/a6456d6b5effa174c8c6fca5537b47866c99546e))
+
 ## [0.3.0] - 2026-05-05
 
 ### Added
