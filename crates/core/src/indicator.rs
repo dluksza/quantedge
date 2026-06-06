@@ -54,6 +54,7 @@ pub trait ErasedIndicatorConfig: Any + Debug + Send + Sync {
     fn dyn_eq(&self, other: &dyn ErasedIndicatorConfig) -> bool;
     fn dyn_hash(&self, hasher: &mut dyn Hasher);
     fn clone_erased(&self) -> Box<dyn ErasedIndicatorConfig>;
+    fn new_indicator(&self) -> Box<dyn ErasedIndicator>;
 }
 
 impl<C: IndicatorConfig> ErasedIndicatorConfig for C {
@@ -72,6 +73,10 @@ impl<C: IndicatorConfig> ErasedIndicatorConfig for C {
 
     fn clone_erased(&self) -> Box<dyn ErasedIndicatorConfig> {
         Box::new(self.clone())
+    }
+
+    fn new_indicator(&self) -> Box<dyn ErasedIndicator> {
+        C::Indicator::new(self.clone()).clone_erased()
     }
 }
 
@@ -131,4 +136,36 @@ pub trait Indicator: Sized + Clone + Debug + Display + Send + Sync + 'static {
     ///
     /// This is a cached field read — O(1) with no computation.
     fn value(&self) -> Option<Self::Output>;
+}
+
+/// Object-safe view of an [`Indicator`].
+///
+/// Plumbing for crates that store heterogeneous indicators (engines).
+/// Strategy code should use the typed [`Indicator`] API. The typed
+/// [`Output`](Indicator::Output) is erased to `Box<dyn Any + Send + Sync>` by
+/// [`compute_erased`](Self::compute_erased) and recovered by downcasting at the
+/// call site.
+///
+/// Blanket-impl'd for every [`Indicator`]; downstream crates that define new
+/// indicator types automatically participate.
+#[doc(hidden)]
+pub trait ErasedIndicator: Any + Debug + Send + Sync {
+    fn as_any(&self) -> &dyn Any;
+    fn clone_erased(&self) -> Box<dyn ErasedIndicator>;
+    fn compute_erased(&mut self, ohlcv: &Ohlcv) -> Option<Box<dyn Any + Send + Sync>>;
+}
+
+impl<I: Indicator> ErasedIndicator for I {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn clone_erased(&self) -> Box<dyn ErasedIndicator> {
+        Box::new(self.clone())
+    }
+
+    fn compute_erased(&mut self, ohlcv: &Ohlcv) -> Option<Box<dyn Any + Send + Sync>> {
+        self.compute(ohlcv)
+            .map(|v| Box::new(v) as Box<dyn Any + Send + Sync>)
+    }
 }
