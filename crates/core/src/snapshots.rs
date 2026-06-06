@@ -11,10 +11,7 @@
 //! [`at`](TimeframeSnapshot::at), [`bars`](TimeframeSnapshot::bars),
 //! and [`closed`](TimeframeSnapshot::closed).
 
-use std::{
-    fmt::{Debug, Display},
-    ops::Range,
-};
+use std::{fmt::Debug, ops::Range};
 
 use crate::{IndicatorConfig, Instrument, Ohlcv, Timeframe, Timestamp};
 
@@ -25,7 +22,7 @@ use crate::{IndicatorConfig, Instrument, Ohlcv, Timeframe, Timestamp};
 /// bar shows the in-progress state for the current period; closed bars
 /// show the final state of periods that have ended. Across successive
 /// snapshots the forming bar advances while closed bars stay fixed.
-pub trait Bar: Send + Sync + Display + Debug {
+pub trait Bar: Send + Sync + Debug {
     /// Whether this bar's period has ended.
     ///
     /// Always `false` for the forming bar and always `true` for any
@@ -68,7 +65,7 @@ pub trait Bar: Send + Sync + Display + Debug {
 /// recent closed bar. So `at(0)` and `closed(0)` differ by one bar,
 /// and `bars(0..3)` includes the forming bar while `bars(1..3)` is
 /// closed-only.
-pub trait TimeframeSnapshot: Send + Sync + Display + Debug {
+pub trait TimeframeSnapshot: Send + Sync + Debug {
     /// Maximum number of bars retained, including the forming bar.
     fn max_bars(&self) -> usize;
 
@@ -111,7 +108,7 @@ pub trait TimeframeSnapshot: Send + Sync + Display + Debug {
 /// Strategies query [`for_timeframe`](Self::for_timeframe) for any
 /// [`Timeframe`] they subscribed to; querying an unsubscribed
 /// timeframe panics.
-pub trait MarketSnapshot: Send + Sync + Display + Debug {
+pub trait MarketSnapshot: Send + Sync + Debug {
     /// The instrument this snapshot describes.
     fn instrument(&self) -> Instrument;
 
