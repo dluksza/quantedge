@@ -1,10 +1,10 @@
-# quantedge-ta
+# tickglide-ta
 
-[![CI](https://github.com/dluksza/quantedge/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/quantedge/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/dluksza/quantedge/branch/main/graph/badge.svg?flag=quantedge-ta)](https://codecov.io/gh/dluksza/quantedge?flags[0]=quantedge-ta)
-[![crates.io](https://img.shields.io/crates/v/quantedge-ta.svg)](https://crates.io/crates/quantedge-ta)
+[![CI](https://github.com/dluksza/tickglide/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/tickglide/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dluksza/tickglide/branch/main/graph/badge.svg?flag=tickglide-ta)](https://codecov.io/gh/dluksza/tickglide?flags[0]=tickglide-ta)
+[![crates.io](https://img.shields.io/crates/v/tickglide-ta.svg)](https://crates.io/crates/tickglide-ta)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#licence)
-[![wasm](https://img.shields.io/badge/wasm-compatible-green.svg)](https://github.com/dluksza/quantedge/actions/workflows/ci.yml)
+[![wasm](https://img.shields.io/badge/wasm-compatible-green.svg)](https://github.com/dluksza/tickglide/actions/workflows/ci.yml)
 
 A streaming technical analysis library for Rust. Correct, tested, documented.
 
@@ -65,7 +65,7 @@ No downcasting, no enums, full type safety.
 ## Usage
 
 ```rust
-use quantedge_ta::{Sma, SmaConfig};
+use tickglide_ta::{Sma, SmaConfig};
 use std::num::NonZero;
 
 let mut sma = Sma::new(SmaConfig::close(NonZero::new(20).unwrap()));
@@ -81,7 +81,7 @@ for kline in stream {
 Bollinger Bands returns a struct with public fields:
 
 ```rust
-use quantedge_ta::{Bb, BbConfig};
+use tickglide_ta::{Bb, BbConfig};
 use std::num::NonZero;
 
 let config = BbConfig::builder()
@@ -100,7 +100,7 @@ for kline in stream {
 Custom standard deviation multiplier:
 
 ```rust
-use quantedge_ta::{BbConfig, Multiplier};
+use tickglide_ta::{BbConfig, Multiplier};
 use std::num::NonZero;
 
 let config = BbConfig::builder()
@@ -112,7 +112,7 @@ let config = BbConfig::builder()
 Derive a new config from an existing one with `to_builder()`:
 
 ```rust
-use quantedge_ta::{SmaConfig, PriceSource};
+use tickglide_ta::{SmaConfig, PriceSource};
 use std::num::NonZero;
 
 let sma_close = SmaConfig::close(NonZero::new(20).unwrap());
@@ -179,7 +179,7 @@ trait Indicator: Sized + Clone + Display + Debug {
 to `compute()`. Convert from your own kline type with a field-wise copy:
 
 ```rust
-use quantedge_ta::Ohlcv;
+use tickglide_ta::Ohlcv;
 
 struct MyKline { o: f64, h: f64, l: f64, c: f64, v: f64, t: u64 }
 
@@ -213,7 +213,7 @@ this defines the warm-up (seeding) phase: bars where the indicator is
 stabilising and should not drive trading decisions.
 
 ```rust
-use quantedge_ta::{SmaConfig, RsiConfig, MacdConfig};
+use tickglide_ta::{SmaConfig, RsiConfig, MacdConfig};
 use std::num::NonZero;
 
 let sma = SmaConfig::close(NonZero::new(20).unwrap());

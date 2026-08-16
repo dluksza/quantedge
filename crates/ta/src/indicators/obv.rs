@@ -18,7 +18,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Obv, ObvConfig, Ohlcv};
+/// use tickglide_ta::{Obv, ObvConfig, Ohlcv};
 ///
 /// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
 ///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
@@ -119,7 +119,7 @@ impl IndicatorConfigBuilder<ObvConfig> for ObvConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Obv, ObvConfig, Ohlcv};
+/// use tickglide_ta::{Obv, ObvConfig, Ohlcv};
 ///
 /// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
 ///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
@@ -206,9 +206,9 @@ impl Display for Obv {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::bar;
+    use tickglide_core::test_util::bar;
 
-    fn vbar(close: f64, volume: f64, time: u64) -> quantedge_core::test_util::Bar {
+    fn vbar(close: f64, volume: f64, time: u64) -> tickglide_core::test_util::Bar {
         bar(close, time).vol(volume)
     }
 

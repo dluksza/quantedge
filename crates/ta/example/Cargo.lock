@@ -1001,24 +1001,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "quantedge-core"
+name = "tickglide-core"
 version = "0.3.0"
 
 [[package]]
-name = "quantedge-ta"
+name = "tickglide-ta"
 version = "0.21.1"
 dependencies = [
- "quantedge-core",
+ "tickglide-core",
 ]
 
 [[package]]
-name = "quantedge-ta-example"
+name = "tickglide-ta-example"
 version = "0.1.0"
 dependencies = [
  "binance",
  "chrono",
  "ctrlc",
- "quantedge-ta",
+ "tickglide-ta",
 ]
 
 [[package]]

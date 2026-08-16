@@ -13,7 +13,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::CciConfig;
+/// use tickglide_ta::CciConfig;
 /// use std::num::NonZero;
 ///
 /// let config = CciConfig::close(NonZero::new(20).unwrap());
@@ -154,7 +154,7 @@ impl IndicatorConfigBuilder<CciConfig> for CciConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Cci, CciConfig, Ohlcv};
+/// use tickglide_ta::{Cci, CciConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -227,7 +227,7 @@ impl Display for Cci {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, assert_approx, bar, nz};
+    use tickglide_core::test_util::{Bar, assert_approx, bar, nz};
 
     fn make_cci(length: usize) -> Cci {
         Cci::new(CciConfig::close(nz(length)))

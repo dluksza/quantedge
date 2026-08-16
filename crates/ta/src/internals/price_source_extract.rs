@@ -1,4 +1,4 @@
-use quantedge_core::{Ohlcv, Price, PriceSource};
+use tickglide_core::{Ohlcv, Price, PriceSource};
 
 pub(crate) fn extract_price(
     price_source: PriceSource,
@@ -33,7 +33,7 @@ pub(crate) fn extract_price(
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, assert_approx};
+    use tickglide_core::test_util::{Bar, assert_approx};
 
     fn bar() -> Bar {
         Bar::new(10.0, 30.0, 5.0, 20.0)

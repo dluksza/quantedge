@@ -4,7 +4,7 @@ use fixtures::{
     assert_near, assert_supertrend_values_match, load_reference_ohlcvs, load_supertrend_ref, nz,
     repaint_sequence,
 };
-use quantedge_ta::{Multiplier, Supertrend, SupertrendConfig};
+use tickglide_ta::{Multiplier, Supertrend, SupertrendConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/supertrend-10-3.csv";
 

@@ -13,7 +13,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::AtrConfig;
+/// use tickglide_ta::AtrConfig;
 /// use std::num::NonZero;
 ///
 /// let config = AtrConfig::builder()
@@ -139,7 +139,7 @@ impl IndicatorConfigBuilder<AtrConfig> for AtrConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Atr, AtrConfig, Ohlcv};
+/// use tickglide_ta::{Atr, AtrConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -202,7 +202,7 @@ impl Display for Atr {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     fn atr(length: usize) -> Atr {
         Atr::new(AtrConfig::builder().length(nz(length)).build())

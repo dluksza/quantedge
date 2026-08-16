@@ -1,7 +1,7 @@
 [workspace]
 
 [package]
-name = "quantedge-ta-example"
+name = "tickglide-ta-example"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
@@ -10,4 +10,4 @@ rust-version = "1.95"
 binance = "^0.21.0"
 chrono = "^0.4.0"
 ctrlc = "^3.5.0"
-quantedge-ta = { path = "../" }
+tickglide-ta = { path = "../" }

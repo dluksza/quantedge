@@ -116,8 +116,8 @@ impl FakeEngine {
 
 #[cfg(test)]
 mod tests {
-    use quantedge_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, nz};
-    use quantedge_ta::EmaConfig;
+    use tickglide_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, nz};
+    use tickglide_ta::EmaConfig;
 
     use crate::{
         MarketSide, MarketSignal, MarketSignalConfig, SignalGenerator,

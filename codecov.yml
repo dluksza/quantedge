@@ -2,6 +2,6 @@ flag_management:
   default_rules:
     carryforward: true
   individual_flags:
-    - name: quantedge-ta
+    - name: tickglide-ta
       paths:
         - crates/ta/

@@ -3,9 +3,9 @@ name: Publish
 on:
   push:
     tags:
-      - "quantedge-core-v*"
-      - "quantedge-ta-v*"
-      - "quantedge-strategy-v*"
+      - "tickglide-core-v*"
+      - "tickglide-ta-v*"
+      - "tickglide-strategy-v*"
 
 concurrency:
   group: publish-${{ github.sha }}
@@ -28,9 +28,9 @@ jobs:
         id: discover
         run: |
           TAGS=$(git tag --points-at HEAD \
-            | grep -E '^quantedge-(core|ta|strategy)-v[0-9]+\.[0-9]+\.[0-9]+$' || true)
+            | grep -E '^tickglide-(core|ta|strategy)-v[0-9]+\.[0-9]+\.[0-9]+$' || true)
           if [ -z "$TAGS" ]; then
-            echo "::error::No quantedge-*-v* tags point at ${{ github.sha }}"
+            echo "::error::No tickglide-*-v* tags point at ${{ github.sha }}"
             exit 1
           fi
           echo "Found tags:"
@@ -68,8 +68,8 @@ jobs:
         run: |
           while IFS= read -r TAG_NAME; do
             [ -z "$TAG_NAME" ] && continue
-            CRATE_DIR=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta|strategy)-v.*$/\1/')
-            TAG_VERSION=$(echo "$TAG_NAME" | sed -E 's/^quantedge-(core|ta|strategy)-v(.*)$/\2/')
+            CRATE_DIR=$(echo "$TAG_NAME" | sed -E 's/^tickglide-(core|ta|strategy)-v.*$/\1/')
+            TAG_VERSION=$(echo "$TAG_NAME" | sed -E 's/^tickglide-(core|ta|strategy)-v(.*)$/\2/')
             CARGO_VERSION=$(grep '^version' "crates/$CRATE_DIR/Cargo.toml" \
               | head -1 | sed 's/.*"\(.*\)".*/\1/')
             if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
@@ -89,7 +89,7 @@ jobs:
         run: |
           publish_if_tagged() {
             local crate_dir="$1"
-            local crate_name="quantedge-$crate_dir"
+            local crate_name="tickglide-$crate_dir"
             if ! echo "$TAGS" | grep -q "^${crate_name}-v"; then
               echo "No tag for $crate_name on HEAD; skipping."
               return

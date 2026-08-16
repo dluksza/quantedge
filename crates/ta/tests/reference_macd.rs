@@ -3,7 +3,7 @@ mod fixtures;
 use fixtures::{
     assert_macd_values_match, assert_near, load_macd_ref, load_reference_ohlcvs, repaint_sequence,
 };
-use quantedge_ta::{Macd, MacdConfig};
+use tickglide_ta::{Macd, MacdConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/macd-12-26-9-close.csv";
 

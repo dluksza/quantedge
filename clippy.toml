@@ -1,0 +1,2 @@
+# Brand name — not code, so `doc_markdown` must not demand backticks around it.
+doc-valid-idents = ["TickGlide", ".."]

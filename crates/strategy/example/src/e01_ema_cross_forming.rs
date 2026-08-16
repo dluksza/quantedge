@@ -4,7 +4,7 @@
 //! dependencies, `evaluate` to detect and emit signals.
 //!
 //! The test module at the bottom doubles as a worked tour of the
-//! `quantedge_strategy::test_util` API. It covers the three slices a
+//! `tickglide_strategy::test_util` API. It covers the three slices a
 //! generator deserves coverage on:
 //!
 //!   1. declared dependencies - via `RecordingMarketSignalConfig`,
@@ -13,7 +13,7 @@
 //!      the `configure` <-> `evaluate` contract by panicking on any
 //!      undeclared read.
 
-use quantedge_strategy::{
+use tickglide_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
     Timeframe, TimeframeSnapshot, nz,
 };
@@ -129,7 +129,7 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
 
 // Three slices of the generator's contract, each with its own kind
 // of fake. Full API reference for the helpers below lives in
-// `quantedge_strategy::test_util`; the tests here are the worked
+// `tickglide_strategy::test_util`; the tests here are the worked
 // tutorial.
 //
 //   - `configure` - pass in a `RecordingMarketSignalConfig` and
@@ -144,7 +144,7 @@ impl SignalGenerator for EmaCrossingFormingSignalGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_strategy::{
+    use tickglide_strategy::{
         EmaConfig, MarketSide, MarketSignal, SignalGenerator, Timeframe, nz,
         test_util::{FakeEngine, FakeMarketSnapshot, RecordingMarketSignalConfig},
     };

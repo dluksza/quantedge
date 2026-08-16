@@ -1,6 +1,6 @@
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
-use quantedge_core::{Timeframe, Timestamp};
 use std::{hint::black_box, time::Duration};
+use tickglide_core::{Timeframe, Timestamp};
 
 /// Mid-period anchor: Mon Apr 28 2025 00:05:30.123456 UTC.
 const TS_BASE: Timestamp = 1_745_798_730_123_456;
@@ -31,7 +31,7 @@ const TIMEFRAMES: &[(&str, Timeframe)] = &[
     ("year_1", Timeframe::YEAR_1),
 ];
 
-/// Apply tighter measurement settings borrowed from `quantedge-ta`'s
+/// Apply tighter measurement settings borrowed from `tickglide-ta`'s
 /// `indicators.rs`: longer warmup/measurement for smoother distributions,
 /// 200-sample size for tighter confidence intervals, 3% noise threshold
 /// to surface the small (~0.1–0.2 ns) per-call deltas on sub-day paths.

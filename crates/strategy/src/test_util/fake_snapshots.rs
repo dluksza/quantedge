@@ -29,7 +29,7 @@ use std::{
     ops::Range,
 };
 
-use quantedge_core::{
+use tickglide_core::{
     Bar, ErasedIndicatorConfig, IndicatorConfig, Instrument, MarketSnapshot, Ohlcv, Price,
     Timeframe, TimeframeSnapshot, Timestamp, test_util::bar,
 };
@@ -833,8 +833,8 @@ impl Display for FakeMarketSnapshot {
 #[cfg(test)]
 mod tests {
     mod fake_bar {
-        use quantedge_core::{Bar, test_util::bar};
-        use quantedge_ta::{BbConfig, BbValue, EmaConfig};
+        use tickglide_core::{Bar, test_util::bar};
+        use tickglide_ta::{BbConfig, BbValue, EmaConfig};
 
         use crate::test_util::FakeBar;
 
@@ -938,7 +938,7 @@ mod tests {
     }
 
     mod fake_timeframe_snapshot {
-        use quantedge_core::{Bar, Timeframe, TimeframeSnapshot, Timestamp, test_util::bar};
+        use tickglide_core::{Bar, Timeframe, TimeframeSnapshot, Timestamp, test_util::bar};
 
         use crate::test_util::{DEFAULT_FORMING_TIME, FakeBar, FakeTimeframeSnapshot};
 
@@ -977,7 +977,7 @@ mod tests {
         #[test]
         fn forming_with_preserves_open_time() {
             let snapshot = FakeTimeframeSnapshot::new(Timeframe::HOUR_1)
-                .forming_with(|b| b.add_value(&quantedge_ta::EmaConfig::default(), 1.0));
+                .forming_with(|b| b.add_value(&tickglide_ta::EmaConfig::default(), 1.0));
 
             assert_eq!(snapshot.forming().open_time(), DEFAULT_FORMING_TIME);
         }
@@ -1159,7 +1159,7 @@ mod tests {
         #[test]
         #[allow(clippy::float_cmp)]
         fn add_closed_with_attaches_indicator_and_extends_history() {
-            let cfg = quantedge_ta::EmaConfig::default();
+            let cfg = tickglide_ta::EmaConfig::default();
             let snapshot = FakeTimeframeSnapshot::new(Timeframe::HOUR_1)
                 .add_closed_with(|b| b.add_value(&cfg, 10.0))
                 .add_closed_with(|b| b.add_value(&cfg, 20.0));
@@ -1228,7 +1228,7 @@ mod tests {
     }
 
     mod fake_market_snapshot {
-        use quantedge_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, test_util::bar};
+        use tickglide_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, test_util::bar};
 
         use crate::test_util::{FakeBar, FakeMarketSnapshot, FakeTimeframeSnapshot};
 

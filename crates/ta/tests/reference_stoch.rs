@@ -3,7 +3,7 @@ mod fixtures;
 use fixtures::{
     assert_near, assert_stoch_values_match, load_reference_ohlcvs, load_stoch_ref, repaint_sequence,
 };
-use quantedge_ta::{Stoch, StochConfig};
+use tickglide_ta::{Stoch, StochConfig};
 
 use std::num::NonZero;
 

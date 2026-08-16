@@ -16,7 +16,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::WillRConfig;
+/// use tickglide_ta::WillRConfig;
 /// use std::num::NonZero;
 ///
 /// let config = WillRConfig::close(NonZero::new(14).unwrap());
@@ -147,7 +147,7 @@ impl IndicatorConfigBuilder<WillRConfig> for WillRConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, WillR, WillRConfig};
+/// use tickglide_ta::{Ohlcv, WillR, WillRConfig};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -217,7 +217,7 @@ impl Display for WillR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, bar, nz, ohlc};
+    use tickglide_core::test_util::{Bar, bar, nz, ohlc};
 
     fn willr(length: usize) -> WillR {
         WillR::new(WillRConfig::close(nz(length)))

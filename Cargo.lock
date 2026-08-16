@@ -369,32 +369,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "quantedge-core"
-version = "0.3.0"
-dependencies = [
- "chrono",
- "criterion",
-]
-
-[[package]]
-name = "quantedge-strategy"
-version = "0.0.1"
-dependencies = [
- "quantedge-core",
- "quantedge-ta",
-]
-
-[[package]]
-name = "quantedge-ta"
-version = "0.21.1"
-dependencies = [
- "criterion",
- "csv",
- "quantedge-core",
- "serde",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -517,6 +491,32 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "tickglide-core"
+version = "0.3.0"
+dependencies = [
+ "chrono",
+ "criterion",
+]
+
+[[package]]
+name = "tickglide-strategy"
+version = "0.0.1"
+dependencies = [
+ "tickglide-core",
+ "tickglide-ta",
+]
+
+[[package]]
+name = "tickglide-ta"
+version = "0.21.1"
+dependencies = [
+ "criterion",
+ "csv",
+ "serde",
+ "tickglide-core",
 ]
 
 [[package]]

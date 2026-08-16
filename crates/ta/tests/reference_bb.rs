@@ -1,7 +1,7 @@
 mod fixtures;
 
 use fixtures::{assert_near, bb_bands, load_channel_ref, nz};
-use quantedge_ta::{Bb, BbConfig};
+use tickglide_ta::{Bb, BbConfig};
 
 use crate::fixtures::{assert_channel_values_match, load_reference_ohlcvs, repaint_sequence};
 

@@ -23,7 +23,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::EmaConfig;
+/// use tickglide_ta::EmaConfig;
 /// use std::num::NonZero;
 ///
 /// let config = EmaConfig::builder()
@@ -187,7 +187,7 @@ impl IndicatorConfigBuilder<EmaConfig> for EmaConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ema, EmaConfig, Ohlcv};
+/// use tickglide_ta::{Ema, EmaConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -256,7 +256,7 @@ impl Display for Ema {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, assert_approx, bar, nz};
+    use tickglide_core::test_util::{Bar, assert_approx, bar, nz};
 
     fn ema(length: usize) -> Ema {
         Ema::new(EmaConfig::builder().length(nz(length)).build())
@@ -558,7 +558,7 @@ mod tests {
 
     mod true_range {
         use super::*;
-        use quantedge_core::test_util::ohlc;
+        use tickglide_core::test_util::ohlc;
 
         fn tr_ema(length: usize) -> Ema {
             Ema::new(

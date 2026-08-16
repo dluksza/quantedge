@@ -15,7 +15,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::BbConfig;
+/// use tickglide_ta::BbConfig;
 /// use std::num::NonZero;
 ///
 /// // Default: length 20, close, 2.0 std devs
@@ -218,7 +218,7 @@ impl Display for BbValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Bb, BbConfig, Ohlcv};
+/// use tickglide_ta::{Bb, BbConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -306,7 +306,7 @@ impl Display for Bb {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, nz};
+    use tickglide_core::test_util::{Bar, nz};
 
     fn bb(length: usize) -> Bb {
         Bb::new(BbConfig::builder().length(nz(length)).build())

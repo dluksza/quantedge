@@ -2,8 +2,8 @@
 
 use std::num::NonZero;
 
-use quantedge_ta::Ohlcv;
 use serde::{Deserialize, de::DeserializeOwned};
+use tickglide_ta::Ohlcv;
 
 pub fn nz(n: usize) -> NonZero<usize> {
     NonZero::new(n).unwrap()
@@ -272,23 +272,23 @@ pub fn assert_channel_values_match<V: std::fmt::Debug>(
     }
 }
 
-pub fn bb_bands(v: &quantedge_ta::BbValue) -> [(&str, f64); 3] {
+pub fn bb_bands(v: &tickglide_ta::BbValue) -> [(&str, f64); 3] {
     [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
-pub fn dc_bands(v: &quantedge_ta::DcValue) -> [(&str, f64); 3] {
+pub fn dc_bands(v: &tickglide_ta::DcValue) -> [(&str, f64); 3] {
     [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
-pub fn kc_bands(v: &quantedge_ta::KcValue) -> [(&str, f64); 3] {
+pub fn kc_bands(v: &tickglide_ta::KcValue) -> [(&str, f64); 3] {
     [("upper", v.upper), ("middle", v.middle), ("lower", v.lower)]
 }
 
 /// Assert ADX values match between closed and repainted indicators.
 pub fn assert_adx_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::AdxValue>,
-    repainted: Option<quantedge_ta::AdxValue>,
+    closed: Option<tickglide_ta::AdxValue>,
+    repainted: Option<tickglide_ta::AdxValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -315,8 +315,8 @@ pub fn assert_adx_values_match(
 /// Assert Ichimoku values match between closed and repainted indicators.
 pub fn assert_ichimoku_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::IchimokuValue>,
-    repainted: Option<quantedge_ta::IchimokuValue>,
+    closed: Option<tickglide_ta::IchimokuValue>,
+    repainted: Option<tickglide_ta::IchimokuValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -345,8 +345,8 @@ pub fn assert_ichimoku_values_match(
 /// Assert MACD values match between closed and repainted indicators.
 pub fn assert_macd_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::MacdValue>,
-    repainted: Option<quantedge_ta::MacdValue>,
+    closed: Option<tickglide_ta::MacdValue>,
+    repainted: Option<tickglide_ta::MacdValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -399,8 +399,8 @@ pub fn assert_macd_values_match(
 /// Assert Stoch values match between closed and repainted indicators.
 pub fn assert_stoch_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::StochValue>,
-    repainted: Option<quantedge_ta::StochValue>,
+    closed: Option<tickglide_ta::StochValue>,
+    repainted: Option<tickglide_ta::StochValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -438,8 +438,8 @@ pub fn assert_stoch_values_match(
 /// Assert KDJ values match between closed and repainted indicators.
 pub fn assert_kdj_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::KdjValue>,
-    repainted: Option<quantedge_ta::KdjValue>,
+    closed: Option<tickglide_ta::KdjValue>,
+    repainted: Option<tickglide_ta::KdjValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -462,8 +462,8 @@ pub fn assert_kdj_values_match(
 /// Assert Supertrend values match between closed and repainted indicators.
 pub fn assert_supertrend_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::SupertrendValue>,
-    repainted: Option<quantedge_ta::SupertrendValue>,
+    closed: Option<tickglide_ta::SupertrendValue>,
+    repainted: Option<tickglide_ta::SupertrendValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -493,8 +493,8 @@ pub fn assert_supertrend_values_match(
 /// Assert Parabolic SAR values match between closed and repainted indicators.
 pub fn assert_psar_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::ParabolicSarValue>,
-    repainted: Option<quantedge_ta::ParabolicSarValue>,
+    closed: Option<tickglide_ta::ParabolicSarValue>,
+    repainted: Option<tickglide_ta::ParabolicSarValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -522,8 +522,8 @@ pub fn assert_psar_values_match(
 /// Assert `StochRsi` values match between closed and repainted indicators.
 pub fn assert_stoch_rsi_values_match(
     bar_idx: usize,
-    closed: Option<quantedge_ta::StochRsiValue>,
-    repainted: Option<quantedge_ta::StochRsiValue>,
+    closed: Option<tickglide_ta::StochRsiValue>,
+    repainted: Option<tickglide_ta::StochRsiValue>,
     tolerance: f64,
 ) {
     match (closed, repainted) {
@@ -566,7 +566,7 @@ macro_rules! reference_test {
     ($name:ident, $ind:ty, $config:expr, $ref_path:expr, $tolerance:expr) => {
         mod $name {
             use super::fixtures::*;
-            use quantedge_ta::*;
+            use tickglide_ta::*;
 
             #[test]
             fn matches_reference() {

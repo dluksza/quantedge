@@ -1,12 +1,12 @@
-# quantedge-core
+# tickglide-core
 
-[![CI](https://github.com/dluksza/quantedge/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/quantedge/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/dluksza/quantedge/branch/main/graph/badge.svg?flag=quantedge-core)](https://codecov.io/gh/dluksza/quantedge?flags[0]=quantedge-core)
-[![crates.io](https://img.shields.io/crates/v/quantedge-core.svg)](https://crates.io/crates/quantedge-core)
+[![CI](https://github.com/dluksza/tickglide/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/tickglide/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dluksza/tickglide/branch/main/graph/badge.svg?flag=tickglide-core)](https://codecov.io/gh/dluksza/tickglide?flags[0]=tickglide-core)
+[![crates.io](https://img.shields.io/crates/v/tickglide-core.svg)](https://crates.io/crates/tickglide-core)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#licence)
-[![wasm](https://img.shields.io/badge/wasm-compatible-green.svg)](https://github.com/dluksza/quantedge/actions/workflows/ci.yml)
+[![wasm](https://img.shields.io/badge/wasm-compatible-green.svg)](https://github.com/dluksza/tickglide/actions/workflows/ci.yml)
 
-Core types shared across the [quantedge](https://github.com/dluksza/quantedge) crates.
+Core types shared across the [TickGlide](https://github.com/dluksza/tickglide) crates.
 
 Defines the `Ohlcv` bar struct, the `Indicator`/`IndicatorConfig` trait surface, the `Instrument` subscription key, streaming snapshot traits (`Bar`, `TimeframeSnapshot`, `MarketSnapshot`), and the `Timeframe` type for bar boundary alignment. Downstream crates share these primitives without pulling in the full indicator library.
 
@@ -18,7 +18,7 @@ Defines the `Ohlcv` bar struct, the `Indicator`/`IndicatorConfig` trait surface,
 
 ### Shared indicator trait surface
 
-`Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` live here and are re-exported by `quantedge-ta`. Engine, sim, and snapshot crates can target the traits directly without depending on `quantedge-ta`. `IndicatorConfig::Output` pairs with `Indicator::Output` so generic code can resolve an indicator's output type from its config alone.
+`Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` live here and are re-exported by `tickglide-ta`. Engine, sim, and snapshot crates can target the traits directly without depending on `tickglide-ta`. `IndicatorConfig::Output` pairs with `Indicator::Output` so generic code can resolve an indicator's output type from its config alone.
 
 ### Instrument identifiers
 
@@ -47,7 +47,7 @@ Compiles for `wasm32-unknown-unknown` and `wasm32-wasip1`. No filesystem or OS c
 ### Ohlcv
 
 ```rust
-use quantedge_core::Ohlcv;
+use tickglide_core::Ohlcv;
 
 let bar = Ohlcv {
     open: 10.0,
@@ -62,7 +62,7 @@ let bar = Ohlcv {
 Converting from your own kline type is a field-wise copy:
 
 ```rust
-use quantedge_core::Ohlcv;
+use tickglide_core::Ohlcv;
 
 struct MyKline { o: f64, h: f64, l: f64, c: f64, v: f64, t: u64 }
 
@@ -83,7 +83,7 @@ impl From<&MyKline> for Ohlcv {
 ### Timeframe
 
 ```rust
-use quantedge_core::Timeframe;
+use tickglide_core::Timeframe;
 
 let ts = 1_745_798_730_123_000; // Mon Apr 28 2025 00:05:30.123 UTC
 
@@ -100,7 +100,7 @@ let (open, close) = Timeframe::HOUR_1.bounds(ts);
 ### Instrument
 
 ```rust
-use quantedge_core::{Asset, Instrument, MarketKind, Ticker, Venue};
+use tickglide_core::{Asset, Instrument, MarketKind, Ticker, Venue};
 
 let instrument = Instrument::new(
     Venue::new("binance").unwrap(),

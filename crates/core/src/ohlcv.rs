@@ -28,7 +28,7 @@ pub type Timestamp = u64;
 /// # Example
 ///
 /// ```
-/// use quantedge_core::Ohlcv;
+/// use tickglide_core::Ohlcv;
 ///
 /// let bar = Ohlcv {
 ///     open: 10.0,

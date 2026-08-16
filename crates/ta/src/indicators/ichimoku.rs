@@ -22,7 +22,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::IchimokuConfig;
+/// use tickglide_ta::IchimokuConfig;
 /// use std::num::NonZero;
 ///
 /// let config = IchimokuConfig::builder()
@@ -256,7 +256,7 @@ impl Display for IchimokuValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ichimoku, IchimokuConfig, Ohlcv};
+/// use tickglide_ta::{Ichimoku, IchimokuConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// let config = IchimokuConfig::builder()
@@ -384,7 +384,7 @@ impl Display for Ichimoku {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     fn default_config() -> IchimokuConfig {
         IchimokuConfig::builder().default().build()

@@ -13,7 +13,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::MomConfig;
+/// use tickglide_ta::MomConfig;
 /// use std::num::NonZero;
 ///
 /// let config = MomConfig::close(NonZero::new(10).unwrap());
@@ -138,7 +138,7 @@ impl IndicatorConfigBuilder<MomConfig> for MomConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Mom, MomConfig};
+/// use tickglide_ta::{Ohlcv, Mom, MomConfig};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -212,7 +212,7 @@ impl Display for Mom {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{bar, nz};
+    use tickglide_core::test_util::{bar, nz};
 
     fn mom(period: usize) -> Mom {
         Mom::new(MomConfig::close(nz(period)))

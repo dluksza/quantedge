@@ -15,12 +15,12 @@
 //! This example shows how the generator and its tests handle them.
 //!
 //! The test module at the bottom doubles as a worked tour of the
-//! `quantedge_strategy::test_util` API for composite-output
+//! `tickglide_strategy::test_util` API for composite-output
 //! generators. It covers the same three slices as the earlier
 //! examples: declared dependencies, single-tick evaluation, and
 //! multi-tick driving via `FakeEngine`.
 
-use quantedge_strategy::{
+use tickglide_strategy::{
     Bar, BbConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
     Timeframe, TimeframeSnapshot,
 };
@@ -101,7 +101,7 @@ impl SignalGenerator for BollingerBreakoutSignalGenerator {
 
 // Three slices of the generator's contract, each with its own kind
 // of fake. Full API reference for the helpers below lives in
-// `quantedge_strategy::test_util`; the tests here are the worked
+// `tickglide_strategy::test_util`; the tests here are the worked
 // tutorial for the composite-output shape.
 //
 //   - `configure` - assert that H4 is declared, one closed bar is
@@ -116,7 +116,7 @@ impl SignalGenerator for BollingerBreakoutSignalGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_strategy::{
+    use tickglide_strategy::{
         BbConfig, BbValue, MarketSide, MarketSignal, SignalGenerator, Timeframe,
         test_util::{FakeEngine, FakeMarketSnapshot, RecordingMarketSignalConfig},
     };

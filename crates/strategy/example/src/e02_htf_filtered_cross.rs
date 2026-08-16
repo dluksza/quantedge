@@ -6,13 +6,13 @@
 //! in `evaluate`, and seeding both timeframes in tests.
 //!
 //! The test module at the bottom doubles as a worked tour of the
-//! `quantedge_strategy::test_util` API for multi-timeframe generators.
+//! `tickglide_strategy::test_util` API for multi-timeframe generators.
 //! It covers the same three slices as `e01`: declared dependencies,
 //! single-tick evaluation across all four trend x cross combinations,
 //! and multi-tick driving via `FakeEngine` where the trend regime
 //! flips mid-stream.
 
-use quantedge_strategy::{
+use tickglide_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
     Timeframe, TimeframeSnapshot, nz,
 };
@@ -125,7 +125,7 @@ impl SignalGenerator for HtfFilteredEmaCrossSignalGenerator {
 
 // Three slices of the generator's contract, each with its own kind
 // of fake. Full API reference for the helpers below lives in
-// `quantedge_strategy::test_util`; the tests here are the worked
+// `tickglide_strategy::test_util`; the tests here are the worked
 // tutorial for the multi-timeframe shape.
 //
 //   - `configure` - assert that both timeframes and all four
@@ -141,7 +141,7 @@ impl SignalGenerator for HtfFilteredEmaCrossSignalGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_strategy::{
+    use tickglide_strategy::{
         EmaConfig, MarketSide, MarketSignal, SignalGenerator, Timeframe, nz,
         test_util::{FakeEngine, FakeMarketSnapshot, RecordingMarketSignalConfig},
     };

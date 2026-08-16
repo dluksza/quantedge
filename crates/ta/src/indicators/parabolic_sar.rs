@@ -21,7 +21,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{ParabolicSarConfig, Multiplier};
+/// use tickglide_ta::{ParabolicSarConfig, Multiplier};
 ///
 /// let config = ParabolicSarConfig::builder()
 ///     .af_step(Multiplier::new(0.02))
@@ -197,7 +197,7 @@ enum Phase {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, ParabolicSar, ParabolicSarConfig};
+/// use tickglide_ta::{Ohlcv, ParabolicSar, ParabolicSarConfig};
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
 ///     Ohlcv { open: o, high: h, low: l, close: c, volume: 0.0, open_time: t }
@@ -417,7 +417,7 @@ impl Display for ParabolicSar {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::ohlc;
+    use tickglide_core::test_util::ohlc;
 
     fn default_sar() -> ParabolicSar {
         ParabolicSar::new(ParabolicSarConfig::default())
@@ -488,7 +488,7 @@ mod tests {
 
     mod computation {
         use super::*;
-        use quantedge_core::test_util::assert_approx;
+        use tickglide_core::test_util::assert_approx;
 
         #[test]
         fn sar_advances_toward_ep_in_uptrend() {

@@ -4,7 +4,7 @@ use fixtures::{
     assert_near, assert_stoch_rsi_values_match, load_reference_ohlcvs, load_stoch_ref,
     repaint_sequence,
 };
-use quantedge_ta::{StochRsi, StochRsiConfig};
+use tickglide_ta::{StochRsi, StochRsiConfig};
 
 use std::num::NonZero;
 

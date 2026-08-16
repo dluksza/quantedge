@@ -1,26 +1,26 @@
 # Changelog
 
-## [0.21.1](https://github.com/dluksza/quantedge/compare/quantedge-ta-v0.21.0...quantedge-ta-v0.21.1) (2026-05-09)
+## [0.21.1](https://github.com/dluksza/tickglide/compare/quantedge-ta-v0.21.0...quantedge-ta-v0.21.1) (2026-05-09)
 
 ### Performance Improvements
 
-* **ta:** merge EmaCore::push tails through self.value() ([ba0e15b](https://github.com/dluksza/quantedge/commit/ba0e15b6735ade7376df0980a2828cf9a571d7d7))
-* **ta:** tag EmaCore cold paths with cold_path() ([c629ca9](https://github.com/dluksza/quantedge/commit/c629ca9450f33a2a00a02d0948320882a09a697e))
+* **ta:** merge EmaCore::push tails through self.value() ([ba0e15b](https://github.com/dluksza/tickglide/commit/ba0e15b6735ade7376df0980a2828cf9a571d7d7))
+* **ta:** tag EmaCore cold paths with cold_path() ([c629ca9](https://github.com/dluksza/tickglide/commit/c629ca9450f33a2a00a02d0948320882a09a697e))
 
 ## [0.21.0] - 2026-05-05
 
 ### Added
 
-- KDJ Oscillator — thin wrapper around [`Stoch`] that adds a %J line (`%J = 3×%K − 2×%D`) amplifying the divergence between %K and %D. Configurable RSV lookback period and %K/%D smoothing windows. Standard settings via `KdjConfig::default()` (9/3/3). Returns `KdjValue { k, d, j }`. Reference tests against a composed talipp Stoch+SMA pipeline (729 BTC/USDT bars, 1e-6 tolerance) — talipp has no native KDJ and pandas_ta uses Wilder's RMA, so the reference mirrors the Rust impl's SMA-via-Stoch semantics. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/quantedge/pull/2).
-- Momentum (MOM) — price-difference oscillator (`price[i] − price[i−period]`) using a `RingBuffer` for O(1) streaming updates with live repaint support. Configurable lookback period and price source (default Close). Standard settings via `MomConfig::default()` (period=10). Returns `f64`. Reference tests against TA-Lib (734 BTC/USDT bars, 1e-6 tolerance) — talipp lacks MOM. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/quantedge/pull/2).
+- KDJ Oscillator — thin wrapper around [`Stoch`] that adds a %J line (`%J = 3×%K − 2×%D`) amplifying the divergence between %K and %D. Configurable RSV lookback period and %K/%D smoothing windows. Standard settings via `KdjConfig::default()` (9/3/3). Returns `KdjValue { k, d, j }`. Reference tests against a composed talipp Stoch+SMA pipeline (729 BTC/USDT bars, 1e-6 tolerance) — talipp has no native KDJ and pandas_ta uses Wilder's RMA, so the reference mirrors the Rust impl's SMA-via-Stoch semantics. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/tickglide/pull/2).
+- Momentum (MOM) — price-difference oscillator (`price[i] − price[i−period]`) using a `RingBuffer` for O(1) streaming updates with live repaint support. Configurable lookback period and price source (default Close). Standard settings via `MomConfig::default()` (period=10). Returns `f64`. Reference tests against TA-Lib (734 BTC/USDT bars, 1e-6 tolerance) — talipp lacks MOM. Criterion benchmarks. Unit tests covering convergence, computation, repaints, live data, clone, config, display, and value accessor. Contributed by [@sweihub](https://github.com/sweihub) in [#2](https://github.com/dluksza/tickglide/pull/2).
 
 ### Changed
 
 - MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95. Enables stabilizations like `core::hint::cold_path` and if-let match guards.
-- **Breaking:** `IndicatorConfig` (re-exported from `quantedge-core 0.3.0`) now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Every built-in config in `quantedge-ta` already satisfies these; custom impls in downstream crates must add the missing bounds.
-- **Breaking:** `IndicatorConfig::Output` (and therefore `Indicator::Output`) now requires `PartialEq`, propagated from `quantedge-core 0.3.0`. Lets callers compare snapshot values directly without workarounds (test assertions, deduplication, change detection). The redundant `Clone` bound was dropped at the same time — `Copy` already implies it. Net bound: `Copy + PartialEq + Display + Debug + Send + Sync + 'static`. Every built-in indicator output already derives `PartialEq`; custom output types in downstream crates must add it.
+- **Breaking:** `IndicatorConfig` (re-exported from `tickglide-core 0.3.0`) now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Every built-in config in `tickglide-ta` already satisfies these; custom impls in downstream crates must add the missing bounds.
+- **Breaking:** `IndicatorConfig::Output` (and therefore `Indicator::Output`) now requires `PartialEq`, propagated from `tickglide-core 0.3.0`. Lets callers compare snapshot values directly without workarounds (test assertions, deduplication, change detection). The redundant `Clone` bound was dropped at the same time — `Copy` already implies it. Net bound: `Copy + PartialEq + Display + Debug + Send + Sync + 'static`. Every built-in indicator output already derives `PartialEq`; custom output types in downstream crates must add it.
 - **Breaking:** Renamed `IchimokuBuilder` to `IchimokuConfigBuilder` to match the `*ConfigBuilder` convention used by every other indicator (`SmaConfigBuilder`, `EmaConfigBuilder`, `BbConfigBuilder`, …). External callers naming the type explicitly must rename their import; users who only go through `IchimokuConfig::builder()` are unaffected.
-- `nz(n: usize) -> NonZero<usize>` promoted from `quantedge_core::test_util` to the crate root as a `const fn` and re-exported from `quantedge_ta`. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so gating the helper behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. Existing `quantedge_core::test_util::nz` imports keep working via re-export.
+- `nz(n: usize) -> NonZero<usize>` promoted from `tickglide_core::test_util` to the crate root as a `const fn` and re-exported from `tickglide_ta`. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so gating the helper behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. Existing `tickglide_core::test_util::nz` imports keep working via re-export.
 - `RingBuffer::push` warm-up arm and `ParabolicSar::initialize` seeding arm tagged with `core::hint::cold_path` so LLVM lays out the steady-state path linearly. Measured (rustc 1.95.0, Apple M5 Max): `stream/dc20` +1.0%, `stream/parabolicsar0.02` +1.8%, `tick/dc20` +1.5%.
 - ParabolicSar `initialize`/`step` helpers now take `Phase` fields as parameters, bound at the dispatch site in `compute`, instead of re-extracting them via `let-else { unreachable!() }`. Drops the unreachable arms. Measured: `stream/parabolicsar0.02` +4.7%, `tick/parabolicsar0.02` +4.6%.
 - Benchmark tables in `README.md` re-run end-to-end on Apple M5 Max with rustc 1.95.0. Notable post-`cold_path`/perf-tweak gains: ATR stream ~30% faster, RSI/Supertrend stream ~18–19%, OBV stream ~15%, BB/RSI repaint_stream 12–21%.
@@ -29,18 +29,18 @@
 
 ### Changed
 
-- **Breaking:** `Ohlcv` changed from a trait to a concrete struct with public fields re-exported from `quantedge-core`. `Indicator::compute` (and every indicator's inherent `compute`) now takes `&Ohlcv` instead of `&impl Ohlcv`. Callers that previously implemented the trait on their own kline type now produce an `Ohlcv` value per bar (fields: `open`, `high`, `low`, `close`, `open_time`, `volume`) and pass it by reference. Simplifies every indicator signature, removes the generic parameter, and turns hot paths into direct field loads.
+- **Breaking:** `Ohlcv` changed from a trait to a concrete struct with public fields re-exported from `tickglide-core`. `Indicator::compute` (and every indicator's inherent `compute`) now takes `&Ohlcv` instead of `&impl Ohlcv`. Callers that previously implemented the trait on their own kline type now produce an `Ohlcv` value per bar (fields: `open`, `high`, `low`, `close`, `open_time`, `volume`) and pass it by reference. Simplifies every indicator signature, removes the generic parameter, and turns hot paths into direct field loads.
 - **Breaking:** Value types (`AdxValue`, `BbValue`, `DcValue`, `IchimokuValue`, `KcValue`, `MacdValue`, `ParabolicSarValue`, `StochValue`, `StochRsiValue`, `SupertrendValue`, `VwapValue`) expose their components as public fields instead of getter methods. Migration: replace `value.upper()` with `value.upper`, `value.adx()` with `value.adx`, etc. Field names match the previous method names exactly.
 - **Breaking:** `IndicatorConfig` gained a required `Output` associated type, bound `'static + Copy + Send + Sync + Display + Debug`, mirroring `Indicator::Output`. Every built-in config now declares it (e.g. `type Output = BbValue` on `BbConfig`); external types that implement `IndicatorConfig` must add a matching `type Output = …;` line. Enables generic code to resolve an indicator's output from its config alone, without instantiating the indicator.
 - **Breaking:** `Indicator::Config` is now constrained as `IndicatorConfig<Output = Self::Output>`, so the output type is shared across the config/indicator pair. Custom `Indicator` impls that declared a divergent `Config::Output` no longer compile; set them to the same type.
-- `Ohlcv`, `Price`, `Timestamp`, `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` moved to the new `quantedge-core` crate and re-exported from `quantedge_ta` at their existing paths. No source changes required for downstream consumers. Test-only helpers (`assert_approx!`, `nz`, `bar`, `ohlc`, `bar_at`, `Ohlcv::new`/`at`/`vol`) likewise moved; tests import them from `quantedge_core::test_util` with the `test-util` dev-feature enabled.
-- Price-source extraction (`PriceSource::extract`) is now a `pub(crate) fn extract_price` inside `quantedge-ta` instead of a public method on the enum. Same-crate visibility restores the call-site specialization the cross-crate method couldn't reliably deliver; post-relocation Criterion run shows every indicator back to or below its pre-migration throughput, with `repaint_stream/vwap` 22% faster than 0.19.0 and `macd` 14% faster. Benchmark tables in `README.md` refreshed accordingly.
+- `Ohlcv`, `Price`, `Timestamp`, `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder`, and `PriceSource` moved to the new `tickglide-core` crate and re-exported from `tickglide_ta` at their existing paths. No source changes required for downstream consumers. Test-only helpers (`assert_approx!`, `nz`, `bar`, `ohlc`, `bar_at`, `Ohlcv::new`/`at`/`vol`) likewise moved; tests import them from `tickglide_core::test_util` with the `test-util` dev-feature enabled.
+- Price-source extraction (`PriceSource::extract`) is now a `pub(crate) fn extract_price` inside `tickglide-ta` instead of a public method on the enum. Same-crate visibility restores the call-site specialization the cross-crate method couldn't reliably deliver; post-relocation Criterion run shows every indicator back to or below its pre-migration throughput, with `repaint_stream/vwap` 22% faster than 0.19.0 and `macd` 14% faster. Benchmark tables in `README.md` refreshed accordingly.
 
 ## [0.18.1] - 2026-04-21
 
 ### Changed
 
-- Repository migrated to the `dluksza/quantedge` monorepo. Crate sources now live at `crates/ta/` and `Cargo.toml` inherits `edition`, `rust-version`, `license`, `repository`, and `authors` from the workspace. No library code, API, or behavior changes — published crate metadata is identical to 0.18.0.
+- Repository migrated to the `dluksza/tickglide` monorepo. Crate sources now live at `crates/ta/` and `Cargo.toml` inherits `edition`, `rust-version`, `license`, `repository`, and `authors` from the workspace. No library code, API, or behavior changes — published crate metadata is identical to 0.18.0.
 
 ## [0.18.0] - 2026-04-18
 
@@ -212,8 +212,8 @@
 
 ### Changed
 
-- `Sma`, `Ema`, and `Bb` now expose `new()`, `compute()`, and `value()` as inherent methods, `use quantedge_ta::Indicator` is no longer required for basic usage.
-- Config and builder types (`SmaConfig`, `EmaConfig`, `BbConfig` and their builders) now expose trait methods as inherent methods. `use quantedge_ta::IndicatorConfig` and `use quantedge_ta::IndicatorConfigBuilder` are no longer required for basic usage.
+- `Sma`, `Ema`, and `Bb` now expose `new()`, `compute()`, and `value()` as inherent methods, `use tickglide_ta::Indicator` is no longer required for basic usage.
+- Config and builder types (`SmaConfig`, `EmaConfig`, `BbConfig` and their builders) now expose trait methods as inherent methods. `use tickglide_ta::IndicatorConfig` and `use tickglide_ta::IndicatorConfigBuilder` are no longer required for basic usage.
 - Benchmark harness: deterministic codegen (`codegen-units = 1`, `lto = "thin"`), lower-overhead batching (`SmallInput`), and tuned tick-group sampling (200 samples, 5s warmup, 10s measurement, 3% noise threshold).
 - `PriceWindow` now uses a `const SUM_OF_SQUARES: bool` generic so SMA no longer computes unused sum-of-squares on every tick.
 - Replaced `VecDeque` with a custom `RingBuffer` in `PriceWindow`, halves buffer memory (`f64` vs `Option<f64>`), eliminates redundant modulo operations, and improves inlining. SMA and BB stream throughput improved 24-33%, tick latency improved 8-31%.
@@ -233,27 +233,27 @@ Initial release.
 - Reference tests against 744 BTC/USDT bars
 - Criterion benchmarks (stream + tick)
 
-[0.21.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.21.1
-[0.21.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.21.0
-[0.20.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.20.0
-[0.19.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.19.0
-[0.18.1]: https://github.com/dluksza/quantedge/releases/tag/quantedge-ta-v0.18.1
-[0.18.0]: https://github.com/dluksza/quantedge/releases/tag/v0.18.0
-[0.17.0]: https://github.com/dluksza/quantedge/releases/tag/v0.17.0
-[0.16.1]: https://github.com/dluksza/quantedge/releases/tag/v0.16.1
-[0.16.0]: https://github.com/dluksza/quantedge/releases/tag/v0.16.0
-[0.15.1]: https://github.com/dluksza/quantedge/releases/tag/v0.15.1
-[0.14.0]: https://github.com/dluksza/quantedge/releases/tag/v0.14.0
-[0.13.0]: https://github.com/dluksza/quantedge/releases/tag/v0.13.0
-[0.12.0]: https://github.com/dluksza/quantedge/releases/tag/v0.12.0
-[0.11.0]: https://github.com/dluksza/quantedge/releases/tag/v0.11.0
-[0.10.0]: https://github.com/dluksza/quantedge/releases/tag/v0.10.0
-[0.9.0]: https://github.com/dluksza/quantedge/releases/tag/v0.9.0
-[0.8.0]: https://github.com/dluksza/quantedge/releases/tag/v0.8.0
-[0.7.0]: https://github.com/dluksza/quantedge/releases/tag/v0.7.0
-[0.6.0]: https://github.com/dluksza/quantedge/releases/tag/v0.6.0
-[0.5.0]: https://github.com/dluksza/quantedge/releases/tag/v0.5.0
-[0.4.0]: https://github.com/dluksza/quantedge/releases/tag/v0.4.0
-[0.3.0]: https://github.com/dluksza/quantedge/releases/tag/v0.3.0
-[0.2.0]: https://github.com/dluksza/quantedge/releases/tag/v0.2.0
-[0.1.0]: https://github.com/dluksza/quantedge/releases/tag/v0.1.0
+[0.21.1]: https://github.com/dluksza/tickglide/releases/tag/quantedge-ta-v0.21.1
+[0.21.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-ta-v0.21.0
+[0.20.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-ta-v0.20.0
+[0.19.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-ta-v0.19.0
+[0.18.1]: https://github.com/dluksza/tickglide/releases/tag/quantedge-ta-v0.18.1
+[0.18.0]: https://github.com/dluksza/tickglide/releases/tag/v0.18.0
+[0.17.0]: https://github.com/dluksza/tickglide/releases/tag/v0.17.0
+[0.16.1]: https://github.com/dluksza/tickglide/releases/tag/v0.16.1
+[0.16.0]: https://github.com/dluksza/tickglide/releases/tag/v0.16.0
+[0.15.1]: https://github.com/dluksza/tickglide/releases/tag/v0.15.1
+[0.14.0]: https://github.com/dluksza/tickglide/releases/tag/v0.14.0
+[0.13.0]: https://github.com/dluksza/tickglide/releases/tag/v0.13.0
+[0.12.0]: https://github.com/dluksza/tickglide/releases/tag/v0.12.0
+[0.11.0]: https://github.com/dluksza/tickglide/releases/tag/v0.11.0
+[0.10.0]: https://github.com/dluksza/tickglide/releases/tag/v0.10.0
+[0.9.0]: https://github.com/dluksza/tickglide/releases/tag/v0.9.0
+[0.8.0]: https://github.com/dluksza/tickglide/releases/tag/v0.8.0
+[0.7.0]: https://github.com/dluksza/tickglide/releases/tag/v0.7.0
+[0.6.0]: https://github.com/dluksza/tickglide/releases/tag/v0.6.0
+[0.5.0]: https://github.com/dluksza/tickglide/releases/tag/v0.5.0
+[0.4.0]: https://github.com/dluksza/tickglide/releases/tag/v0.4.0
+[0.3.0]: https://github.com/dluksza/tickglide/releases/tag/v0.3.0
+[0.2.0]: https://github.com/dluksza/tickglide/releases/tag/v0.2.0
+[0.1.0]: https://github.com/dluksza/tickglide/releases/tag/v0.1.0

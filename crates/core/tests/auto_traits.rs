@@ -1,4 +1,4 @@
-use quantedge_core::Ohlcv;
+use tickglide_core::Ohlcv;
 
 fn assert_send<T: Send>() {}
 fn assert_sync<T: Sync>() {}

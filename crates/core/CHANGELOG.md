@@ -4,12 +4,12 @@
 
 ### Added
 
-- `nz(n: usize) -> NonZero<usize>` `const fn` at the crate root. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so the previous gating behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. The existing `quantedge_core::test_util::nz` import path keeps working via re-export.
+- `nz(n: usize) -> NonZero<usize>` `const fn` at the crate root. Indicator config call sites such as `EmaConfig::builder().length(nz(9)).build()` are not test-only, so the previous gating behind the `test-util` feature forced production code to either enable a test feature or repeat `NonZero::new(n).unwrap()` inline. The existing `tickglide_core::test_util::nz` import path keeps working via re-export.
 
 ### Changed
 
 - MSRV raised from 1.93 to 1.95. Workspace `rust-toolchain.toml` and CI jobs pinned to 1.95. Enables stabilizations like `core::hint::cold_path` and if-let match guards.
-- **Breaking:** `IndicatorConfig` now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Existing config types in `quantedge-ta` already satisfy these bounds; custom impls that don't will need to add them.
+- **Breaking:** `IndicatorConfig` now requires `Clone + Send + Sync + 'static` in addition to its previous bounds. Existing config types in `tickglide-ta` already satisfy these bounds; custom impls that don't will need to add them.
 - **Breaking:** `IndicatorConfig::Output` (and therefore `Indicator::Output`) now requires `PartialEq`. Lets callers compare snapshot values directly without workarounds (test assertions, deduplication, change detection). The redundant `Clone` bound was dropped at the same time — `Copy` already implies it. Net bound: `Copy + PartialEq + Display + Debug + Send + Sync + 'static`. Custom output types must derive or implement `PartialEq`; every built-in indicator output already does.
 - **Breaking:** `Bar::ohlcv()` returns `Ohlcv` by value instead of `&Ohlcv`. `Ohlcv` is `Copy`, and the by-reference signature forced lifetimes through a non-dyn-compatible trait surface that downstream builders (`MarketSignal`) need to capture.
 - **Breaking:** `MarketSnapshot::instrument()` returns `Instrument` by value instead of `&Instrument`. `Instrument` clones are four atomic increments (`Arc<str>` leaves), and the by-value signature lets builders capture it without threading lifetimes.
@@ -19,7 +19,7 @@
 
 ### Added
 
-- `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder` traits and `PriceSource` enum, relocated from `quantedge-ta` so downstream crates can depend on the trait surface without pulling in the full indicator library. `quantedge-ta` continues to re-export them at their existing paths, so no source changes are required for its consumers.
+- `Indicator`, `IndicatorConfig`, `IndicatorConfigBuilder` traits and `PriceSource` enum, relocated from `tickglide-ta` so downstream crates can depend on the trait surface without pulling in the full indicator library. `tickglide-ta` continues to re-export them at their existing paths, so no source changes are required for its consumers.
 - `IndicatorConfig::Output` associated type. Pairs with the existing `Indicator::Output` so generic code can resolve an indicator's output from its config alone, without instantiating the indicator. Bound: `'static + Copy + Send + Sync + Display + Debug`.
 - `Instrument` module: a typed subscription key composed of `Venue`, `Ticker` (a base/quote `Asset` pair), and `MarketKind`. Each leaf is an ASCII-validated, case-normalized newtype over `Arc<str>`; instrument clones are four atomic increments, cheap enough for log lines and strategy code. Grammar separators (`/`, `:`, `@`) are rejected at the leaf, so `Ticker::from_str` and `Instrument`'s `Display` cannot be broken by pathological input. Exports: `Asset`, `AssetError`, `Instrument`, `MarketKind`, `MarketKindError`, `Ticker`, `TickerError`, `Venue`, `VenueError`.
 - Streaming snapshot traits (`Bar`, `TimeframeSnapshot`, `MarketSnapshot`) that define the surface strategy code reads at one tick. Each snapshot is immutable; successive ticks surface as new snapshots. Indexing: `at(0)` / `bars(0..)` = forming bar then closed history newest-first; `closed(0)` = most recent closed bar. Querying an unsubscribed indicator or timeframe panics — subscriptions are fixed at construction, so misses are caller bugs.
@@ -46,8 +46,8 @@
 
 ### Added
 
-- Initial release. Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases, extracted from `quantedge-ta` so downstream crates can share a single bar abstraction without depending on the full indicator library.
+- Initial release. Defines the `Ohlcv` bar trait and its `Price` and `Timestamp` aliases, extracted from `tickglide-ta` so downstream crates can share a single bar abstraction without depending on the full indicator library.
 
-[0.3.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.3.0
-[0.2.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.2.0
-[0.1.0]: https://github.com/dluksza/quantedge/releases/tag/quantedge-core-v0.1.0
+[0.3.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-core-v0.3.0
+[0.2.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-core-v0.2.0
+[0.1.0]: https://github.com/dluksza/tickglide/releases/tag/quantedge-core-v0.1.0

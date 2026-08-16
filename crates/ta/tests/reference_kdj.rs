@@ -3,7 +3,7 @@ mod fixtures;
 use fixtures::{
     assert_kdj_values_match, assert_near, load_kdj_ref, load_reference_ohlcvs, repaint_sequence,
 };
-use quantedge_ta::{Kdj, KdjConfig};
+use tickglide_ta::{Kdj, KdjConfig};
 
 use std::num::NonZero;
 

@@ -4,8 +4,8 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use quantedge_core::{Bar, Instrument, MarketSnapshot, Timeframe, TimeframeSnapshot};
-use quantedge_ta::Ohlcv;
+use tickglide_core::{Bar, Instrument, MarketSnapshot, Timeframe, TimeframeSnapshot};
+use tickglide_ta::Ohlcv;
 
 use crate::SignalGenerator;
 

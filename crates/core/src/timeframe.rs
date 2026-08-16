@@ -38,7 +38,7 @@ pub enum TimeUnit {
 /// # Example
 ///
 /// ```
-/// use quantedge_core::Timeframe;
+/// use tickglide_core::Timeframe;
 ///
 /// // Mon Apr 28 2025 00:05:30.123 UTC
 /// let ts = 1_745_798_730_123_000;

@@ -1,6 +1,6 @@
-# quantedge-ta-example
+# tickglide-ta-example
 
-A runnable showcase of the [`quantedge-ta`](../README.md) streaming technical
+A runnable showcase of the [`tickglide-ta`](../README.md) streaming technical
 analysis library. Connects to Binance, streams live BTC/USDT klines, and prints
 an SMA(20) value that updates on every tick — including intra-bar repaints.
 
@@ -51,7 +51,7 @@ The example is hardcoded to `BTCUSDT` on the `5m` interval with
 
 - Change symbol/interval — modify the `stream_binance_klines(...)` call
 - Swap indicator — replace `Sma`/`SmaConfig` with any other indicator exported
-  from `quantedge_ta` (EMA, RSI, BB, MACD, ATR, …)
+  from `tickglide_ta` (EMA, RSI, BB, MACD, ATR, …)
 
 ## Layout
 

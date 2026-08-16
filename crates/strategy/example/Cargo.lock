@@ -3,27 +3,27 @@
 version = 4
 
 [[package]]
-name = "quantedge-core"
+name = "tickglide-core"
 version = "0.3.0"
 
 [[package]]
-name = "quantedge-strategy"
+name = "tickglide-strategy"
 version = "0.0.1"
 dependencies = [
- "quantedge-core",
- "quantedge-ta",
+ "tickglide-core",
+ "tickglide-ta",
 ]
 
 [[package]]
-name = "quantedge-strategy-example"
+name = "tickglide-strategy-example"
 version = "0.1.0"
 dependencies = [
- "quantedge-strategy",
+ "tickglide-strategy",
 ]
 
 [[package]]
-name = "quantedge-ta"
+name = "tickglide-ta"
 version = "0.21.1"
 dependencies = [
- "quantedge-core",
+ "tickglide-core",
 ]

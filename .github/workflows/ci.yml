@@ -43,7 +43,7 @@ jobs:
       - run: cargo nextest run --locked --workspace --all-features
 
   example-ta:
-    name: quantedge-ta example
+    name: tickglide-ta example
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -54,7 +54,7 @@ jobs:
       - run: cargo check --manifest-path crates/ta/example/Cargo.toml --locked
 
   example-strategy:
-    name: quantedge-strategy example
+    name: tickglide-strategy example
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -74,12 +74,12 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown wasm32-wasip1
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@wasmtime
-      - run: cargo build --locked -p quantedge-core --lib --target wasm32-unknown-unknown
-      - run: cargo test --locked -p quantedge-core --target wasm32-wasip1
-      - run: cargo build --locked -p quantedge-ta --lib --target wasm32-unknown-unknown
-      - run: cargo test --locked -p quantedge-ta --target wasm32-wasip1
-      - run: cargo build --locked -p quantedge-strategy --lib --target wasm32-unknown-unknown
-      - run: cargo test --locked -p quantedge-strategy --target wasm32-wasip1
+      - run: cargo build --locked -p tickglide-core --lib --target wasm32-unknown-unknown
+      - run: cargo test --locked -p tickglide-core --target wasm32-wasip1
+      - run: cargo build --locked -p tickglide-ta --lib --target wasm32-unknown-unknown
+      - run: cargo test --locked -p tickglide-ta --target wasm32-wasip1
+      - run: cargo build --locked -p tickglide-strategy --lib --target wasm32-unknown-unknown
+      - run: cargo test --locked -p tickglide-strategy --target wasm32-wasip1
 
   msrv:
     name: MSRV
@@ -88,9 +88,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@1.95
       - uses: Swatinem/rust-cache@v2
-      - run: cargo check --locked -p quantedge-core --lib --all-features
-      - run: cargo check --locked -p quantedge-ta --lib --all-features
-      - run: cargo check --locked -p quantedge-strategy --lib --all-features
+      - run: cargo check --locked -p tickglide-core --lib --all-features
+      - run: cargo check --locked -p tickglide-ta --lib --all-features
+      - run: cargo check --locked -p tickglide-strategy --lib --all-features
 
   coverage:
     name: Coverage
@@ -103,24 +103,24 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - run: cargo llvm-cov --locked nextest -p quantedge-core --all-features --lcov --output-path lcov-core.info
+      - run: cargo llvm-cov --locked nextest -p tickglide-core --all-features --lcov --output-path lcov-core.info
       - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov-core.info
-          flags: quantedge-core
+          flags: tickglide-core
           fail_ci_if_error: false
-      - run: cargo llvm-cov --locked nextest -p quantedge-ta --all-features --lcov --output-path lcov-ta.info
+      - run: cargo llvm-cov --locked nextest -p tickglide-ta --all-features --lcov --output-path lcov-ta.info
       - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov-ta.info
-          flags: quantedge-ta
+          flags: tickglide-ta
           fail_ci_if_error: false
-      - run: cargo llvm-cov --locked nextest -p quantedge-strategy --all-features --lcov --output-path lcov-strategy.info
+      - run: cargo llvm-cov --locked nextest -p tickglide-strategy --all-features --lcov --output-path lcov-strategy.info
       - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov-strategy.info
-          flags: quantedge-strategy
+          flags: tickglide-strategy
           fail_ci_if_error: false

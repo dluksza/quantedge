@@ -1,13 +1,13 @@
 [workspace]
 
 [package]
-name = "quantedge-strategy-example"
+name = "tickglide-strategy-example"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 
 [dependencies]
-quantedge-strategy = { path = "../" }
+tickglide-strategy = { path = "../" }
 
 [dev-dependencies]
-quantedge-strategy = { path = "../", features = ["test-util"] }
+tickglide-strategy = { path = "../", features = ["test-util"] }

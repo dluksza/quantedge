@@ -1,7 +1,7 @@
 mod fixtures;
 
 use fixtures::{assert_near, kc_bands, load_channel_ref, nz};
-use quantedge_ta::{Kc, KcConfig, Multiplier};
+use tickglide_ta::{Kc, KcConfig, Multiplier};
 
 use crate::fixtures::{assert_channel_values_match, load_reference_ohlcvs, repaint_sequence};
 

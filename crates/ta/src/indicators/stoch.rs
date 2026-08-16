@@ -21,7 +21,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::StochConfig;
+/// use tickglide_ta::StochConfig;
 /// use std::num::NonZero;
 ///
 /// let config = StochConfig::builder()
@@ -248,7 +248,7 @@ impl Display for StochValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Stoch, StochConfig};
+/// use tickglide_ta::{Ohlcv, Stoch, StochConfig};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -382,7 +382,7 @@ impl Display for Stoch {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     /// Stoch(3,1,1) — simplest config: no smoothing, raw %K output.
     fn stoch_3_1_1() -> Stoch {

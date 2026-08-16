@@ -15,7 +15,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::RsiConfig;
+/// use tickglide_ta::RsiConfig;
 /// use std::num::NonZero;
 ///
 /// let config = RsiConfig::close(NonZero::new(14).unwrap());
@@ -165,7 +165,7 @@ enum RsiPhase {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Rsi, RsiConfig};
+/// use tickglide_ta::{Ohlcv, Rsi, RsiConfig};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -383,7 +383,7 @@ impl Display for Rsi {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{bar, nz};
+    use tickglide_core::test_util::{bar, nz};
 
     /// Returns a seeded RSI(3) after bars: 10, 12, 11, 13 at times 1–4.
     fn seeded_rsi3() -> Rsi {
@@ -660,7 +660,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use quantedge_core::test_util::Bar;
+        use tickglide_core::test_util::Bar;
 
         #[test]
         fn uses_configured_source() {

@@ -22,7 +22,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{KcConfig, Multiplier};
+/// use tickglide_ta::{KcConfig, Multiplier};
 /// use std::num::NonZero;
 ///
 /// let config = KcConfig::builder()
@@ -236,7 +236,7 @@ impl Display for KcValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Kc, KcConfig, Multiplier, Ohlcv};
+/// use tickglide_ta::{Kc, KcConfig, Multiplier, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -325,7 +325,7 @@ impl Display for Kc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     /// KC(2, 2, 1.5) — small windows for tractable hand calculations.
     fn kc_2_2() -> Kc {
@@ -395,7 +395,7 @@ mod tests {
 
     mod computation {
         use super::*;
-        use quantedge_core::test_util::assert_approx;
+        use tickglide_core::test_util::assert_approx;
 
         #[test]
         fn middle_equals_ema() {
@@ -715,7 +715,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use quantedge_core::test_util::assert_approx;
+        use tickglide_core::test_util::assert_approx;
 
         #[test]
         fn uses_configured_source() {

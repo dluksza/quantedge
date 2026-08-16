@@ -65,7 +65,7 @@ impl Display for VwapAnchor {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
+/// use tickglide_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
 ///
 /// let mut vwap = Vwap::new(VwapConfig::builder().anchor(VwapAnchor::User).build());
 ///
@@ -316,7 +316,7 @@ impl VwapValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
+/// use tickglide_ta::{Ohlcv, Vwap, VwapAnchor, VwapConfig};
 ///
 /// fn bar(close: f64, volume: f64, time: u64) -> Ohlcv {
 ///     Ohlcv { open: close, high: close, low: close, close, volume, open_time: time }
@@ -490,9 +490,9 @@ impl Display for Vwap {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{assert_approx, bar};
+    use tickglide_core::test_util::{assert_approx, bar};
 
-    fn vbar(close: f64, volume: f64, time: u64) -> quantedge_core::test_util::Bar {
+    fn vbar(close: f64, volume: f64, time: u64) -> tickglide_core::test_util::Bar {
         bar(close, time).vol(volume)
     }
 

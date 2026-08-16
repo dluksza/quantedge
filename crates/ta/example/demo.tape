@@ -1,4 +1,4 @@
-# VHS tape for the quantedge-ta-example demo GIF.
+# VHS tape for the tickglide-ta-example demo GIF.
 # Install: https://github.com/charmbracelet/vhs
 # Render:  vhs demo.tape  (produces demo.gif)
 

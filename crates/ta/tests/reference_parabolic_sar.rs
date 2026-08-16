@@ -3,7 +3,7 @@ mod fixtures;
 use fixtures::{
     assert_near, assert_psar_values_match, load_psar_ref, load_reference_ohlcvs, repaint_sequence,
 };
-use quantedge_ta::{Multiplier, ParabolicSar, ParabolicSarConfig};
+use tickglide_ta::{Multiplier, ParabolicSar, ParabolicSarConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/psar-0.02-0.2.csv";
 

@@ -21,7 +21,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::StochRsiConfig;
+/// use tickglide_ta::StochRsiConfig;
 /// use std::num::NonZero;
 ///
 /// let config = StochRsiConfig::builder()
@@ -248,7 +248,7 @@ impl Display for StochRsiValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Ohlcv, StochRsi, StochRsiConfig};
+/// use tickglide_ta::{Ohlcv, StochRsi, StochRsiConfig};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -378,7 +378,7 @@ impl Display for StochRsi {
 #[allow(clippy::float_cmp, clippy::cast_precision_loss)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{bar, nz};
+    use tickglide_core::test_util::{bar, nz};
 
     /// StochRsi(rsi=3, stoch=3, k=1, d=1) — simplest config.
     fn stoch_rsi_3_3_1_1() -> StochRsi {

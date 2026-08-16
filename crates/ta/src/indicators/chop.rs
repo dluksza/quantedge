@@ -18,7 +18,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::ChopConfig;
+/// use tickglide_ta::ChopConfig;
 /// use std::num::NonZero;
 ///
 /// let config = ChopConfig::builder().length(NonZero::new(14).unwrap()).build();
@@ -132,7 +132,7 @@ impl IndicatorConfigBuilder<ChopConfig> for ChopConfigBuilder {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Chop, ChopConfig, Ohlcv};
+/// use tickglide_ta::{Chop, ChopConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -214,7 +214,7 @@ impl Display for Chop {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{assert_approx, nz, ohlc};
+    use tickglide_core::test_util::{assert_approx, nz, ohlc};
 
     fn chop(length: usize) -> Chop {
         Chop::new(ChopConfig::builder().length(nz(length)).build())

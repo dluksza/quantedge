@@ -15,7 +15,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::DcConfig;
+/// use tickglide_ta::DcConfig;
 ///
 /// let config = DcConfig::builder().build();
 /// assert_eq!(config.convergence(), 20);
@@ -147,7 +147,7 @@ impl Display for DcValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Dc, DcConfig, Ohlcv};
+/// use tickglide_ta::{Dc, DcConfig, Ohlcv};
 ///
 /// let bar = Ohlcv {
 ///     open: 10.0, high: 12.0, low: 8.0, close: 11.0,
@@ -221,7 +221,7 @@ impl Display for Dc {
 #[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     fn dc(length: usize) -> Dc {
         Dc::new(DcConfig::builder().length(nz(length)).build())

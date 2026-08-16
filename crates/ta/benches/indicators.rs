@@ -4,14 +4,14 @@ mod fixtures;
 use crate::fixtures::{RefBar, load_reference_ohlcvs, repaint_sequence};
 
 use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
-use quantedge_ta::{
+use std::{hint::black_box, num::NonZero, sync::OnceLock, time::Duration};
+use tickglide_ta::{
     Adx, AdxConfig, Atr, AtrConfig, Bb, BbConfig, Cci, CciConfig, Chop, ChopConfig, Dc, DcConfig,
     Ema, EmaConfig, Ichimoku, IchimokuConfig, IndicatorConfig, Kc, KcConfig, Kdj, KdjConfig, Macd,
     MacdConfig, Mom, MomConfig, Multiplier, Obv, ObvConfig, ParabolicSar, ParabolicSarConfig, Rsi,
     RsiConfig, Sma, SmaConfig, Stoch, StochConfig, StochRsi, StochRsiConfig, Supertrend,
     SupertrendConfig, Vwap, VwapConfig, WillR, WillRConfig,
 };
-use std::{hint::black_box, num::NonZero, sync::OnceLock, time::Duration};
 
 fn nz(n: usize) -> NonZero<usize> {
     NonZero::new(n).expect("non zero value")

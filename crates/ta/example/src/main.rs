@@ -1,6 +1,6 @@
 use std::sync::{Arc, atomic::AtomicBool};
 
-use quantedge_ta::{Sma, SmaConfig};
+use tickglide_ta::{Sma, SmaConfig};
 
 use crate::{
     binance_client::stream_binance_klines,

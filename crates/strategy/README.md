@@ -1,12 +1,12 @@
-# quantedge-strategy
+# tickglide-strategy
 
-[![CI](https://github.com/dluksza/quantedge/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/quantedge/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/dluksza/quantedge/branch/main/graph/badge.svg?flag=quantedge-strategy)](https://codecov.io/gh/dluksza/quantedge?flags[0]=quantedge-strategy)
-[![crates.io](https://img.shields.io/crates/v/quantedge-strategy.svg)](https://crates.io/crates/quantedge-strategy)
+[![CI](https://github.com/dluksza/tickglide/actions/workflows/ci.yml/badge.svg)](https://github.com/dluksza/tickglide/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dluksza/tickglide/branch/main/graph/badge.svg?flag=tickglide-strategy)](https://codecov.io/gh/dluksza/tickglide?flags[0]=tickglide-strategy)
+[![crates.io](https://img.shields.io/crates/v/tickglide-strategy.svg)](https://crates.io/crates/tickglide-strategy)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#licence)
 
 Trait surface and test harness for writing market-signal generators in the
-[quantedge](https://github.com/dluksza/quantedge) ecosystem.
+[TickGlide](https://github.com/dluksza/tickglide) ecosystem.
 
 A generator is a stateless function from a market snapshot to an optional
 signal. This crate defines the `SignalGenerator` trait, the `MarketSignal`
@@ -82,16 +82,16 @@ The `test-util` feature exposes a complete kit for unit-testing generators:
 
 ### Re-exports core + ta
 
-Consumers import `quantedge_strategy::{...}` for everything: bar types,
+Consumers import `tickglide_strategy::{...}` for everything: bar types,
 timeframe enum, indicator configs, signal types. No need to also depend on
-`quantedge-core` or `quantedge-ta` directly.
+`tickglide-core` or `tickglide-ta` directly.
 
 ## Quickstart
 
 A minimal EMA-cross generator:
 
 ```rust
-use quantedge_strategy::{
+use tickglide_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot,
     SignalGenerator, Timeframe, TimeframeSnapshot, nz,
 };
@@ -172,17 +172,17 @@ To use the test harness in your own crate, enable the `test-util` feature:
 
 ```toml
 [dev-dependencies]
-quantedge-strategy = { version = "0.0.1", features = ["test-util"] }
+tickglide-strategy = { version = "0.0.1", features = ["test-util"] }
 ```
 
-The harness lives at `quantedge_strategy::test_util` and is the canonical
+The harness lives at `tickglide_strategy::test_util` and is the canonical
 way to test a generator. The example crate's tests (linked above) double as
 a worked tour of every helper.
 
 ## Out of scope
 
 - **Implementing custom indicators.** Indicators belong in
-  [`quantedge-ta`](https://crates.io/crates/quantedge-ta), where the engine
+  [`tickglide-ta`](https://crates.io/crates/tickglide-ta), where the engine
   can manage their state via the `Indicator` trait. When no shipped
   indicator fits a strategy's needs, add a new one there — don't pull
   rolling math into `evaluate`.

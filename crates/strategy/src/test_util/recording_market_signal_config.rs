@@ -10,7 +10,7 @@
 
 use std::collections::HashSet;
 
-use quantedge_core::{ErasedIndicatorConfig, IndicatorConfig, Timeframe};
+use tickglide_core::{ErasedIndicatorConfig, IndicatorConfig, Timeframe};
 
 use crate::MarketSignalConfig;
 
@@ -88,8 +88,8 @@ impl MarketSignalConfig for RecordingMarketSignalConfig {
 
 #[cfg(test)]
 mod tests {
-    use quantedge_core::{Timeframe, nz};
-    use quantedge_ta::{EmaConfig, SmaConfig};
+    use tickglide_core::{Timeframe, nz};
+    use tickglide_ta::{EmaConfig, SmaConfig};
 
     use crate::{MarketSignalConfig, test_util::RecordingMarketSignalConfig};
 

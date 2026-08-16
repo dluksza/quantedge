@@ -1,9 +1,9 @@
-# quantedge-strategy examples
+# tickglide-strategy examples
 
 Reference implementations for `SignalGenerator`. Each file is both a
 working generator and a worked tutorial — module docs (`//!`) explain
 the pattern; the test block at the bottom doubles as a tour of the
-`quantedge_strategy::test_util` API.
+`tickglide_strategy::test_util` API.
 
 ## Reading order
 
@@ -47,7 +47,7 @@ helpful:
 
 ## Out of scope
 
-- **Writing custom indicators.** Indicators live in `quantedge_ta` and
+- **Writing custom indicators.** Indicators live in `tickglide_ta` and
   have their own contract (rolling state, incremental updates). When
   no shipped indicator fits a strategy's needs, the answer is to
   implement a new one there, not to pull rolling math into `evaluate`

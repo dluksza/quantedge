@@ -4,7 +4,7 @@ use fixtures::{
     assert_ichimoku_values_match, assert_near, load_ichimoku_ref, load_reference_ohlcvs, nz,
     repaint_sequence,
 };
-use quantedge_ta::{Ichimoku, IchimokuConfig};
+use tickglide_ta::{Ichimoku, IchimokuConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/ichimoku-9-26-52-26.csv";
 

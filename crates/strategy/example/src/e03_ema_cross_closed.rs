@@ -11,11 +11,11 @@
 //! delay) for confirmation (the cross is in the historical record).
 //!
 //! The test module at the bottom doubles as a worked tour of the
-//! `quantedge_strategy::test_util` API for closed-bar generators.
+//! `tickglide_strategy::test_util` API for closed-bar generators.
 //! It covers the same three slices as e01: declared dependencies,
 //! single-tick evaluation, and multi-tick driving via `FakeEngine`.
 
-use quantedge_strategy::{
+use tickglide_strategy::{
     Bar, EmaConfig, MarketSide, MarketSignal, MarketSignalConfig, MarketSnapshot, SignalGenerator,
     Timeframe, TimeframeSnapshot, nz,
 };
@@ -99,7 +99,7 @@ impl SignalGenerator for EmaCrossingClosedSignalGenerator {
 
 // Three slices of the generator's contract, each with its own kind
 // of fake. Full API reference for the helpers below lives in
-// `quantedge_strategy::test_util`; the tests here are the worked
+// `tickglide_strategy::test_util`; the tests here are the worked
 // tutorial for the closed-bar trigger shape.
 //
 //   - `configure` - assert that H4 is declared, two closed bars are
@@ -113,7 +113,7 @@ impl SignalGenerator for EmaCrossingClosedSignalGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_strategy::{
+    use tickglide_strategy::{
         EmaConfig, MarketSide, MarketSignal, SignalGenerator, Timeframe, nz,
         test_util::{FakeEngine, FakeMarketSnapshot, RecordingMarketSignalConfig},
     };

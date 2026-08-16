@@ -15,8 +15,8 @@
 
 use std::{collections::HashMap, fmt::Display, sync::Arc};
 
-use quantedge_core::{Bar, Instrument, MarketSnapshot, Timeframe, TimeframeSnapshot, Timestamp};
-use quantedge_ta::{IndicatorConfig, Ohlcv};
+use tickglide_core::{Bar, Instrument, MarketSnapshot, Timeframe, TimeframeSnapshot, Timestamp};
+use tickglide_ta::{IndicatorConfig, Ohlcv};
 
 use crate::test_util::{
     FakeBar, FakeMarketSnapshot, FakeTimeframeSnapshot, RecordingMarketSignalConfig,
@@ -276,8 +276,8 @@ impl Display for EnforcingMarketSnapshot {
 mod tests {
     use std::sync::Arc;
 
-    use quantedge_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, nz};
-    use quantedge_ta::EmaConfig;
+    use tickglide_core::{Bar, MarketSnapshot, Timeframe, TimeframeSnapshot, nz};
+    use tickglide_ta::EmaConfig;
 
     use crate::{
         MarketSignalConfig,

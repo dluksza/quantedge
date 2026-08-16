@@ -5,7 +5,7 @@ use std::sync::{
 
 use chrono::{Local, TimeZone};
 
-use quantedge_ta::{Ohlcv, Price};
+use tickglide_ta::{Ohlcv, Price};
 
 pub(crate) fn register_sigint(running: Arc<AtomicBool>) {
     ctrlc::set_handler(move || {

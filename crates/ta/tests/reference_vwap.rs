@@ -1,7 +1,7 @@
 mod fixtures;
 
 use fixtures::*;
-use quantedge_ta::*;
+use tickglide_ta::*;
 
 const REF_PATH: &str = "tests/fixtures/data/vwap-day-hlc3.csv";
 const TOLERANCE: f64 = 1e-4;

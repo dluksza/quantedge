@@ -3,7 +3,7 @@ mod fixtures;
 use fixtures::{
     assert_adx_values_match, assert_near, load_adx_ref, load_reference_ohlcvs, nz, repaint_sequence,
 };
-use quantedge_ta::{Adx, AdxConfig};
+use tickglide_ta::{Adx, AdxConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/adx-14.csv";
 

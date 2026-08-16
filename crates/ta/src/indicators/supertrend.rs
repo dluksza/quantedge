@@ -22,7 +22,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{SupertrendConfig, Multiplier};
+/// use tickglide_ta::{SupertrendConfig, Multiplier};
 /// use std::num::NonZero;
 ///
 /// let config = SupertrendConfig::builder()
@@ -208,7 +208,7 @@ impl Display for SupertrendValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Multiplier, Ohlcv, Supertrend, SupertrendConfig};
+/// use tickglide_ta::{Multiplier, Ohlcv, Supertrend, SupertrendConfig};
 /// use std::num::NonZero;
 ///
 /// fn ohlc(o: f64, h: f64, l: f64, c: f64, t: u64) -> Ohlcv {
@@ -364,7 +364,7 @@ impl Display for Supertrend {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{nz, ohlc};
+    use tickglide_core::test_util::{nz, ohlc};
 
     /// Supertrend(3, 1.0) — small window for tractable hand calculations.
     fn st_3() -> Supertrend {

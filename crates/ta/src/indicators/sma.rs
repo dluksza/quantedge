@@ -13,7 +13,7 @@ use crate::{
 /// # Example
 ///
 /// ```rust
-/// use quantedge_ta::SmaConfig;
+/// use tickglide_ta::SmaConfig;
 /// use std::num::NonZero;
 ///
 /// let config = SmaConfig::close(NonZero::new(20).unwrap());
@@ -149,7 +149,7 @@ impl IndicatorConfigBuilder<SmaConfig> for SmaConfigBuilder {
 /// # Example
 ///
 /// ```rust
-/// use quantedge_ta::{Ohlcv, Sma, SmaConfig};
+/// use tickglide_ta::{Ohlcv, Sma, SmaConfig};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -209,7 +209,7 @@ impl Display for Sma {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{assert_approx, bar, nz};
+    use tickglide_core::test_util::{assert_approx, bar, nz};
 
     fn sma(length: usize) -> Sma {
         Sma::new(SmaConfig::close(nz(length)))
@@ -327,7 +327,7 @@ mod tests {
 
     mod price_source {
         use super::*;
-        use quantedge_core::test_util::Bar;
+        use tickglide_core::test_util::Bar;
 
         #[test]
         fn hl2_source() {
@@ -437,7 +437,7 @@ mod tests {
 
     mod true_range {
         use super::*;
-        use quantedge_core::test_util::ohlc;
+        use tickglide_core::test_util::ohlc;
 
         fn tr_sma(length: usize) -> Sma {
             Sma::new(

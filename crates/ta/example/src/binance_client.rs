@@ -15,7 +15,7 @@ use binance::{
     websockets::{WebSockets, WebsocketEvent},
 };
 
-use quantedge_ta::{Ohlcv, Price, Timestamp};
+use tickglide_ta::{Ohlcv, Price, Timestamp};
 
 /// NOTE: panics on malformed price data, intentional for demo purposes.
 /// Production callers must validate input before this point

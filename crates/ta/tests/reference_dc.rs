@@ -4,7 +4,7 @@ use fixtures::{
     assert_channel_values_match, assert_near, dc_bands, load_channel_ref, load_reference_ohlcvs,
     repaint_sequence,
 };
-use quantedge_ta::{Dc, DcConfig};
+use tickglide_ta::{Dc, DcConfig};
 
 const REF_PATH: &str = "tests/fixtures/data/dc-20.csv";
 

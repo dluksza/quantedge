@@ -12,7 +12,7 @@
 
 use std::fmt::Debug;
 
-use quantedge_core::{IndicatorConfig, MarketSnapshot, Timeframe, Timestamp};
+use tickglide_core::{IndicatorConfig, MarketSnapshot, Timeframe, Timestamp};
 
 use crate::MarketSignal;
 
@@ -55,7 +55,7 @@ pub trait MarketSignalConfig: Sync + Send {
     /// query its value via [`Bar::value`] on the snapshot with the
     /// same `config`.
     ///
-    /// [`Bar::value`]: quantedge_core::Bar::value
+    /// [`Bar::value`]: tickglide_core::Bar::value
     #[must_use]
     fn register(self, config: &impl IndicatorConfig) -> Self;
 }

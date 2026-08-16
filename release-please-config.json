@@ -9,20 +9,20 @@
   "packages": {
     "crates/core": {
       "release-type": "rust",
-      "package-name": "quantedge-core",
-      "component": "quantedge-core",
+      "package-name": "tickglide-core",
+      "component": "tickglide-core",
       "changelog-path": "CHANGELOG.md"
     },
     "crates/ta": {
       "release-type": "rust",
-      "package-name": "quantedge-ta",
-      "component": "quantedge-ta",
+      "package-name": "tickglide-ta",
+      "component": "tickglide-ta",
       "changelog-path": "CHANGELOG.md"
     },
     "crates/strategy": {
       "release-type": "rust",
-      "package-name": "quantedge-strategy",
-      "component": "quantedge-strategy",
+      "package-name": "tickglide-strategy",
+      "component": "tickglide-strategy",
       "changelog-path": "CHANGELOG.md",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,

@@ -22,7 +22,7 @@ use crate::{
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::MacdConfig;
+/// use tickglide_ta::MacdConfig;
 /// use std::num::NonZero;
 ///
 /// let config = MacdConfig::close(
@@ -255,7 +255,7 @@ impl Display for MacdValue {
 /// # Example
 ///
 /// ```
-/// use quantedge_ta::{Macd, MacdConfig, Ohlcv};
+/// use tickglide_ta::{Macd, MacdConfig, Ohlcv};
 /// use std::num::NonZero;
 ///
 /// fn bar(close: f64, time: u64) -> Ohlcv {
@@ -367,7 +367,7 @@ impl Display for Macd {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quantedge_core::test_util::{Bar, bar, nz};
+    use tickglide_core::test_util::{Bar, bar, nz};
 
     /// Standard MACD(3, 6, 4) on close for tractable hand calculations.
     /// Fast α = 2/4 = 0.5, Slow α = 2/7 ≈ 0.2857, Signal α = 2/5 = 0.4

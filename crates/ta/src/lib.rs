@@ -9,7 +9,7 @@
 //! import needed. Import [`Indicator`], [`IndicatorConfig`], or
 //! [`IndicatorConfigBuilder`] only for generic code.
 
-pub use quantedge_core::{
+pub use tickglide_core::{
     Indicator, IndicatorConfig, IndicatorConfigBuilder, Ohlcv, Price, PriceSource, Timestamp,
 };
 
@@ -113,7 +113,7 @@ impl_inherent_methods!(WillR, WillRConfig, WillRConfigBuilder);
 #[cfg(test)]
 mod inherent_methods {
     use super::{Bb, BbConfig, BbValue, Ema, EmaConfig, Sma, SmaConfig};
-    use quantedge_core::{nz, test_util::bar};
+    use tickglide_core::{nz, test_util::bar};
 
     #[test]
     fn sma_without_indicator_import() {
