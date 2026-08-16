@@ -1001,27 +1001,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tickglide-core"
-version = "0.3.0"
-
-[[package]]
-name = "tickglide-ta"
-version = "0.21.1"
-dependencies = [
- "tickglide-core",
-]
-
-[[package]]
-name = "tickglide-ta-example"
-version = "0.1.0"
-dependencies = [
- "binance",
- "chrono",
- "ctrlc",
- "tickglide-ta",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1391,6 +1370,27 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "tickglide-core"
+version = "0.4.0"
+
+[[package]]
+name = "tickglide-ta"
+version = "0.22.0"
+dependencies = [
+ "tickglide-core",
+]
+
+[[package]]
+name = "tickglide-ta-example"
+version = "0.1.0"
+dependencies = [
+ "binance",
+ "chrono",
+ "ctrlc",
+ "tickglide-ta",
 ]
 
 [[package]]
