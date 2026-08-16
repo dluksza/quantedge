@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.4.0](https://github.com/dluksza/tickglide/compare/tickglide-core-v0.3.0...tickglide-core-v0.4.0) (2026-08-16)
+
+
+### Features
+
+* add ErasedIndicatorConfig trait ([0009ba8](https://github.com/dluksza/tickglide/commit/0009ba88717b79fc4e1fa3a3e3bf9cd066b3bb6c))
+* add ErasedIndicatorOutput, hide erased plumbing ([d7d6709](https://github.com/dluksza/tickglide/commit/d7d670974c68e3ff87464b0cca7564fd0fced435))
+* add Instrument identifier types ([81c1142](https://github.com/dluksza/tickglide/commit/81c11421f8797452f5fd2966a41ae60c22e63a21))
+* add MarketSignal builder API ([7afe15f](https://github.com/dluksza/tickglide/commit/7afe15fcaf250aee5342a10ae2e8dcbd715c187a))
+* add quantedge-core crate for shared types ([ec4c153](https://github.com/dluksza/tickglide/commit/ec4c15328da443e78c04903ef47612a2d026df0f))
+* add streaming snapshot traits ([76ff747](https://github.com/dluksza/tickglide/commit/76ff747da521b9267f302ffce44218bfecf71388))
+* add Timeframe for bar boundary alignment ([25e5a4e](https://github.com/dluksza/tickglide/commit/25e5a4eebcefed33ba432b1f84a0f617f9cd0df0))
+* canonicalize 12 months to 1 year in Timeframe::new ([77c1fd2](https://github.com/dluksza/tickglide/commit/77c1fd21661c44f001ba4bd57ae5f0a024d6e303))
+* cap ascii_ident length at 32 bytes ([c1d3487](https://github.com/dluksza/tickglide/commit/c1d3487f58de47f2410a1b5a9346d48264bc600d))
+* **core:** add ErasedIndicator object-safe trait ([627a539](https://github.com/dluksza/tickglide/commit/627a5397b1457ca26885cf3a7201d59c05746af8))
+* **core:** add Indicator associated type to IndicatorConfig ([a6456d6](https://github.com/dluksza/tickglide/commit/a6456d6b5effa174c8c6fca5537b47866c99546e))
+* implement Display for Timeframe ([9891cb7](https://github.com/dluksza/tickglide/commit/9891cb7cca4e97947e100dc87c00be0b20c054e6))
+* promote nz helper to public quantedge_core API ([77cc686](https://github.com/dluksza/tickglide/commit/77cc6868e69c773197b7e789cbb3c0f394caba9e))
+* require PartialEq on indicator outputs and bars ([58eff5f](https://github.com/dluksza/tickglide/commit/58eff5f1ee3c53115503494fc1724dd7318bc633))
+
+
+### Bug Fixes
+
+* debug-assert period_months fits in u32 ([14bb3ed](https://github.com/dluksza/tickglide/commit/14bb3ed792e23d5bcf481d7276efa1fdf0285447))
+* drop Ord/PartialOrd derive from Timeframe ([d40d067](https://github.com/dluksza/tickglide/commit/d40d0678a68601fa88eea0d39df7a862183c7b53))
+* guard Day/Week open/close against pre-epoch underflow ([68bfbe8](https://github.com/dluksza/tickglide/commit/68bfbe85bf62e26d5881f1b1ae1b432d478334f9))
+
+
+### Performance Improvements
+
+* cache period and add bounds() to Timeframe ([10d1c47](https://github.com/dluksza/tickglide/commit/10d1c47ad8c5aa19763dde4a28d2c8709671b9bc))
+* relocate price extraction to ta internals ([a69a4f6](https://github.com/dluksza/tickglide/commit/a69a4f6e2679c974d7bb01382e9598b1db2a1644))
+
 ## [0.3.0] - 2026-05-05
 
 ### Added

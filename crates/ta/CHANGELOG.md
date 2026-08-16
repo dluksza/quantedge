@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.22.0](https://github.com/dluksza/tickglide/compare/tickglide-ta-v0.21.1...tickglide-ta-v0.22.0) (2026-08-16)
+
+
+### Features
+
+* add KDJ and Momentum (MOM) indicators ([3a22aa8](https://github.com/dluksza/tickglide/commit/3a22aa8f52eb7ed37c997dc3e7bd5e658230705c))
+* add KDJ and Momentum (MOM) indicators ([3f41853](https://github.com/dluksza/tickglide/commit/3f418530a4b756ca4c2eedf4364f411fde712f39))
+* add quantedge-core crate for shared types ([ec4c153](https://github.com/dluksza/tickglide/commit/ec4c15328da443e78c04903ef47612a2d026df0f))
+* **core:** add Indicator associated type to IndicatorConfig ([a6456d6](https://github.com/dluksza/tickglide/commit/a6456d6b5effa174c8c6fca5537b47866c99546e))
+* promote nz helper to public quantedge_core API ([77cc686](https://github.com/dluksza/tickglide/commit/77cc6868e69c773197b7e789cbb3c0f394caba9e))
+
+
+### Performance Improvements
+
+* relocate price extraction to ta internals ([a69a4f6](https://github.com/dluksza/tickglide/commit/a69a4f6e2679c974d7bb01382e9598b1db2a1644))
+* tag warm-up branches with cold_path ([5a1a4c3](https://github.com/dluksza/tickglide/commit/5a1a4c321ed026308805ae233a1d0086242dd308))
+* **ta:** merge EmaCore::push tails through self.value() ([ba0e15b](https://github.com/dluksza/tickglide/commit/ba0e15b6735ade7376df0980a2828cf9a571d7d7))
+* **ta:** tag EmaCore cold paths with cold_path() ([c629ca9](https://github.com/dluksza/tickglide/commit/c629ca9450f33a2a00a02d0948320882a09a697e))
+
 ## [0.21.1](https://github.com/dluksza/tickglide/compare/quantedge-ta-v0.21.0...quantedge-ta-v0.21.1) (2026-05-09)
 
 ### Performance Improvements
