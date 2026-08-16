@@ -4,11 +4,11 @@ version = 4
 
 [[package]]
 name = "tickglide-core"
-version = "0.3.0"
+version = "0.4.0"
 
 [[package]]
 name = "tickglide-strategy"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "tickglide-core",
  "tickglide-ta",
@@ -23,7 +23,7 @@ dependencies = [
 
 [[package]]
 name = "tickglide-ta"
-version = "0.21.1"
+version = "0.22.0"
 dependencies = [
  "tickglide-core",
 ]

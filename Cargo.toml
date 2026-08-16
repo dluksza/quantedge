@@ -10,8 +10,8 @@ repository = "https://github.com/dluksza/tickglide"
 authors = ["Darek Luksza <dariusz@luksza.org>"]
 
 [workspace.dependencies]
-tickglide-core = { version = "0.3.0", path = "crates/core" }
-tickglide-ta = { version = "0.21.1", path = "crates/ta" }
+tickglide-core = { version = "0.4.0", path = "crates/core" }
+tickglide-ta = { version = "0.22.0", path = "crates/ta" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
